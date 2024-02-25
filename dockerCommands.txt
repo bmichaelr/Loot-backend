@@ -1,0 +1,57 @@
+(for more info on dockerfile or compose see -> https://docs.docker.com/get-started/overview/)
+
+Very basic docker commands:
+
+If using compose file: (WE ARE SO USE THESE COMMANDS)
+
+    Build an image and run it on a new container (add -d flag at the end to run in background)
+    $ docker compose up --build
+
+    Stop a currently running image
+    $ docker compose down
+
+If not using compose file:
+
+    Build image:
+    $ docker build -t <name of image> .
+
+    Run an image:
+    $ docker run <name of image>
+
+    Stop and image:
+    $ docker stop <name of container>
+
+Images:
+
+    See all images:
+    $ docker images
+
+    Remove an image:
+    $ docker rmi <image name>
+
+Containers:
+
+    See running containers:
+    $ docker ps
+
+    See all containers (running and stopped):
+    $ docker ps -a
+
+    Stop a running container:
+    $ docker stop <container id or name>
+
+    Remove a container:
+    $ docker rm <container id or name>
+
+AWS:
+
+    Not a docker command, but this is the tool to push the new image to the container in lightsail
+    $ aws lightsail push-container-image --region <Region> --service-name <ContainerServiceName> --label \
+    <ContainerImageLabel> --image <LocalContainerImageName>:<ImageTag>
+
+    Breakdown:
+        <Region> is the name of the region the container lives in (e.g. us-west-2)
+        <ContainerServiceName> is the name of the container in AWS
+        <ContainerImageLabel> can also be the name of the container in AWS
+        <LocalContainerImageName> the name of the image on your LOCAL computer that you want to push (see commands above to list all images)
+        <ImageTag> is the tag for the image you are pushing, normally use 'latest', but run docker images and check the tag to be safe
