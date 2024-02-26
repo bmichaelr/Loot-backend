@@ -2,6 +2,7 @@ package com.loot.server.api;
 
 import com.loot.server.domain.entity.PlayerEntity;
 import com.loot.server.repositories.PlayerRepository;
+import com.loot.server.socket.domain.Player;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

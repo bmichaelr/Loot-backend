@@ -25,4 +25,5 @@ public class PlayerDto {
 
     @JsonProperty
     private String image;
+
 }
