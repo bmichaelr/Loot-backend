@@ -6,7 +6,7 @@ Backend services for Loot! mobile application.
 - REST API to handle player accounts and leaderboard functionality
 
 ## Contributors (in alphabetical order)
-- Benjamin Michael
 - Joshua Singontiko
+- Benjamin Michael
 - Ian Ryan
 - Kenna Chase
