@@ -5,8 +5,8 @@ Backend services for Loot! mobile application.
 - WebSocket for game connections/gameplay
 - REST API to handle player accounts and leaderboard functionality
 
-## Contributors (in alphabetical order)
-- Benjamin Michael
+## Contributors (in alphabetical order) 
 - Ian Ryan
 - Kenna Chase
 - Joshua Singontiko
+- Benjamin Michael
