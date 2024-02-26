@@ -7,6 +7,6 @@ Backend services for Loot! mobile application.
 
 ## Contributors (in alphabetical order) 
 - Ian Ryan
-- Joshua Singontiko
 - Kenna Chase
+- Joshua Singontiko
 - Benjamin Michael
