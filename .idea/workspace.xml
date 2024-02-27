@@ -5,23 +5,55 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/api/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/api/Controller.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/entity/ErrorResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/dto/PlayerDto.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/dto/PlayerDto.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/controllers/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/controllers/GameController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/PlayerHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/PlayerHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/static/socket.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/socket.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession$GameSessionBuilder.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession$GameSessionBuilder.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/playerhandler/PlayerHandler.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/playerhandler/PlayerHandler.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/ServerApplication.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/GameCreationDto$GameCreationDtoBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/GameCreationDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/dto/PlayerDto$PlayerDtoBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/dto/PlayerDto.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/entity/PlayerEntity$PlayerEntityBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/domain/entity/PlayerEntity.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/mapper/Mapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/mapper/impl/PlayerMapper.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/repositories/PlayerRepository.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/WebSocketConfig.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/controllers/GameController.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession$GameSessionBuilder.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/GameSession.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/IGameSession.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/BaseCard.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/CardStack.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/ICardStack.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/DreadGazebo.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/DuckOfDoom.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/Loot.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/MaulRat.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/NetTroll.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/PottedPlant.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/TurboniumDragon.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/cards/impl/WishingRing.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/playerhandler/IPlayerHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/loot/server/socket/logic/playerhandler/PlayerHandler.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/createdFiles.lst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" beforeDir="false" afterPath="$PROJECT_DIR$/target/maven-status/maven-compiler-plugin/testCompile/default-testCompile/inputFiles.lst" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -123,7 +155,7 @@
       <workItem from="1709055289948" duration="559000" />
       <workItem from="1709058411515" duration="14000" />
       <workItem from="1709058427650" duration="60000" />
-      <workItem from="1709058489964" duration="1378000" />
+      <workItem from="1709058489964" duration="3878000" />
     </task>
     <servers />
   </component>

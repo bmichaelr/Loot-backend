@@ -75,7 +75,9 @@ public class PlayerHandler implements IPlayerHandler {
             }
         });
 
-        readyPlayers.add(player);
+        if(!readyPlayers.contains(player)){
+            readyPlayers.add(player);
+        }
         if(readyPlayers.size() == numberOfPlayersForGame) {
             startNewRound();
             return true;

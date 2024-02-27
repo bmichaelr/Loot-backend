@@ -1,5 +1,6 @@
 package com.loot.server.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -26,4 +27,14 @@ public class PlayerDto {
     @JsonProperty
     private String image;
 
+
+    @JsonIgnore
+    public boolean missingParam(){
+        return id == null || name == null;
+    }
+
+    @JsonIgnore
+    public String getMissingParam() {
+        return (id == null) ? "Missing player id." : "Missing player name.";
+    }
 }

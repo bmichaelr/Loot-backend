@@ -82,7 +82,7 @@ function handleMatchmaking(lobbyData) {
 }
 
 function handleError(error) {
-    const binaryData = lobbyData._binaryBody;
+    const binaryData = error._binaryBody;
     const stringData = new TextDecoder().decode(binaryData);
     const parsedData = JSON.parse(stringData);
 
