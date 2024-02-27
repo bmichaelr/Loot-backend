@@ -112,12 +112,25 @@ function showGameStatus(message) {
 class Player {
     constructor(name) {
         this.name = name;
+        this.ready = false;
         this.id = Math.floor(Math.random() * 1000); // Generate a random integer for the ID
     }
 }
-var player;
 
-window.onload = function() {
+var player;
+let roomKey;
+
+class Lobby {
+    constructor(roomKey, players) {
+        this.roomKey = roomKey;
+        this.players = players;
+    }
+}
+
+let lobby;
+let initialLoad = true;
+
+window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const playerName = urlParams.get('playerName');
 
@@ -126,16 +139,74 @@ window.onload = function() {
     sock_connect(playerName);
 };
 
+// <div className="player-item">
+//     <div className="player-name">Player 1</div>
+//     <div className="ready-status">✔️</div>
+// </div>
+
+function handlePlayersInLobby(players, roomKey) {
+    if (!lobby) {
+        lobby = new Lobby(roomKey, players);
+        players.forEach(player => {
+            addPlayerToLobby(player);
+        });
+    } else {
+        console.log('in the else for handling players in lobby')
+        players.forEach(player => {
+           if(document.getElementById('player-'+player.id)) {
+               console.log(player)
+               console.log('have the wrapper player div, player ready = ', player.ready)
+               const playerWrapper = document.getElementById('player-' + player.id);
+               const statusDivToUpdate = playerWrapper.querySelector('.ready-status');
+               if(player.ready) {
+                   statusDivToUpdate.textContent = "✔️";
+               } else {
+                   statusDivToUpdate.textContent = "❌";
+               }
+           } else {
+               addPlayerToLobby(player);
+           }
+        });
+    }
+}
+
+function addPlayerToLobby(player) {
+    const parentContainer = document.getElementById("list-of-players");
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('player-item');
+    wrapper.id = 'player-' + player.id;
+
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = player.name;
+    nameDiv.classList.add('player-name');
+    const statusDiv = document.createElement('div');
+    if(player.ready) {
+        statusDiv.textContent = "✔️";
+    } else {
+        statusDiv.textContent = "❌";
+    }
+    statusDiv.classList.add('ready-status');
+
+    wrapper.appendChild(nameDiv);
+    wrapper.appendChild(statusDiv);
+    parentContainer.appendChild(wrapper);
+}
+
 $(function () {
-    $( "#createGameBtn" ).click(() => {
-            if(connected && player) {
-                sock_createGame(player)
-            }
+    $("#createGameBtn").click(() => {
+        if (connected && player) {
+            sock_createGame(player)
+        }
     });
-    $( "#joinGameBtn" ).click(() => {
+    $("#joinGameBtn").click(() => {
         let roomKey = prompt("Enter game room key:");
         if (roomKey && player) {
             sock_joinGame(player, roomKey);
+        }
+    });
+    $("#readyBtn").click(() => {
+        if(player && roomKey) {
+            sock_readyUp(player, roomKey);
         }
     });
 });

@@ -40,6 +40,7 @@ public class GameController {
 
         // Should just have a player dto and no key
         String roomKey = gameService.getRoomKeyForNewGame();
+        request.getPlayerDto().setReady(false);
         gameSessions.put(roomKey, new GameSession(roomKey));
         gameSessions.get(roomKey).addPlayer(request.getPlayerDto());
 
@@ -56,10 +57,12 @@ public class GameController {
         String roomKey = request.getRoomKey();
         if(roomKey != null && gameSessions.containsKey(roomKey)){
             GameSession gameSession = gameSessions.get(roomKey);
+            request.getPlayerDto().setReady(false);
             gameSession.addPlayer(request.getPlayerDto());
 
             LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
             messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
+            messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
         }
         printDebug();
     }
@@ -71,12 +74,10 @@ public class GameController {
         if(gameSession != null){
             boolean everyoneReady = gameSession.readyPlayerUp(request.getPlayerDto());
             String message = everyoneReady ? "Everyone is ready to play! Starting the game now..." : "Player - " + request.getPlayerDto().getName() + " is ready to begin!";
-            String json = mapper.writeValueAsString(
-                    GameStatus.builder()
-                    .message(message)
-                    .build()
-            );
-            messagingTemplate.convertAndSend("/topic/gameStatus/" + roomKey, json);
+
+            LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
+            System.out.println("players for ready endpoint: " + gameSession.getPlayers());
+            messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
         } else {
             System.out.println("No players! Room key = " + request.getRoomKey());
         }

@@ -48,6 +48,11 @@ public class GameSession implements IGameSession{
 
     @Override
     public Boolean readyPlayerUp(PlayerDto player) {
+        for(PlayerDto playerDto : players) {
+            if(playerDto.getId().equals(player.getId())){
+                playerDto.setReady(true);
+            }
+        }
         return playerHandler.readyUp(player);
     }
 

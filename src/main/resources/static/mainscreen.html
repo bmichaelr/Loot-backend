@@ -8,48 +8,18 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="socket.js"></script>
     <script src="app.js" defer></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        button {
-           padding: 10px 20px;
-            font-size: 18px;
-            margin: 10px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            width: 15vw; /* Set width to 15% of viewport width */
-        }
-    </style>
+    <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<button id="createGameBtn">Create Game</button>
-<button id="joinGameBtn">Join Game</button>
-
-<script>
-    // Add event listeners to the buttons
-    document.getElementById("createGameBtn").addEventListener("click", function() {
-        // Handle create game button click
-        console.log("Create game button clicked");
-        // Add your code here to handle creating a game
-    });
-
-    document.getElementById("joinGameBtn").addEventListener("click", function() {
-        // Handle join game button click
-        console.log("Join game button clicked");
-        // Add your code here to handle joining a game
-    });
-</script>
+<div style="display: flex; flex-direction: column; justify-content: center; display: contents" id="div-menu-choices">
+    <button id="createGameBtn">Create Game</button>
+    <button id="joinGameBtn">Join Game</button>
+</div>
+<div class="lobby" id="lobby-list" style="display: none">
+    <div class="room-title" id="roomKey">Room Key: </div>
+    <div class="player-list" id="list-of-players"></div>
+    <button id="readyBtn">Ready Up</button>
+</div>
 </body>
 </html>
 

@@ -45,13 +45,35 @@ function sock_joinGame(player, roomKey) {
     });
 }
 
+function sock_readyUp(player, roomKey) {
+    stompClient.publish({
+        destination: "/app/ready",
+        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+    });
+}
+
+function sock_initGameRoomSubscription(roomKey) {
+    stompClient.subscribe('/topic/lobby/' + roomKey, (lobbyUpdates) => {
+        handleMatchmaking(lobbyUpdates);
+    });
+}
+
 // This function will be responsible for parsing the creation and login responses
 function handleMatchmaking(lobbyData) {
-    console.log("response in lobby connection channel!");
-    console.log((lobbyData));
-
     const binaryData = lobbyData._binaryBody;
     const stringData = new TextDecoder().decode(binaryData);
     const parsedData = JSON.parse(stringData);
-    console.log("parsed data: ", parsedData);
+
+    if(initialLoad) {
+        var menuDiv = document.getElementById("div-menu-choices");
+        menuDiv.style.display = "none";
+        var lobbyDiv = document.getElementById("lobby-list");
+        lobbyDiv.style.display = "contents";
+        document.getElementById("roomKey").textContent += parsedData.roomKey
+        initialLoad = false
+        roomKey = parsedData.roomKey;
+        sock_initGameRoomSubscription(parsedData.roomKey);
+    }
+
+    handlePlayersInLobby(parsedData.players, parsedData.roomKey);
 }
