@@ -125,3 +125,21 @@ $(function () {
         }
     });
 });
+
+// use this
+class Player {
+    constructor(name) {
+        this.name = name;
+        this.id = Math.floor(Math.random() * 1000); // Generate a random integer for the ID
+    }
+}
+var player;
+
+window.onload = function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const playerName = urlParams.get('playerName');
+
+    console.log('Player name:', playerName);
+    player = new Player(playerName);
+    connect();
+};

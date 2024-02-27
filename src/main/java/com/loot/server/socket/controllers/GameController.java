@@ -3,7 +3,6 @@ package com.loot.server.socket.controllers;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.loot.server.socket.domain.Player;
 import com.loot.server.socket.logic.GameSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -12,8 +11,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loot.server.socket.domain.GameRequestDto;
-import com.loot.server.socket.domain.GameStatus;
+import com.loot.server.domain.GameRequestDto;
+import com.loot.server.domain.GameStatus;
 
 @Controller
 @ComponentScan

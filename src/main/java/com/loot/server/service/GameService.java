@@ -1,4 +1,4 @@
-package com.loot.server.api.service;
+package com.loot.server.service;
 
 import com.loot.server.domain.GameCreationDto;
 

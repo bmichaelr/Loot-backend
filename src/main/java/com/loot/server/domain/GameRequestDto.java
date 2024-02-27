@@ -1,4 +1,4 @@
-package com.loot.server.socket.domain;
+package com.loot.server.domain;
 
 import com.loot.server.domain.dto.PlayerDto;
 import lombok.AllArgsConstructor;

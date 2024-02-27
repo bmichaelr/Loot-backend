@@ -1,4 +1,4 @@
-package com.loot.server.api.controllers;
+package com.loot.server.api;
 
 import com.loot.server.domain.GameCreationDto;
 import com.loot.server.domain.entity.PlayerEntity;
@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.loot.server.api.service.GameService;
+import com.loot.server.service.GameService;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
