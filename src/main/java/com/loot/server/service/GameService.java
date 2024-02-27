@@ -6,7 +6,7 @@ public interface GameService {
     
     String generateRoomKey();
 
-    GameCreationDto getRoomKeyForNewGame();
+    String getRoomKeyForNewGame();
 
     Boolean isValidRoomKey(String roomKey);
 

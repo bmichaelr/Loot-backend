@@ -1,4 +1,4 @@
-let initPlayerId;
+/*let initPlayerId;
 let initRoomKey;
 
 const stompClient = new StompJs.Client({
@@ -106,25 +106,7 @@ function readyUp(){
 function showGameStatus(message) {
     console.log("message from server: ", message)
     $("#gameStatus").append("<p>" + JSON.stringify(message.body) + "</p>");
-}
-
-$(function () {
-    $( "#disconnect" ).click(() => disconnect());
-    $( "#createGame" ).click(() => {
-        let playerId = prompt("Enter your username: ");
-        if(playerId) {
-            createGame(playerId)
-        }
-    });
-    $( "#ready" ).click(() => readyUp());
-    $( "#joinGame" ).click(() => {
-        let playerId = prompt("Enter your username: ");
-        let sessionId = prompt("Enter game session ID:");
-        if (sessionId && playerId) {
-            joinGame(playerId, sessionId);
-        }
-    });
-});
+}*/
 
 // use this
 class Player {
@@ -143,3 +125,17 @@ window.onload = function() {
     player = new Player(playerName);
     connect();
 };
+
+$(function () {
+    $( "#createGameBtn" ).click(() => {
+            if(connected && player) {
+                sock_createGame(player)
+            }
+    });
+    $( "#joinGameBtn" ).click(() => {
+        let roomKey = prompt("Enter game room key:");
+        if (roomKey && player) {
+            sock_joinGame(player, roomKey);
+        }
+    });
+});

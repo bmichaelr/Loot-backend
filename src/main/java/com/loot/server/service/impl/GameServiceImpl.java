@@ -29,7 +29,7 @@ public class GameServiceImpl implements GameService{
     }
 
     @Override
-    public GameCreationDto getRoomKeyForNewGame() {
+    public String getRoomKeyForNewGame() {
         String roomKey;
         do {
             roomKey = generateRoomKey();
@@ -37,7 +37,7 @@ public class GameServiceImpl implements GameService{
         inUseRoomKeys.add(roomKey);
         // For debugging purposes
         printAllRoomKeys();
-        return GameCreationDto.builder().roomKey(roomKey).build();
+        return roomKey;
     }
 
     @Override

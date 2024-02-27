@@ -17,8 +17,8 @@
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/impl/DreadGazebo.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/ICardStack.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/api/Controller.java
-/Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/domain/GameRequestDto.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/domain/Player.java
+/Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/domain/LobbyResponse.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/GameSession.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/impl/DuckOfDoom.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/playerhandler/IPlayerHandler.java
@@ -27,4 +27,5 @@
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/impl/Loot.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/CardStack.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/logic/cards/BaseCard.java
+/Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/domain/LobbyRequest.java
 /Users/benjaminmichael/IdeaProjects/Loot-backend/src/main/java/com/loot/server/socket/controllers/GameController.java

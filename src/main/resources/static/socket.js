@@ -11,14 +11,42 @@ stompClient.onStompError = (frame) => {
     console.error('Additional details: ' + frame.body);
 };
 
-function connect() {
+let connected = false;
+// Function that is called when the user is connected to the websocket
+function connect(playerName) {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
+        stompClient.subscribe('/topic/matchmaking/' + playerName, (lobbyData) => {
+            handleMatchmaking(lobbyData);
+        });
+
+        connected = true;
     };
 }
 
+// Function that is called when we want to disconnect from the WebSocket
 function disconnect() {
     stompClient.deactivate();
     console.log("Disconnected");
+}
+
+function sock_createGame(player) {
+    stompClient.publish({
+        destination: "/app/createGame",
+        body: JSON.stringify({ playerDto: player })
+    });
+}
+
+function sock_joinGame(player, roomKey) {
+    stompClient.publish({
+        destination: "/app/joinGame",
+        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+    });
+}
+
+// This function will be responsible for parsing the creation and login responses
+function handleMatchmaking(lobbyData) {
+    console.log("response in lobby connection channel!");
+    console.log(JSON.parse(lobbyData));
 }
