@@ -1,8 +1,13 @@
 package com.loot.server.socket.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.loot.server.domain.LobbyResponse;
+import com.loot.server.domain.dto.PlayerDto;
+import com.loot.server.service.GameService;
 import com.loot.server.socket.logic.GameSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,7 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loot.server.domain.GameRequestDto;
+import com.loot.server.domain.LobbyRequest;
 import com.loot.server.domain.GameStatus;
 
 @Controller
@@ -22,48 +27,45 @@ public class GameController {
     private ObjectMapper mapper;
 
     @Autowired
+    private GameService gameService;
+
+    @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
     private final Map<String, GameSession> gameSessions = new HashMap<>();
 
     @MessageMapping("/createGame")
-    public void createGame(GameRequestDto request) throws Exception {
-        System.out.println(request);
+    public void createGame(LobbyRequest request) throws Exception {
+        System.out.println("Received lobby request in create game: " + request);
 
-        String roomKey = request.getRoomKey();
-
+        // Should just have a player dto and no key
+        String roomKey = gameService.getRoomKeyForNewGame();
         gameSessions.put(roomKey, new GameSession(roomKey));
-        GameSession gameSession = gameSessions.get(roomKey);
-        gameSession.addPlayer(request.getPlayerDto());
+        gameSessions.get(roomKey).addPlayer(request.getPlayerDto());
 
-        String body = mapper.writeValueAsString(GameStatus.builder().message("Game created: " + roomKey).build());
-        messagingTemplate.convertAndSend("/topic/gameStatus/" + roomKey, body);
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(request.getPlayerDto()));
 
+        messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
         printDebug();
     }
 
     @MessageMapping("/joinGame")
-    public void joinGame(GameRequestDto request) {
-        System.out.println(request);
+    public void joinGame(LobbyRequest request) {
+        System.out.println("Received lobby request in join game: " + request);
 
         String roomKey = request.getRoomKey();
-        GameSession gameSession = gameSessions.get(roomKey);
-        if (gameSession != null) {
+        if(roomKey != null && gameSessions.containsKey(roomKey)){
+            GameSession gameSession = gameSessions.get(roomKey);
             gameSession.addPlayer(request.getPlayerDto());
 
-            StringBuilder builder = new StringBuilder("Players in room: ");
-            gameSession.getPlayers().forEach(player -> builder.append(player).append(" "));
-            GameStatus status = GameStatus.builder().message(builder.toString()).build();
-            messagingTemplate.convertAndSend("/topic/gameStatus/" + roomKey, status);
-        } else {
-            messagingTemplate.convertAndSend("/topic/error", "Game session not found: " + roomKey);
+            LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
+            messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
         }
-
         printDebug();
     }
 
     @MessageMapping("/ready")
-    public void startGame(GameRequestDto request) throws Exception {
+    public void startGame(LobbyRequest request) throws Exception {
         String roomKey = request.getRoomKey();
         GameSession gameSession = gameSessions.get(roomKey);
         if(gameSession != null){

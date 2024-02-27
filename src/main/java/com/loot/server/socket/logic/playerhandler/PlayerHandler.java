@@ -3,6 +3,7 @@ package com.loot.server.socket.logic.playerhandler;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.BaseCard;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
+@Data
 public class PlayerHandler implements IPlayerHandler {
 
     private List<PlayerDto> playersInRoom;

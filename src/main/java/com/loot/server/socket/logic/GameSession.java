@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class GameSession implements IGameSession{
 
-    private List<String> players;
+    private List<PlayerDto> players;
     private String roomKey;
 
     private CardStack cardStack;
@@ -53,7 +53,10 @@ public class GameSession implements IGameSession{
 
     @Override
     public void addPlayer(PlayerDto player) {
-        players.add(player.getName());
         playerHandler.addPlayer(player);
+    }
+
+    public List<PlayerDto> getPlayers() {
+        return playerHandler.getPlayersInRoom();
     }
 }
