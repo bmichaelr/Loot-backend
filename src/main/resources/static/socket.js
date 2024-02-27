@@ -13,7 +13,7 @@ stompClient.onStompError = (frame) => {
 
 let connected = false;
 // Function that is called when the user is connected to the websocket
-function connect(playerName) {
+function sock_connect(playerName) {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
@@ -48,5 +48,10 @@ function sock_joinGame(player, roomKey) {
 // This function will be responsible for parsing the creation and login responses
 function handleMatchmaking(lobbyData) {
     console.log("response in lobby connection channel!");
-    console.log(JSON.parse(lobbyData));
+    console.log((lobbyData));
+
+    const binaryData = lobbyData._binaryBody;
+    const stringData = new TextDecoder().decode(binaryData);
+    const parsedData = JSON.parse(stringData);
+    console.log("parsed data: ", parsedData);
 }

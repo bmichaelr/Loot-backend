@@ -123,7 +123,7 @@ window.onload = function() {
 
     console.log('Player name:', playerName);
     player = new Player(playerName);
-    connect();
+    sock_connect(playerName);
 };
 
 $(function () {
