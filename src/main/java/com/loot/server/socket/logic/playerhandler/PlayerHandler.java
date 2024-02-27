@@ -69,6 +69,12 @@ public class PlayerHandler implements IPlayerHandler {
 
     @Override
     public Boolean readyUp(PlayerDto player) {
+        playersInRoom.forEach(playerDto -> {
+            if(playerDto.getId().equals(player.getId())){
+                playerDto.setReady(true);
+            }
+        });
+
         readyPlayers.add(player);
         if(readyPlayers.size() == numberOfPlayersForGame) {
             startNewRound();

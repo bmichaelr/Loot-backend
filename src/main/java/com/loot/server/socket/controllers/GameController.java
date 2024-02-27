@@ -63,6 +63,8 @@ public class GameController {
             LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
             messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
             messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+        } else {
+
         }
         printDebug();
     }

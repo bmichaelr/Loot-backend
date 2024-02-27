@@ -20,6 +20,9 @@ function sock_connect(playerName) {
         stompClient.subscribe('/topic/matchmaking/' + playerName, (lobbyData) => {
             handleMatchmaking(lobbyData);
         });
+        stompClient.subscribe("/topic/error/" + playerName, (error) => {
+           handleError(error);
+        });
 
         connected = true;
     };
@@ -76,4 +79,12 @@ function handleMatchmaking(lobbyData) {
     }
 
     handlePlayersInLobby(parsedData.players, parsedData.roomKey);
+}
+
+function handleError(error) {
+    const binaryData = lobbyData._binaryBody;
+    const stringData = new TextDecoder().decode(binaryData);
+    const parsedData = JSON.parse(stringData);
+
+    alert(parsedData.details);
 }
