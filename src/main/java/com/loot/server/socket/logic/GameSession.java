@@ -21,19 +21,17 @@ public class GameSession implements IGameSession{
 
     private List<PlayerDto> players;
     private String roomKey;
-
-    private CardStack cardStack;
-    private PlayerHandler playerHandler;
-
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
     private int numberOfReadyPlayers = 0;
+
+    private CardStack cardStack;
+    //private PlayerHandler playerHandler;
 
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
         players = new ArrayList<>();
         cardStack = new CardStack();
-        playerHandler = new PlayerHandler();
     }
 
     @Override
@@ -53,7 +51,13 @@ public class GameSession implements IGameSession{
 
     @Override
     public Boolean readyPlayerUp(PlayerDto player) {
-        return playerHandler.readyUp(player);
+        PlayerDto playerDto = players.get(players.indexOf(player));
+        if(playerDto != null && !playerDto.getReady()) {
+            playerDto.setReady(true);
+            numberOfReadyPlayers++;
+        }
+
+        return numberOfReadyPlayers >= maxPlayers;
     }
 
     /*
@@ -61,10 +65,9 @@ public class GameSession implements IGameSession{
      */
     @Override
     public void addPlayer(PlayerDto player) {
-        ++numberOfPlayers;
+        numberOfPlayers += 1;
         player.setReady(false);
         players.add(player);
-        playerHandler.addPlayer(player);
     }
 
     public boolean lobbyIsReady() {
@@ -73,9 +76,5 @@ public class GameSession implements IGameSession{
 
     public boolean lobbyIsFull() {
         return numberOfPlayers >= maxPlayers;
-    }
-
-    public List<PlayerDto> getPlayers() {
-        return playerHandler.getPlayersInRoom();
     }
 }
