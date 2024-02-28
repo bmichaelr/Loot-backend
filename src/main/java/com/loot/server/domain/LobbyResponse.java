@@ -23,4 +23,7 @@ public class LobbyResponse {
     @JsonProperty
     private List<PlayerDto> players;
 
+    @JsonProperty
+    private Boolean allReady;
+
 }

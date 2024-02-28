@@ -47,7 +47,7 @@ public class GameController {
         gameSessions.put(roomKey, new GameSession(roomKey));
         gameSessions.get(roomKey).addPlayer(player);
 
-        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(request.getPlayerDto()));
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(request.getPlayerDto()), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + player.getName(), lobbyResponse);
     }
 
@@ -75,7 +75,7 @@ public class GameController {
         PlayerDto player = request.getPlayerDto();
         gameSession.addPlayer(player);
 
-        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
@@ -94,8 +94,8 @@ public class GameController {
         PlayerDto player = request.getPlayerDto();
         GameSession gameSession = gameSessions.get(roomKey);
 
-        gameSession.readyPlayerUp(player);
-        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers());
+        boolean everyoneReady = gameSession.changePlayerReadyStatus(player);
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), everyoneReady);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 

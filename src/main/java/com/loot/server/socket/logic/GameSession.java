@@ -24,6 +24,7 @@ public class GameSession implements IGameSession{
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
     private int numberOfReadyPlayers = 0;
+    private int turnIndex = 0;
 
     private CardStack cardStack;
     //private PlayerHandler playerHandler;
@@ -50,11 +51,19 @@ public class GameSession implements IGameSession{
     }
 
     @Override
-    public Boolean readyPlayerUp(PlayerDto player) {
+    public Boolean changePlayerReadyStatus(PlayerDto player) {
         PlayerDto playerDto = players.get(players.indexOf(player));
-        if(playerDto != null && !playerDto.getReady()) {
-            playerDto.setReady(true);
-            numberOfReadyPlayers++;
+        if(playerDto != null) {
+            boolean wasReady = playerDto.getReady();
+            boolean isReady = player.getReady();
+
+            if(!wasReady && isReady) {
+                numberOfReadyPlayers++;
+                playerDto.setReady(true);
+            } else if(wasReady && !isReady) {
+                numberOfReadyPlayers--;
+                playerDto.setReady(false);
+            }
         }
 
         return numberOfReadyPlayers >= maxPlayers;
@@ -68,10 +77,6 @@ public class GameSession implements IGameSession{
         numberOfPlayers += 1;
         player.setReady(false);
         players.add(player);
-    }
-
-    public boolean lobbyIsReady() {
-        return numberOfReadyPlayers == numberOfPlayers;
     }
 
     public boolean lobbyIsFull() {

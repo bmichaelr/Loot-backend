@@ -11,7 +11,7 @@ public interface IGameSession {
 
     BaseCard dealCard(PlayerDto player);
 
-    Boolean readyPlayerUp(PlayerDto player);
+    Boolean changePlayerReadyStatus(PlayerDto player);
 
     void addPlayer(PlayerDto player);
 }
