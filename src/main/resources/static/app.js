@@ -129,6 +129,7 @@ class Lobby {
 
 let lobby;
 let initialLoad = true;
+let ready = false;
 
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -206,7 +207,9 @@ $(function () {
     });
     $("#readyBtn").click(() => {
         if(player && roomKey) {
-            sock_readyUp(player, roomKey);
+            ready = !ready;
+            document.getElementById("readyBtn").innerText = (ready) ? "Unready" : "Ready up";
+            sock_readyUp(player, roomKey, ready);
         }
     });
 });

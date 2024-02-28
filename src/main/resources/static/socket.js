@@ -48,7 +48,8 @@ function sock_joinGame(player, roomKey) {
     });
 }
 
-function sock_readyUp(player, roomKey) {
+function sock_readyUp(player, roomKey, ready) {
+    player.ready = ready;
     stompClient.publish({
         destination: "/app/ready",
         body: JSON.stringify({ playerDto: player, roomKey: roomKey })

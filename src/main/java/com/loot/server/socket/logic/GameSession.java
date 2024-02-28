@@ -52,17 +52,21 @@ public class GameSession implements IGameSession{
 
     @Override
     public Boolean changePlayerReadyStatus(PlayerDto player) {
-        PlayerDto playerDto = players.get(players.indexOf(player));
-        if(playerDto != null) {
-            boolean wasReady = playerDto.getReady();
+        PlayerDto playerToAlter = players.stream()
+                .filter(playerInRoom -> playerInRoom.getId().equals(player.getId()))
+                .findFirst()
+                .orElse(null);
+
+        if(playerToAlter != null) {
+            boolean wasReady = playerToAlter.getReady();
             boolean isReady = player.getReady();
 
             if(!wasReady && isReady) {
                 numberOfReadyPlayers++;
-                playerDto.setReady(true);
+                playerToAlter.setReady(true);
             } else if(wasReady && !isReady) {
                 numberOfReadyPlayers--;
-                playerDto.setReady(false);
+                playerToAlter.setReady(false);
             }
         }
 

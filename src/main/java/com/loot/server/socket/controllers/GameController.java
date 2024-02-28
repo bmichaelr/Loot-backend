@@ -88,7 +88,7 @@ public class GameController {
             return;
         }
 
-        // MAJOR ASSUMPTION : the room key will always be present. more of a frontend issue but we should account
+        // MAJOR ASSUMPTION : the room key will always be present. more of a frontend issue, but we should account
         // for all edge cases in the future
         String roomKey = request.getRoomKey();
         PlayerDto player = request.getPlayerDto();
