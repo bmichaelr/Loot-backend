@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -20,11 +21,13 @@ import java.util.Objects;
 public class GameSession implements IGameSession{
 
     private List<PlayerDto> players;
+    private HashMap<PlayerDto, List<BaseCard>> playedCards;
     private String roomKey;
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
     private int numberOfReadyPlayers = 0;
     private int turnIndex = 0;
+    private int numberOfPlayersLoadedIn = 0;
 
     private CardStack cardStack;
     //private PlayerHandler playerHandler;
@@ -32,6 +35,7 @@ public class GameSession implements IGameSession{
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
         players = new ArrayList<>();
+        playedCards = new HashMap<>();
         cardStack = new CardStack();
     }
 
@@ -43,6 +47,11 @@ public class GameSession implements IGameSession{
     @Override
     public void dealInitialCards() {
 
+    }
+
+    public BaseCard dealInitialCard(PlayerDto player) {
+        numberOfPlayersLoadedIn += 1;
+        return cardStack.isDeckEmpty() ? null : cardStack.drawCard();
     }
 
     @Override
@@ -70,7 +79,11 @@ public class GameSession implements IGameSession{
             }
         }
 
-        return numberOfReadyPlayers >= maxPlayers;
+        boolean ready =  numberOfReadyPlayers >= maxPlayers;
+        if(ready) {
+            dealInitialCards();
+        }
+        return ready;
     }
 
     /*

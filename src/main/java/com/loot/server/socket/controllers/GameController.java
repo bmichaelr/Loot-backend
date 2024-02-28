@@ -3,10 +3,12 @@ package com.loot.server.socket.controllers;
 import java.util.*;
 
 import com.loot.server.domain.LobbyResponse;
+import com.loot.server.domain.TurnResponse;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.service.GameService;
 import com.loot.server.socket.logic.GameSession;
+import com.loot.server.socket.logic.cards.BaseCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
@@ -97,6 +99,23 @@ public class GameController {
         boolean everyoneReady = gameSession.changePlayerReadyStatus(player);
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), everyoneReady);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+    }
+
+    @MessageMapping("/loadedIntoGame")
+    public void loadedIntoGame(LobbyRequest request) {
+        Pair<Boolean, String> validation = validLobbyRequest(request, false);
+        if(!validation.getFirst()) {
+            sendErrorMessage(request, validation.getSecond());
+            return;
+        }
+
+        String roomKey = request.getRoomKey();
+        PlayerDto playerDto = request.getPlayerDto();
+        GameSession gameSession = gameSessions.get(roomKey);
+
+        BaseCard dealtCard = gameSession.dealInitialCard(playerDto);
+        TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
+        messagingTemplate.convertAndSend("/topic/gameplay/"+playerDto.getId()+"/"+roomKey, turnResponse);
     }
 
     // TODO : move helper function to service class
