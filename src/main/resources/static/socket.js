@@ -79,7 +79,12 @@ function handleMatchmaking(lobbyData) {
         sock_initGameRoomSubscription(parsedData.roomKey);
     }
 
-    handlePlayersInLobby(parsedData.players, parsedData.roomKey);
+    if(parsedData.allReady) {
+        stompClient.subscribe('/topic/gameplay/' + roomKey, (gameUpdate) => {
+            handleGamePlay(gameUpdate);
+        });
+    }
+    handlePlayersInLobby(parsedData);
 }
 
 function handleError(error) {

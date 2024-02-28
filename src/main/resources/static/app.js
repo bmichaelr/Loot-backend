@@ -130,6 +130,7 @@ class Lobby {
 let lobby;
 let initialLoad = true;
 let ready = false;
+let allReady = false;
 
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -145,7 +146,10 @@ window.onload = function () {
 //     <div className="ready-status">✔️</div>
 // </div>
 
-function handlePlayersInLobby(players, roomKey) {
+function handlePlayersInLobby(parsedData) {
+    const players = parsedData.players;
+    const allReady = parsedData.allReady;
+
     if (!lobby) {
         lobby = new Lobby(roomKey, players);
         players.forEach(player => {
@@ -168,6 +172,10 @@ function handlePlayersInLobby(players, roomKey) {
                addPlayerToLobby(player);
            }
         });
+    }
+
+    if(allReady) {
+        beginGameStartThings()
     }
 }
 
@@ -193,6 +201,31 @@ function addPlayerToLobby(player) {
     parentContainer.appendChild(wrapper);
 }
 
+function handleGamePlay(gameUpdate) {
+    const binaryData = gameUpdate._binaryBody;
+    const stringData = new TextDecoder().decode(binaryData);
+    const parsedData = JSON.parse(stringData);
+}
+
+async function beginGameStartThings() {
+    allReady = true;
+    document.getElementById("readyBtn").style.backgroundColor = "gray";
+
+    const gameCounter = document.getElementById("gameCounter");
+    gameCounter.style.display = "contents";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting in 2...";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting in 1...";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting now!";
+
+}
+
+function sleep(ms = 0) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 $(function () {
     $("#createGameBtn").click(() => {
         if (connected && player) {
@@ -206,7 +239,7 @@ $(function () {
         }
     });
     $("#readyBtn").click(() => {
-        if(player && roomKey) {
+        if(player && roomKey && !allReady) {
             ready = !ready;
             document.getElementById("readyBtn").innerText = (ready) ? "Unready" : "Ready up";
             sock_readyUp(player, roomKey, ready);
