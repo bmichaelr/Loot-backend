@@ -219,7 +219,7 @@ async function beginGameStartThings() {
     gameCounter.innerText = "Game starting in 1...";
     await sleep(1000);
     gameCounter.innerText = "Game starting now!";
-
+    // Josh, put the new html page activation here and set the current one to none
 }
 
 function sleep(ms = 0) {
