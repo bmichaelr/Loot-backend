@@ -21,7 +21,7 @@ public class LobbyResponse {
     private String roomKey;
 
     @JsonProperty
-    private List<PlayerDto> players;
+    private List<GamePlayer> players;
 
     @JsonProperty
     private Boolean allReady;

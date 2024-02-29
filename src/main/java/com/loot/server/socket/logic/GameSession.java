@@ -1,5 +1,6 @@
 package com.loot.server.socket.logic;
 
+import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.BaseCard;
 import com.loot.server.socket.logic.cards.CardStack;
@@ -20,8 +21,8 @@ import java.util.Objects;
 @AllArgsConstructor
 public class GameSession implements IGameSession{
 
-    private List<PlayerDto> players;
-    private HashMap<PlayerDto, List<BaseCard>> playedCards;
+    private List<GamePlayer> players;
+    private HashMap<GamePlayer, List<BaseCard>> playedCards;
     private String roomKey;
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
@@ -40,7 +41,7 @@ public class GameSession implements IGameSession{
     }
 
     @Override
-    public void playCard(PlayerDto player, BaseCard card) {
+    public void playCard(GamePlayer player, BaseCard card) {
 
     }
 
@@ -49,19 +50,19 @@ public class GameSession implements IGameSession{
 
     }
 
-    public BaseCard dealInitialCard(PlayerDto player) {
+    public BaseCard dealInitialCard(GamePlayer player) {
         numberOfPlayersLoadedIn += 1;
         return cardStack.isDeckEmpty() ? null : cardStack.drawCard();
     }
 
     @Override
-    public BaseCard dealCard(PlayerDto player) {
+    public BaseCard dealCard(GamePlayer player) {
         return null;
     }
 
     @Override
-    public Boolean changePlayerReadyStatus(PlayerDto player) {
-        PlayerDto playerToAlter = players.stream()
+    public Boolean changePlayerReadyStatus(GamePlayer player) {
+        GamePlayer playerToAlter = players.stream()
                 .filter(playerInRoom -> playerInRoom.getId().equals(player.getId()))
                 .findFirst()
                 .orElse(null);
@@ -90,7 +91,7 @@ public class GameSession implements IGameSession{
      * increment the number of players by one and set ready to false since they just joined
      */
     @Override
-    public void addPlayer(PlayerDto player) {
+    public void addPlayer(GamePlayer player) {
         numberOfPlayers += 1;
         player.setReady(false);
         players.add(player);

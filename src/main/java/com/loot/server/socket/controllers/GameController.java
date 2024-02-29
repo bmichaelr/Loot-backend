@@ -2,8 +2,7 @@ package com.loot.server.socket.controllers;
 
 import java.util.*;
 
-import com.loot.server.domain.LobbyResponse;
-import com.loot.server.domain.TurnResponse;
+import com.loot.server.domain.*;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.service.GameService;
@@ -17,8 +16,6 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loot.server.domain.LobbyRequest;
-import com.loot.server.domain.GameStatus;
 
 @Controller
 @ComponentScan
@@ -45,11 +42,11 @@ public class GameController {
 
         // Create the room key, create the game session, add the player
         String roomKey = gameService.getRoomKeyForNewGame();
-        PlayerDto player = request.getPlayerDto();
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
         gameSessions.put(roomKey, new GameSession(roomKey));
         gameSessions.get(roomKey).addPlayer(player);
 
-        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(request.getPlayerDto()), false);
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(player), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + player.getName(), lobbyResponse);
     }
 
@@ -74,7 +71,7 @@ public class GameController {
         }
 
         // Get the player and add them to the game session
-        PlayerDto player = request.getPlayerDto();
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
         gameSession.addPlayer(player);
 
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
@@ -93,7 +90,7 @@ public class GameController {
         // MAJOR ASSUMPTION : the room key will always be present. more of a frontend issue, but we should account
         // for all edge cases in the future
         String roomKey = request.getRoomKey();
-        PlayerDto player = request.getPlayerDto();
+        GamePlayer player = new GamePlayer(request.getPlayerDto(), request.getPlayerDto().getReady());
         GameSession gameSession = gameSessions.get(roomKey);
 
         boolean everyoneReady = gameSession.changePlayerReadyStatus(player);
@@ -110,12 +107,12 @@ public class GameController {
         }
 
         String roomKey = request.getRoomKey();
-        PlayerDto playerDto = request.getPlayerDto();
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
         GameSession gameSession = gameSessions.get(roomKey);
 
-        BaseCard dealtCard = gameSession.dealInitialCard(playerDto);
+        BaseCard dealtCard = gameSession.dealInitialCard(player);
         TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
-        messagingTemplate.convertAndSend("/topic/gameplay/"+playerDto.getId()+"/"+roomKey, turnResponse);
+        messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
     }
 
     // TODO : move helper function to service class
