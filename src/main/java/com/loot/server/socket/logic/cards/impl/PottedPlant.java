@@ -3,6 +3,7 @@ package com.loot.server.socket.logic.cards.impl;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.loot.server.domain.GamePlayer;
 import com.loot.server.socket.logic.cards.BaseCard;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class PottedPlant extends BaseCard {
 
     @JsonProperty
-    private String playedOn;
+    private GamePlayer playedOn;
 
     @JsonProperty
     private int guess;
@@ -24,7 +25,7 @@ public class PottedPlant extends BaseCard {
         super(power, name, description);
     }
 
-    public PottedPlant(int power, String name, String description, String playedOn, int guess){
+    public PottedPlant(int power, String name, String description, GamePlayer playedOn, int guess){
         super(power, name, description);
         this.playedOn = playedOn;
         this.guess = guess;

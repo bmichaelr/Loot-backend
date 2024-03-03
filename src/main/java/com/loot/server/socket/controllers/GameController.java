@@ -115,6 +115,16 @@ public class GameController {
         messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
     }
 
+    @MessageMapping("/playCard")
+    public void playCard(PlayCardRequest playCardRequest) {
+        // TODO : add in error checking
+
+        GamePlayer player = new GamePlayer(playCardRequest.getPlayer());
+        GameSession gameSession = gameSessions.get(playCardRequest.getRoomKey());
+        BaseCard cardPlayed = playCardRequest.getCard();
+        gameSession.playCard(player, cardPlayed);
+    }
+
     // TODO : move helper function to service class
     public void printDebug() {
         for(GameSession session : gameSessions.values()) {

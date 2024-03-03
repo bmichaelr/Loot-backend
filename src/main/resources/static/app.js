@@ -175,7 +175,7 @@ function handlePlayersInLobby(parsedData) {
     }
 
     if(allReady) {
-        beginGameStartThings()
+        beginGameStartThings();
     }
 }
 

@@ -4,6 +4,7 @@ import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.BaseCard;
 import com.loot.server.socket.logic.cards.CardStack;
+import com.loot.server.socket.logic.cards.impl.PottedPlant;
 import com.loot.server.socket.logic.playerhandler.PlayerHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,7 +23,8 @@ import java.util.Objects;
 public class GameSession implements IGameSession{
 
     private List<GamePlayer> players;
-    private HashMap<GamePlayer, List<BaseCard>> playedCards;
+    private List<GamePlayer> playersInRound;
+    private HashMap<GamePlayer, List<Integer>> cardsInHand;
     private String roomKey;
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
@@ -36,13 +38,21 @@ public class GameSession implements IGameSession{
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
         players = new ArrayList<>();
-        playedCards = new HashMap<>();
+        cardsInHand = new HashMap<>();
         cardStack = new CardStack();
     }
 
     @Override
-    public void playCard(GamePlayer player, BaseCard card) {
+    public void playCard(GamePlayer playerActing, BaseCard card) {
+        // remove the card from the players hand
+        cardsInHand.get(playerActing).remove(card.getPower());
 
+        if(card instanceof PottedPlant pottedPlant) {
+            int guessedCard = pottedPlant.getGuess();
+            if(cardsInHand.get(pottedPlant.getPlayedOn()).contains(guessedCard)) {
+
+            }
+        }
     }
 
     @Override
@@ -52,12 +62,18 @@ public class GameSession implements IGameSession{
 
     public BaseCard dealInitialCard(GamePlayer player) {
         numberOfPlayersLoadedIn += 1;
-        return cardStack.isDeckEmpty() ? null : cardStack.drawCard();
+        BaseCard card = cardStack.drawCard();
+        cardsInHand.get(player).add(card.getPower());
+        return card;
     }
 
     @Override
     public BaseCard dealCard(GamePlayer player) {
-        return null;
+        if(cardStack.isDeckEmpty()) {
+            return null;
+        }
+
+        return cardStack.drawCard();
     }
 
     @Override
@@ -82,6 +98,8 @@ public class GameSession implements IGameSession{
 
         boolean ready =  numberOfReadyPlayers >= maxPlayers;
         if(ready) {
+            players.forEach(p -> cardsInHand.put(p, new ArrayList<>()));
+            playersInRound = new ArrayList<>(players);
             dealInitialCards();
         }
         return ready;
@@ -99,5 +117,18 @@ public class GameSession implements IGameSession{
 
     public boolean lobbyIsFull() {
         return numberOfPlayers >= maxPlayers;
+    }
+
+    public static void main(String[] args) {
+        GameSession gameSession = new GameSession("ABC123");
+        GamePlayer player1 = new GamePlayer(PlayerDto.builder().id(1L).name("Ben").build());
+        GamePlayer player2 = new GamePlayer(PlayerDto.builder().id(2L).name("Josh").build());
+        GamePlayer player3 = new GamePlayer(PlayerDto.builder().id(3L).name("Ian").build());
+        GamePlayer player4 = new GamePlayer(PlayerDto.builder().id(4L).name("Kenna").build());
+
+        gameSession.addPlayer(player1);
+        gameSession.addPlayer(player2);
+        gameSession.addPlayer(player3);
+        gameSession.addPlayer(player4);
     }
 }

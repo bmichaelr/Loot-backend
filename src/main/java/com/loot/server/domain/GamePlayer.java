@@ -38,4 +38,24 @@ public class GamePlayer {
         this.name = playerDto.getName();
         this.ready = ready;
     }
+
+    @JsonIgnore
+    @Override
+    public boolean equals(Object obj){
+        if(obj == this){
+            return true;
+        }
+
+        if(obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        GamePlayer player = (GamePlayer) obj;
+        return (player.getId().equals(this.getId()) && player.getName().equals(this.getName()));
+    }
+
+    @JsonIgnore
+    @Override
+    public int hashCode() {
+        return this.getId().intValue();
+    }
 }

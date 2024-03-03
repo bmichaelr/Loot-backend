@@ -1,5 +1,6 @@
 package com.loot.server.api;
 
+import com.loot.server.domain.PlayCardRequest;
 import com.loot.server.domain.entity.PlayerEntity;
 import com.loot.server.repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,5 +28,11 @@ public class Controller {
         List<PlayerEntity> playerEntities = new ArrayList<>();
         playerRepository.findAll().forEach(playerEntities::add);
         return new ResponseEntity<>(playerEntities, HttpStatus.OK);
+    }
+
+    // TEST
+    @PostMapping(value = "/playCard")
+    public void playCard(@RequestBody PlayCardRequest playCardRequest) {
+        System.out.println(playCardRequest);
     }
 }
