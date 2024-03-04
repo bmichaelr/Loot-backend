@@ -4,7 +4,9 @@ import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.Card;
 import com.loot.server.socket.logic.cards.CardStack;
+import com.loot.server.socket.logic.cards.impl.GuessingCard;
 import com.loot.server.socket.logic.cards.impl.PlayedCard;
+import com.loot.server.socket.logic.cards.impl.TargetedEffectCard;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -42,8 +44,48 @@ public class GameSession implements IGameSession{
 
     @Override
     public void playCard(GamePlayer playerActing, PlayedCard card) {
-        // remove the card from the players hand
+        // Remove the card from the players hand
         cardsInHand.get(playerActing.getId()).remove(card.getPower());
+
+        if(card instanceof TargetedEffectCard effectCard) {
+            switch(effectCard.getPower()) {
+                case 2 -> {
+                    // Do maul rat action here
+                }
+                case 3 -> {
+                    // Do duck of doom action here
+                }
+                case 5 -> {
+                    // Do net troll action here
+                }
+                case 6 -> {
+                    // Do gazebo action here
+                }
+            }
+        } else if(card instanceof GuessingCard guessingCard) {
+            // Do potted plant action here
+            // e.g. get the guessed id, check if they have the guessed card, then send some result
+            Long idOfGuessedPlayer = guessingCard.getGuessedPlayerId();
+            int cardGuessed = guessingCard.getGuessedCard();
+            List<Integer> guessedPlayersCards = cardsInHand.get(idOfGuessedPlayer);
+            if(guessedPlayersCards.contains(cardGuessed)) {
+                // They guessed right
+            } else {
+                // They guessed wrong
+            }
+        } else {
+            switch (card.getPower()) {
+                case 4 -> {
+                    // do the ring action here
+                }
+                case 7 -> {
+                    // do the dragon action here
+                }
+                case 8 -> {
+                    // do the loot action here
+                }
+            }
+        }
     }
 
     @Override
