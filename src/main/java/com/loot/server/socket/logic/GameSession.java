@@ -49,6 +49,7 @@ public class GameSession implements IGameSession{
         cardsInHand.get(playerActing.getId()).remove(card.getPower());
 
         if(card instanceof TargetedEffectCard effectCard) {
+            Card opponentCard = Card.cardFromPower(cardsInHand.get(effectCard.getPlayedOnId()).get(0));
             switch(effectCard.getPower()) {
                 case 2 -> {
                     // Do maul rat action here -- send the player who played the card the description of the persons card
@@ -57,7 +58,14 @@ public class GameSession implements IGameSession{
                 }
                 case 3 -> {
                     // Do duck of doom action here --
+                    Card playersCard = Card.cardFromPower(cardsInHand.get(playerActing.getId()).get(0));
+                    if(opponentCard.getPower() > playersCard.getPower()) {
 
+                    } else if(opponentCard.getPower() < playersCard.getPower()) {
+
+                    } else {
+                        // Nothing happens
+                    }
                 }
                 case 5 -> {
                     // Do net troll action here
