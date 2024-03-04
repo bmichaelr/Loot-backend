@@ -2,7 +2,7 @@ package com.loot.server.socket.logic.cards.impl;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TurboniumDragon extends BaseCard {
+public class TurboniumDragon extends Card {
 
     public TurboniumDragon(int power, String name, String description) {
         super(power, name, description);

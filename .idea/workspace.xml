@@ -5,14 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/PlayCardRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/api/Controller.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/api/Controller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/PlayCardRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/PlayCardRequest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/TurnResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/TurnResponse.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/controllers/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/controllers/GameController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/IGameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/IGameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/BaseCard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/Card.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/ICardStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/ICardStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/DreadGazebo.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/DreadGazebo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/DuckOfDoom.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/DuckOfDoom.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/Loot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/Loot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/MaulRat.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/MaulRat.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/NetTroll.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/NetTroll.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/PottedPlant.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/PottedPlant.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TurboniumDragon.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TurboniumDragon.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/WishingRing.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/WishingRing.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/IPlayerHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/IPlayerHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/PlayerHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/playerhandler/PlayerHandler.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +77,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.GameSession.executor": "Run",
     "RequestMappingsPanelOrder0": "0",
     "RequestMappingsPanelOrder1": "1",
     "RequestMappingsPanelWidth0": "75",
@@ -83,7 +96,20 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.GameSession">
+    <configuration name="GameSession" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.socket.logic.GameSession" />
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.socket.logic.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="Loot-backend" />
       <method v="2">
@@ -112,6 +138,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.GameSession" />
         <item itemvalue="Spring Boot.ServerApplication" />
       </list>
     </recent_temporary>

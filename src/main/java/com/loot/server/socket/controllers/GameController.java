@@ -3,11 +3,10 @@ package com.loot.server.socket.controllers;
 import java.util.*;
 
 import com.loot.server.domain.*;
-import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.service.GameService;
 import com.loot.server.socket.logic.GameSession;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
@@ -110,7 +109,7 @@ public class GameController {
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         GameSession gameSession = gameSessions.get(roomKey);
 
-        BaseCard dealtCard = gameSession.dealInitialCard(player);
+        Card dealtCard = gameSession.dealInitialCard(player);
         TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
         messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
     }
@@ -121,7 +120,7 @@ public class GameController {
 
         GamePlayer player = new GamePlayer(playCardRequest.getPlayer());
         GameSession gameSession = gameSessions.get(playCardRequest.getRoomKey());
-        BaseCard cardPlayed = playCardRequest.getCard();
+        Card cardPlayed = playCardRequest.getCard();
         gameSession.playCard(player, cardPlayed);
     }
 

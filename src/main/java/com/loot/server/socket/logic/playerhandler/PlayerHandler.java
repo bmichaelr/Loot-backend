@@ -1,7 +1,7 @@
 package com.loot.server.socket.logic.playerhandler;
 
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -19,7 +19,7 @@ public class PlayerHandler implements IPlayerHandler {
     private List<PlayerDto> readyPlayers;
     private int playerTurnIndex;
 
-    Map<PlayerDto, List<BaseCard>> playedCards;
+    Map<PlayerDto, List<Card>> playedCards;
     Map<PlayerDto, Integer> numberOfWins;
 
     private int numberOfPlayersForGame = 4;
@@ -63,7 +63,7 @@ public class PlayerHandler implements IPlayerHandler {
     }
 
     @Override
-    public void addPlayedCard(PlayerDto player, BaseCard card) {
+    public void addPlayedCard(PlayerDto player, Card card) {
         playedCards.get(player).add(card);
     }
 

@@ -1,7 +1,7 @@
 package com.loot.server.domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class TurnResponse {
 
     @JsonProperty
-    private BaseCard card;
+    private Card card;
 
     @JsonProperty
     private Boolean myTurn;

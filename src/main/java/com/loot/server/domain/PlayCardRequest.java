@@ -3,7 +3,7 @@ package com.loot.server.domain;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,5 +23,5 @@ public class PlayCardRequest {
     private PlayerDto player;
 
     @JsonProperty
-    private BaseCard card;
+    private Card card;
 }

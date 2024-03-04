@@ -2,10 +2,9 @@ package com.loot.server.socket.logic;
 
 import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import com.loot.server.socket.logic.cards.CardStack;
 import com.loot.server.socket.logic.cards.impl.PottedPlant;
-import com.loot.server.socket.logic.playerhandler.PlayerHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 @Data
 @Builder
@@ -24,7 +22,7 @@ public class GameSession implements IGameSession{
 
     private List<GamePlayer> players;
     private List<GamePlayer> playersInRound;
-    private HashMap<GamePlayer, List<Integer>> cardsInHand;
+    private HashMap<Long, List<Integer>> cardsInHand;
     private String roomKey;
     private int maxPlayers = 4;
     private int numberOfPlayers = 0;
@@ -43,9 +41,9 @@ public class GameSession implements IGameSession{
     }
 
     @Override
-    public void playCard(GamePlayer playerActing, BaseCard card) {
+    public void playCard(GamePlayer playerActing, Card card) {
         // remove the card from the players hand
-        cardsInHand.get(playerActing).remove(card.getPower());
+        cardsInHand.get(playerActing.getId()).remove(card.getPower());
 
         if(card instanceof PottedPlant pottedPlant) {
             int guessedCard = pottedPlant.getGuess();
@@ -60,15 +58,15 @@ public class GameSession implements IGameSession{
 
     }
 
-    public BaseCard dealInitialCard(GamePlayer player) {
+    public Card dealInitialCard(GamePlayer player) {
         numberOfPlayersLoadedIn += 1;
-        BaseCard card = cardStack.drawCard();
-        cardsInHand.get(player).add(card.getPower());
+        Card card = cardStack.drawCard();
+        cardsInHand.get(player.getId()).add(card.getPower());
         return card;
     }
 
     @Override
-    public BaseCard dealCard(GamePlayer player) {
+    public Card dealCard(GamePlayer player) {
         if(cardStack.isDeckEmpty()) {
             return null;
         }
@@ -98,7 +96,7 @@ public class GameSession implements IGameSession{
 
         boolean ready =  numberOfReadyPlayers >= maxPlayers;
         if(ready) {
-            players.forEach(p -> cardsInHand.put(p, new ArrayList<>()));
+            players.forEach(p -> cardsInHand.put(p.getId(), new ArrayList<>()));
             playersInRound = new ArrayList<>(players);
             dealInitialCards();
         }
@@ -130,5 +128,8 @@ public class GameSession implements IGameSession{
         gameSession.addPlayer(player2);
         gameSession.addPlayer(player3);
         gameSession.addPlayer(player4);
+
+        Card card = gameSession.dealCard(player1);
+        System.out.println(card);
     }
 }
