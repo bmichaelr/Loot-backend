@@ -27,6 +27,7 @@ public class GameSession implements IGameSession{
     private HashMap<Long, List<Integer>> cardsInHand;
     private String roomKey;
     private int maxPlayers = 4;
+    private int minPlayers = 2;
     private int numberOfPlayers = 0;
     private int numberOfReadyPlayers = 0;
     private int turnIndex = 0;
@@ -132,7 +133,7 @@ public class GameSession implements IGameSession{
             }
         }
 
-        boolean ready =  numberOfReadyPlayers >= maxPlayers;
+        boolean ready =  numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
         if(ready) {
             players.forEach(p -> cardsInHand.put(p.getId(), new ArrayList<>()));
             playersInRound = new ArrayList<>(players);
