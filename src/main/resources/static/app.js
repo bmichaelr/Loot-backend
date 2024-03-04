@@ -1,4 +1,4 @@
-let initPlayerId;
+/*let initPlayerId;
 let initRoomKey;
 
 const stompClient = new StompJs.Client({
@@ -106,40 +106,143 @@ function readyUp(){
 function showGameStatus(message) {
     console.log("message from server: ", message)
     $("#gameStatus").append("<p>" + JSON.stringify(message.body) + "</p>");
-}
-
-$(function () {
-    $( "#disconnect" ).click(() => disconnect());
-    $( "#createGame" ).click(() => {
-        let playerId = prompt("Enter your username: ");
-        if(playerId) {
-            createGame(playerId)
-        }
-    });
-    $( "#ready" ).click(() => readyUp());
-    $( "#joinGame" ).click(() => {
-        let playerId = prompt("Enter your username: ");
-        let sessionId = prompt("Enter game session ID:");
-        if (sessionId && playerId) {
-            joinGame(playerId, sessionId);
-        }
-    });
-});
+}*/
 
 // use this
 class Player {
     constructor(name) {
         this.name = name;
+        this.ready = false;
         this.id = Math.floor(Math.random() * 1000); // Generate a random integer for the ID
     }
 }
-var player;
 
-window.onload = function() {
+var player;
+let roomKey;
+
+class Lobby {
+    constructor(roomKey, players) {
+        this.roomKey = roomKey;
+        this.players = players;
+    }
+}
+
+let lobby;
+let initialLoad = true;
+let ready = false;
+let allReady = false;
+
+window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
     const playerName = urlParams.get('playerName');
 
     console.log('Player name:', playerName);
     player = new Player(playerName);
-    connect();
+    sock_connect(playerName);
 };
+
+// <div className="player-item">
+//     <div className="player-name">Player 1</div>
+//     <div className="ready-status">✔️</div>
+// </div>
+
+function handlePlayersInLobby(parsedData) {
+    const players = parsedData.players;
+    const allReady = parsedData.allReady;
+
+    if (!lobby) {
+        lobby = new Lobby(roomKey, players);
+        players.forEach(player => {
+            addPlayerToLobby(player);
+        });
+    } else {
+        console.log('in the else for handling players in lobby')
+        players.forEach(player => {
+           if(document.getElementById('player-'+player.id)) {
+               console.log(player)
+               console.log('have the wrapper player div, player ready = ', player.ready)
+               const playerWrapper = document.getElementById('player-' + player.id);
+               const statusDivToUpdate = playerWrapper.querySelector('.ready-status');
+               if(player.ready) {
+                   statusDivToUpdate.textContent = "✔️";
+               } else {
+                   statusDivToUpdate.textContent = "❌";
+               }
+           } else {
+               addPlayerToLobby(player);
+           }
+        });
+    }
+
+    if(allReady) {
+        beginGameStartThings();
+    }
+}
+
+function addPlayerToLobby(player) {
+    const parentContainer = document.getElementById("list-of-players");
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('player-item');
+    wrapper.id = 'player-' + player.id;
+
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = player.name;
+    nameDiv.classList.add('player-name');
+    const statusDiv = document.createElement('div');
+    if(player.ready) {
+        statusDiv.textContent = "✔️";
+    } else {
+        statusDiv.textContent = "❌";
+    }
+    statusDiv.classList.add('ready-status');
+
+    wrapper.appendChild(nameDiv);
+    wrapper.appendChild(statusDiv);
+    parentContainer.appendChild(wrapper);
+}
+
+function handleGamePlay(gameUpdate) {
+    const binaryData = gameUpdate._binaryBody;
+    const stringData = new TextDecoder().decode(binaryData);
+    const parsedData = JSON.parse(stringData);
+}
+
+async function beginGameStartThings() {
+    allReady = true;
+    document.getElementById("readyBtn").style.backgroundColor = "gray";
+
+    const gameCounter = document.getElementById("gameCounter");
+    gameCounter.style.display = "contents";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting in 2...";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting in 1...";
+    await sleep(1000);
+    gameCounter.innerText = "Game starting now!";
+    // Josh, put the new html page activation here and set the current one to none
+}
+
+function sleep(ms = 0) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+$(function () {
+    $("#createGameBtn").click(() => {
+        if (connected && player) {
+            sock_createGame(player)
+        }
+    });
+    $("#joinGameBtn").click(() => {
+        let roomKey = prompt("Enter game room key:");
+        if (roomKey && player) {
+            sock_joinGame(player, roomKey);
+        }
+    });
+    $("#readyBtn").click(() => {
+        if(player && roomKey && !allReady) {
+            ready = !ready;
+            document.getElementById("readyBtn").innerText = (ready) ? "Unready" : "Ready up";
+            sock_readyUp(player, roomKey, ready);
+        }
+    });
+});

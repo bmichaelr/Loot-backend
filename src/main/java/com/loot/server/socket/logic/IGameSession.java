@@ -1,18 +1,18 @@
 package com.loot.server.socket.logic;
 
-import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.domain.Player;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.domain.GamePlayer;
+import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.socket.logic.cards.impl.PlayedCard;
 
 public interface IGameSession {
 
-    void playCard(PlayerDto player, BaseCard card);
+    void playCard(GamePlayer playerActing, PlayedCard card);
 
     void dealInitialCards();
 
-    BaseCard dealCard(PlayerDto player);
+    Card dealCard(GamePlayer player);
 
-    Boolean readyPlayerUp(PlayerDto player);
+    Boolean changePlayerReadyStatus(GamePlayer player);
 
-    void addPlayer(PlayerDto player);
+    void addPlayer(GamePlayer player);
 }

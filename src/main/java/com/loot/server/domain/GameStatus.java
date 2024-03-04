@@ -1,40 +1,36 @@
-package com.loot.server.domain.dto;
+package com.loot.server.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.loot.server.domain.dto.PlayerDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PlayerDto {
+public class GameStatus {
 
     @JsonProperty
-    private Long id;
+    private String roomKey;
 
     @JsonProperty
-    private Boolean ready;
-
-    @JsonProperty
-    private String name;
-
-    @JsonProperty
-    private String image;
-
+    private List<PlayerDto> players;
 
     @JsonIgnore
-    public boolean missingParam(){
-        return id == null || name == null;
-    }
+    public void addPlayer(PlayerDto playerDto) {
+        if(players == null) {
+            players = new ArrayList<>();
+        }
 
-    @JsonIgnore
-    public String getMissingParam() {
-        return (id == null) ? "Missing player id." : "Missing player name.";
+        players.add(playerDto);
     }
 }

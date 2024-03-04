@@ -1,7 +1,7 @@
 package com.loot.server.socket.logic.playerhandler;
 
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 
 public interface IPlayerHandler {
 
@@ -13,7 +13,7 @@ public interface IPlayerHandler {
 
     Boolean addWinToPlayer(PlayerDto player);
 
-    void addPlayedCard(PlayerDto player, BaseCard card);
+    void addPlayedCard(PlayerDto player, Card card);
 
     Boolean readyUp(PlayerDto player);
 

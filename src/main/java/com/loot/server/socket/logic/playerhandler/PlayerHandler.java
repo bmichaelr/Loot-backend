@@ -1,9 +1,9 @@
 package com.loot.server.socket.logic.playerhandler;
 
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.domain.Player;
-import com.loot.server.socket.logic.cards.BaseCard;
+import com.loot.server.socket.logic.cards.Card;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
+@Data
 public class PlayerHandler implements IPlayerHandler {
 
     private List<PlayerDto> playersInRoom;
@@ -18,7 +19,7 @@ public class PlayerHandler implements IPlayerHandler {
     private List<PlayerDto> readyPlayers;
     private int playerTurnIndex;
 
-    Map<PlayerDto, List<BaseCard>> playedCards;
+    Map<PlayerDto, List<Card>> playedCards;
     Map<PlayerDto, Integer> numberOfWins;
 
     private int numberOfPlayersForGame = 4;
@@ -62,13 +63,21 @@ public class PlayerHandler implements IPlayerHandler {
     }
 
     @Override
-    public void addPlayedCard(PlayerDto player, BaseCard card) {
+    public void addPlayedCard(PlayerDto player, Card card) {
         playedCards.get(player).add(card);
     }
 
     @Override
     public Boolean readyUp(PlayerDto player) {
-        readyPlayers.add(player);
+        playersInRoom.forEach(playerDto -> {
+            if(playerDto.getId().equals(player.getId())){
+                playerDto.setReady(true);
+            }
+        });
+
+        if(!readyPlayers.contains(player)){
+            readyPlayers.add(player);
+        }
         if(readyPlayers.size() == numberOfPlayersForGame) {
             startNewRound();
             return true;
