@@ -13,17 +13,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = PottedPlant.class, name = "pottedPlant"),
-        @JsonSubTypes.Type(value = MaulRat.class, name = "maulRat"),
-        @JsonSubTypes.Type(value = DuckOfDoom.class, name = "duckOfDoom"),
-        @JsonSubTypes.Type(value = WishingRing.class, name = "wishingRing"),
-        @JsonSubTypes.Type(value = NetTroll.class, name = "netTroll"),
-        @JsonSubTypes.Type(value = DreadGazebo.class, name = "dreadGazebo"),
-        @JsonSubTypes.Type(value = TurboniumDragon.class, name = "turboniumDragon"),
-        @JsonSubTypes.Type(value = Loot.class, name = "loot")
-})
 public class Card {
 
     private int power;
