@@ -21,6 +21,20 @@ public class Card {
 
     private String description;
 
+    public static Card cardFromPower(int power) {
+        return switch (power) {
+            case 1 -> pottedPlant();
+            case 2 -> maulRat();
+            case 3 -> duckOfDoom();
+            case 4 -> wishingRing();
+            case 5 -> netTroll();
+            case 6 -> dreadGazebo();
+            case 7 -> turboniumDragon();
+            case 8 -> loot();
+            default -> throw new IllegalStateException("Unexpected card value: " + power);
+        };
+    }
+
     @JsonIgnore
     public static Card pottedPlant(){
         int power = 1;

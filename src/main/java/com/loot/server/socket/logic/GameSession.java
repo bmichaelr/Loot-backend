@@ -50,10 +50,13 @@ public class GameSession implements IGameSession{
         if(card instanceof TargetedEffectCard effectCard) {
             switch(effectCard.getPower()) {
                 case 2 -> {
-                    // Do maul rat action here
+                    // Do maul rat action here -- send the player who played the card the description of the persons card
+                    Card cardInHand = Card.cardFromPower(cardsInHand.get(effectCard.getPlayedOnId()).get(0));
+                    // Show them this card!
                 }
                 case 3 -> {
-                    // Do duck of doom action here
+                    // Do duck of doom action here --
+
                 }
                 case 5 -> {
                     // Do net troll action here

@@ -23,6 +23,9 @@ public class GamePlayer {
     private Boolean ready;
 
     @JsonProperty
+    private Boolean isSafe;
+
+    @JsonProperty
     private String name;
 
     @JsonIgnore
@@ -30,6 +33,7 @@ public class GamePlayer {
         this.id = playerDto.getId();
         this.name = playerDto.getName();
         this.ready = false;
+        this.isSafe = false;
     }
 
     @JsonIgnore
@@ -37,6 +41,7 @@ public class GamePlayer {
         this.id = playerDto.getId();
         this.name = playerDto.getName();
         this.ready = ready;
+        this.isSafe = false;
     }
 
     @JsonIgnore
