@@ -7,6 +7,7 @@ import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.service.GameService;
 import com.loot.server.socket.logic.GameSession;
 import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.socket.logic.cards.impl.PlayedCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
@@ -120,7 +121,7 @@ public class GameController {
 
         GamePlayer player = new GamePlayer(playCardRequest.getPlayer());
         GameSession gameSession = gameSessions.get(playCardRequest.getRoomKey());
-        Card cardPlayed = playCardRequest.getCard();
+        PlayedCard cardPlayed = playCardRequest.getCard();
         gameSession.playCard(player, cardPlayed);
     }
 

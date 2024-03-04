@@ -4,7 +4,7 @@ import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.Card;
 import com.loot.server.socket.logic.cards.CardStack;
-import com.loot.server.socket.logic.cards.impl.PottedPlant;
+import com.loot.server.socket.logic.cards.impl.PlayedCard;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,16 +41,9 @@ public class GameSession implements IGameSession{
     }
 
     @Override
-    public void playCard(GamePlayer playerActing, Card card) {
+    public void playCard(GamePlayer playerActing, PlayedCard card) {
         // remove the card from the players hand
         cardsInHand.get(playerActing.getId()).remove(card.getPower());
-
-        if(card instanceof PottedPlant pottedPlant) {
-            int guessedCard = pottedPlant.getGuess();
-            if(cardsInHand.get(pottedPlant.getPlayedOn()).contains(guessedCard)) {
-
-            }
-        }
     }
 
     @Override

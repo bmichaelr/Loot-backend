@@ -2,10 +2,11 @@ package com.loot.server.socket.logic;
 
 import com.loot.server.domain.GamePlayer;
 import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.socket.logic.cards.impl.PlayedCard;
 
 public interface IGameSession {
 
-    void playCard(GamePlayer player, Card card);
+    void playCard(GamePlayer playerActing, PlayedCard card);
 
     void dealInitialCards();
 

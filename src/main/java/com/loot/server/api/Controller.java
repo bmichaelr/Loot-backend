@@ -34,5 +34,6 @@ public class Controller {
     @PostMapping(value = "/playCard")
     public void playCard(@RequestBody PlayCardRequest playCardRequest) {
         System.out.println(playCardRequest);
+        System.out.println(playCardRequest.getCard().toString());
     }
 }
