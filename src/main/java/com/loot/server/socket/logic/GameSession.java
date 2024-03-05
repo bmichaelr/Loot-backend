@@ -4,6 +4,7 @@ import com.loot.server.domain.GamePlayer;
 import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.Card;
 import com.loot.server.socket.logic.cards.CardStack;
+import com.loot.server.socket.logic.cards.HandOfCards;
 import com.loot.server.socket.logic.cards.impl.GuessingCard;
 import com.loot.server.socket.logic.cards.impl.PlayedCard;
 import com.loot.server.socket.logic.cards.impl.TargetedEffectCard;
@@ -24,7 +25,8 @@ public class GameSession implements IGameSession{
 
     private List<GamePlayer> players;
     private List<GamePlayer> playersInRound;
-    private HashMap<Long, List<Integer>> cardsInHand;
+    private HashMap<GamePlayer, HandOfCards> cardsInHand;
+    private HashMap<GamePlayer, List<Card>> playedCards;
     private String roomKey;
     private int maxPlayers = 4;
     private int minPlayers = 2;
@@ -45,30 +47,42 @@ public class GameSession implements IGameSession{
 
     @Override
     public void playCard(GamePlayer playerActing, PlayedCard card) {
-        // Remove the card from the players hand
-        cardsInHand.get(playerActing.getId()).remove(card.getPower());
+        // Get the power of the played card, then remove card from players hand and add it to their played cards
+        var powerOfPlayedCard = card.getPower();
+        cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
+        playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
 
         if(card instanceof TargetedEffectCard effectCard) {
-            Card opponentCard = Card.cardFromPower(cardsInHand.get(effectCard.getPlayedOnId()).get(0));
-            switch(effectCard.getPower()) {
+            // The opponent
+            var opponent = effectCard.getPlayedOn();
+            switch(powerOfPlayedCard) {
                 case 2 -> {
                     // Do maul rat action here -- send the player who played the card the description of the persons card
-                    Card cardInHand = Card.cardFromPower(cardsInHand.get(effectCard.getPlayedOnId()).get(0));
-                    // Show them this card!
+                    Card cardInHand = Card.cardFromPower(cardsInHand.get(opponent).getCardInHand());
+                    // Show them this card! some sort of response needed here...
+                    // TODO ^
                 }
                 case 3 -> {
                     // Do duck of doom action here --
-                    Card playersCard = Card.cardFromPower(cardsInHand.get(playerActing.getId()).get(0));
-                    if(opponentCard.getPower() > playersCard.getPower()) {
-
-                    } else if(opponentCard.getPower() < playersCard.getPower()) {
-
-                    } else {
-                        // Nothing happens
+                    var powerOfOpponentCard = cardsInHand.get(opponent).getCardInHand();
+                    if(powerOfOpponentCard > powerOfPlayedCard) {
+                        playersInRound.remove(playerActing);
+                        playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
+                    } else if(powerOfOpponentCard < powerOfPlayedCard) {
+                        playersInRound.remove(opponent);
+                        playedCards.get(opponent).add(Card.cardFromPower(powerOfOpponentCard));
                     }
+                    // On tie, nothing happens
                 }
                 case 5 -> {
                     // Do net troll action here
+                    if(cardStack.deckIsEmpty()) {
+
+                    } else {
+                        Integer newCardPower = cardStack.drawCard();
+                        // TODO : add in way to swap new card for player hand
+                        cardsInHand.get(opponent);
+                    }
                 }
                 case 6 -> {
                     // Do gazebo action here
@@ -79,8 +93,8 @@ public class GameSession implements IGameSession{
             // e.g. get the guessed id, check if they have the guessed card, then send some result
             Long idOfGuessedPlayer = guessingCard.getGuessedPlayerId();
             int cardGuessed = guessingCard.getGuessedCard();
-            List<Integer> guessedPlayersCards = cardsInHand.get(idOfGuessedPlayer);
-            if(guessedPlayersCards.contains(cardGuessed)) {
+            // TODO check if they guessed right
+            if(true) {
                 // They guessed right
             } else {
                 // They guessed wrong
@@ -102,23 +116,18 @@ public class GameSession implements IGameSession{
 
     @Override
     public void dealInitialCards() {
-
-    }
-
-    public Card dealInitialCard(GamePlayer player) {
-        numberOfPlayersLoadedIn += 1;
-        Card card = cardStack.drawCard();
-        cardsInHand.get(player.getId()).add(card.getPower());
-        return card;
+        players.forEach(gamePlayer -> cardsInHand.put(gamePlayer, new HandOfCards(cardStack.drawCard())));
     }
 
     @Override
     public Card dealCard(GamePlayer player) {
-        if(cardStack.isDeckEmpty()) {
+        if(cardStack.deckIsEmpty()) {
             return null;
         }
 
-        return cardStack.drawCard();
+        var dealtCard = cardStack.drawCard();
+        cardsInHand.get(player).setDrawnCard(dealtCard);
+        return Card.cardFromPower(dealtCard);
     }
 
     @Override
@@ -143,7 +152,6 @@ public class GameSession implements IGameSession{
 
         boolean ready =  numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
         if(ready) {
-            players.forEach(p -> cardsInHand.put(p.getId(), new ArrayList<>()));
             playersInRound = new ArrayList<>(players);
             dealInitialCards();
         }

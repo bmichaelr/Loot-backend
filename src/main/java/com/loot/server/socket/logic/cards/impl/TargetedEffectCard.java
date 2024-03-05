@@ -2,6 +2,7 @@ package com.loot.server.socket.logic.cards.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.loot.server.domain.GamePlayer;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -12,10 +13,10 @@ import lombok.*;
 public class TargetedEffectCard extends PlayedCard {
 
     @JsonProperty
-    private Long playedOnId;
+    private GamePlayer playedOn;
 
     @Override
     public String toString() {
-        return "Targeted Effect Card:\n\tpower: " + this.getPower() + "\n\tplayedOnId: " + this.getPlayedOnId();
+        return "Targeted Effect Card:\n\tpower: " + this.getPower() + "\n\tplayedOn: " + this.getPlayedOn();
     }
 }

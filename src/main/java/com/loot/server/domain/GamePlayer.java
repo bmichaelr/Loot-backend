@@ -61,6 +61,6 @@ public class GamePlayer {
     @JsonIgnore
     @Override
     public int hashCode() {
-        return this.getId().intValue();
+        return id.hashCode() + name.hashCode();
     }
 }

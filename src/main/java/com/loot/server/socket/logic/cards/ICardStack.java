@@ -4,8 +4,8 @@ public interface ICardStack {
 
     void shuffle();
 
-    Card drawCard();
+    Integer drawCard();
 
-    Boolean isDeckEmpty();
+    Boolean deckIsEmpty();
 
 }

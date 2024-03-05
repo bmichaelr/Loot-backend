@@ -10,27 +10,10 @@ import java.util.Stack;
 public class CardStack implements ICardStack {
 
     // Stores all the possible cards
-    private final List<Card> cardPool = List.of(
-            Card.pottedPlant(),
-            Card.pottedPlant(),
-            Card.pottedPlant(),
-            Card.pottedPlant(),
-            Card.pottedPlant(),
-            Card.maulRat(),
-            Card.maulRat(),
-            Card.duckOfDoom(),
-            Card.duckOfDoom(),
-            Card.wishingRing(),
-            Card.wishingRing(),
-            Card.netTroll(),
-            Card.netTroll(),
-            Card.dreadGazebo(),
-            Card.turboniumDragon(),
-            Card.loot()
-    );
+    private final List<Integer> cardPool = List.of(1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6, 7, 8);
 
     // Acts as the stack of cards for the round
-    private Stack<Card> drawPile;
+    private Stack<Integer> drawPile;
 
     public CardStack(){
         shuffle();
@@ -39,22 +22,22 @@ public class CardStack implements ICardStack {
     @Override
     public void shuffle() {
         Random rand = new Random();
-        List<Card> cardPoolCopy = new ArrayList<>(cardPool);
+        List<Integer> cardPoolCopy = new ArrayList<>(cardPool);
 
         // Remove a random card from the deck
         cardPoolCopy.remove(rand.nextInt(cardPoolCopy.size()));
 
         // Use Fisher-Yates algorithm to shuffle the cards
         for(int i = cardPoolCopy.size() - 1; i > 0; --i){
-            int j = rand.nextInt(i + 1);
-            Card temp = cardPoolCopy.get(i);
+            var j = rand.nextInt(i + 1);
+            var temp = cardPoolCopy.get(i);
             cardPoolCopy.set(i, cardPoolCopy.get(j));
             cardPoolCopy.set(j, temp);
         }
 
         // Initialize the stack and push the cards onto it
         drawPile = new Stack<>();
-        for(Card card : cardPoolCopy) {
+        for(var card : cardPoolCopy) {
             drawPile.push(card);
         }
 
@@ -66,12 +49,12 @@ public class CardStack implements ICardStack {
     }
 
     @Override
-    public Card drawCard() {
+    public Integer drawCard() {
         return drawPile.pop();
     }
 
     @Override
-    public Boolean isDeckEmpty() {
+    public Boolean deckIsEmpty() {
         return drawPile.isEmpty();
     }
 }

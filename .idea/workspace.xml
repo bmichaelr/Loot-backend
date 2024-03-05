@@ -5,7 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/HandOfCards.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/ICardStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/ICardStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TargetedEffectCard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TargetedEffectCard.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,7 +72,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "ws__setup",
+    "git-widget-placeholder": "sprint1__backend__turnActionManagement",
     "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -145,6 +151,7 @@
       <workItem from="1709058427650" duration="60000" />
       <workItem from="1709058489964" duration="3878000" />
       <workItem from="1709222182321" duration="942000" />
+      <workItem from="1709596890074" duration="2801000" />
     </task>
     <servers />
   </component>
