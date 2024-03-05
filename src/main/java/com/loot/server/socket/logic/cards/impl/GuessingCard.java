@@ -2,6 +2,7 @@ package com.loot.server.socket.logic.cards.impl;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.loot.server.domain.GamePlayer;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
@@ -12,13 +13,13 @@ import lombok.*;
 public class GuessingCard extends PlayedCard {
 
     @JsonProperty
-    private Long guessedPlayerId;
+    private GamePlayer guessedOn;
 
     @JsonProperty
     private int guessedCard;
 
     @Override
     public String toString() {
-        return "Guessing Card:\n\tpower: " + this.getPower() + "\n\tguessedPlayerId: " + this.getGuessedPlayerId() + "\n\tguessedCard: " + this.getGuessedCard();
+        return "Guessing Card:\n\tpower: " + this.getPower() + "\n\tguessedOn: " + this.getGuessedOn() + "\n\tguessedCard: " + this.getGuessedCard();
     }
 }

@@ -48,12 +48,14 @@ public class GameSession implements IGameSession{
     @Override
     public void playCard(GamePlayer playerActing, PlayedCard card) {
         // Get the power of the played card, then remove card from players hand and add it to their played cards
+        // This line removes any lingering wishing ring effects
+        playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(false);
+
         var powerOfPlayedCard = card.getPower();
         cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
         playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
 
         if(card instanceof TargetedEffectCard effectCard) {
-            // The opponent
             var opponent = effectCard.getPlayedOn();
             switch(powerOfPlayedCard) {
                 case 2 -> {
@@ -75,41 +77,41 @@ public class GameSession implements IGameSession{
                     // On tie, nothing happens
                 }
                 case 5 -> {
-                    // Do net troll action here
+                    // Net Troll action here
+                    var discardedCard = cardsInHand.get(opponent).discardHand();
+                    playedCards.get(opponent).add(Card.cardFromPower(discardedCard));
                     if(cardStack.deckIsEmpty()) {
-
+                        playersInRound.remove(opponent);
                     } else {
-                        Integer newCardPower = cardStack.drawCard();
-                        // TODO : add in way to swap new card for player hand
-                        cardsInHand.get(opponent);
+                        cardsInHand.get(opponent).drawCard(cardStack.drawCard());
                     }
                 }
                 case 6 -> {
                     // Do gazebo action here
+                    var opponentCard = cardsInHand.get(opponent).discardHand();
+                    var playerHand = cardsInHand.get(playerActing).discardHand();
+                    cardsInHand.get(opponent).drawCard(playerHand);
+                    cardsInHand.get(playerActing).drawCard(opponentCard);
                 }
             }
         } else if(card instanceof GuessingCard guessingCard) {
             // Do potted plant action here
             // e.g. get the guessed id, check if they have the guessed card, then send some result
-            Long idOfGuessedPlayer = guessingCard.getGuessedPlayerId();
-            int cardGuessed = guessingCard.getGuessedCard();
-            // TODO check if they guessed right
-            if(true) {
+            var opponent = guessingCard.getGuessedOn();
+            var guessedCard = guessingCard.getGuessedCard();
+            if(cardsInHand.get(opponent).getCardInHand().equals(guessedCard)) {
                 // They guessed right
-            } else {
-                // They guessed wrong
+                var cardToDiscard = cardsInHand.get(opponent).discardHand();
+                playedCards.get(opponent).add(Card.cardFromPower(cardToDiscard));
+                playersInRound.remove(opponent);
             }
+            // if they guessed wrong nothing happens
         } else {
             switch (card.getPower()) {
-                case 4 -> {
-                    // do the ring action here
-                }
-                case 7 -> {
-                    // do the dragon action here
-                }
-                case 8 -> {
-                    // do the loot action here
-                }
+                // Wishing Ring action
+                case 4 -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+                // Loot action
+                case 8 -> playersInRound.remove(playerActing);
             }
         }
     }

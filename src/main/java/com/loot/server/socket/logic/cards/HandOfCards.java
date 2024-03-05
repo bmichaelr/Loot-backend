@@ -34,6 +34,32 @@ public class HandOfCards {
      * @return int of card in hand
      */
     public Integer getCardInHand() {
+        if(holdingCard == -1) {
+            throw new RuntimeException("This person is no longer in the game!");
+        }
         return holdingCard;
+    }
+
+    /**
+     * method called to draw a card for the player. if they have no card in their hand (e.g. they just discarded) then
+     * set the holding card to the drawn card, else we set the drawnCard to the new card
+     * @param cardPower of the drawn card
+     */
+    public void drawCard(Integer cardPower) {
+        if(holdingCard == -1) {
+            holdingCard = cardPower;
+        } else {
+            drawnCard = cardPower;
+        }
+    }
+
+    /**
+     * method called to discard a persons hand (whether for net troll, or loot, or otherwise)
+     */
+    public Integer discardHand() {
+        var tmp = holdingCard;
+        holdingCard = -1;
+        drawnCard = -1;
+        return tmp;
     }
 }
