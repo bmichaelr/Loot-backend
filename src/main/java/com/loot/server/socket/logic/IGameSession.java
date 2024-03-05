@@ -8,7 +8,7 @@ public interface IGameSession {
 
     void playCard(GamePlayer playerActing, PlayedCard card);
 
-    void dealInitialCards();
+    void startRound();
 
     Card dealCard(GamePlayer player);
 

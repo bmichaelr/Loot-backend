@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForCardStack.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/static/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/static/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/IGameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/IGameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/Card.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/Card.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/CardStack.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,8 +83,8 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="JUnit.TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady">
-    <configuration name="TestsForGameSessionObject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.TestsForCardStack">
+    <configuration name="TestsForCardStack" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -88,13 +93,13 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
       <option name="TEST_OBJECT" value="class" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestsForGameSessionObject.testThatAddingPlayersWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestsForCardStack.testThatCardStackShuffleMethodWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -103,14 +108,14 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
-      <option name="METHOD_NAME" value="testThatAddingPlayersWorks" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
+      <option name="METHOD_NAME" value="testThatCardStackShuffleMethodWorks" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestsForGameSessionObject.testThatChangingReadyStatusWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestsForCardStack.testThatReshuffleWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -119,14 +124,14 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
-      <option name="METHOD_NAME" value="testThatChangingReadyStatusWorks" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
+      <option name="METHOD_NAME" value="testThatReshuffleWorks" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestsForGameSessionObject.testThatLoadingInPlayersWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestsForCardStack.testThatTheCardRemovalWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -135,14 +140,14 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
-      <option name="METHOD_NAME" value="testThatLoadingInPlayersWorks" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
+      <option name="METHOD_NAME" value="testThatTheCardRemovalWorks" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestsForCardStack.testThatThereAre15DrawableCardsBeforeDeckEmpty" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -151,8 +156,8 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
-      <option name="METHOD_NAME" value="testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
+      <option name="METHOD_NAME" value="testThatThereAre15DrawableCardsBeforeDeckEmpty" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -173,11 +178,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" />
-        <item itemvalue="JUnit.TestsForGameSessionObject.testThatLoadingInPlayersWorks" />
-        <item itemvalue="JUnit.TestsForGameSessionObject" />
-        <item itemvalue="JUnit.TestsForGameSessionObject.testThatChangingReadyStatusWorks" />
-        <item itemvalue="JUnit.TestsForGameSessionObject.testThatAddingPlayersWorks" />
+        <item itemvalue="JUnit.TestsForCardStack" />
+        <item itemvalue="JUnit.TestsForCardStack.testThatReshuffleWorks" />
+        <item itemvalue="JUnit.TestsForCardStack.testThatTheCardRemovalWorks" />
+        <item itemvalue="JUnit.TestsForCardStack.testThatThereAre15DrawableCardsBeforeDeckEmpty" />
+        <item itemvalue="JUnit.TestsForCardStack.testThatCardStackShuffleMethodWorks" />
       </list>
     </recent_temporary>
   </component>

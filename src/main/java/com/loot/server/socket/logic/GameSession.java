@@ -42,7 +42,6 @@ public class GameSession implements IGameSession{
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
         players = new ArrayList<>();
-        cardsInHand = new HashMap<>();
         cardStack = new CardStack();
     }
 
@@ -118,7 +117,7 @@ public class GameSession implements IGameSession{
     }
 
     @Override
-    public void dealInitialCards() {
+    public void startRound() {
         players.forEach(gamePlayer -> cardsInHand.put(gamePlayer, new HandOfCards(cardStack.drawCard())));
     }
 

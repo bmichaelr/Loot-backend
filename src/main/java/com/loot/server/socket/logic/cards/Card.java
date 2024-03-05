@@ -36,6 +36,12 @@ public class Card {
     }
 
     @JsonIgnore
+    @Override
+    public String toString() {
+        return "Card : {\n\tpower : " + power + ",\n\tname : " + name + ",\n\tdescription : " + description + "\n}";
+    }
+
+    @JsonIgnore
     public static Card pottedPlant(){
         int power = 1;
         String name = "Potted Plant";

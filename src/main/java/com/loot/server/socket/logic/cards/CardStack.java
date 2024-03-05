@@ -1,31 +1,36 @@
 package com.loot.server.socket.logic.cards;
 
 import com.loot.server.socket.logic.cards.impl.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Stack;
 
+@NoArgsConstructor
 public class CardStack implements ICardStack {
 
     // Stores all the possible cards
-    private final List<Integer> cardPool = List.of(1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 6, 7, 8);
+    private final List<Integer> cardPool = List.of(1, 1, 1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 7, 8);
 
     // Acts as the stack of cards for the round
     private Stack<Integer> drawPile;
-
-    public CardStack(){
-        shuffle();
-    }
+    @Getter
+    private Integer cardKeptOut;
 
     @Override
     public void shuffle() {
+        if(drawPile == null) {
+            drawPile = new Stack<>();
+        }
+
         Random rand = new Random();
         List<Integer> cardPoolCopy = new ArrayList<>(cardPool);
 
         // Remove a random card from the deck
-        cardPoolCopy.remove(rand.nextInt(cardPoolCopy.size()));
+        cardKeptOut = cardPoolCopy.remove(rand.nextInt(cardPoolCopy.size()));
 
         // Use Fisher-Yates algorithm to shuffle the cards
         for(int i = cardPoolCopy.size() - 1; i > 0; --i){
@@ -36,16 +41,9 @@ public class CardStack implements ICardStack {
         }
 
         // Initialize the stack and push the cards onto it
-        drawPile = new Stack<>();
         for(var card : cardPoolCopy) {
             drawPile.push(card);
         }
-
-        System.out.println(drawPile);
-    }
-
-    public static void main(String[] args) {
-        CardStack stack = new CardStack();
     }
 
     @Override
@@ -55,6 +53,6 @@ public class CardStack implements ICardStack {
 
     @Override
     public Boolean deckIsEmpty() {
-        return drawPile.isEmpty();
+        return drawPile == null || drawPile.isEmpty();
     }
 }
