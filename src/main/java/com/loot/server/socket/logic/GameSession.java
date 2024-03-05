@@ -118,6 +118,7 @@ public class GameSession implements IGameSession{
     @Override
     public void startRound() {
         cardStack = new CardStack();
+        cardStack.shuffle();
         playersInRound = new ArrayList<>(players.size());
         playedCards = new HashMap<>();
         cardsInHand = new HashMap<>();

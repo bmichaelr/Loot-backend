@@ -216,11 +216,17 @@ public class TestsForGameSessionObject {
             var copy = player.copy(); copyOfPlayers.add(copy);
         });
 
-        Boolean loadedIn = false;
+        Boolean loadedIn;
         for(int i = 0; i < copyOfPlayers.size(); i++) {
             loadedIn = gameSession.loadedIntoGame(copyOfPlayers.get(i));
-
             assert (i == copyOfPlayers.size() - 1) == loadedIn;
         }
+
+        gameSession.startRound();
+        assert gameSession.getPlayersInRound() != null;
+        assert gameSession.getCardsInHand() != null;
+        assert gameSession.getPlayedCards() != null;
+        assert gameSession.getCardStack() != null;
+        //assert gameSession.getPlayersInRound().size() == gameSession.getPlayers().size();
     }
 }

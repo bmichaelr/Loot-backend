@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
