@@ -4,6 +4,7 @@ import com.loot.server.domain.GamePlayer;
 import com.loot.server.socket.logic.GameSession;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TestsForGameSessionObject {
@@ -204,5 +205,22 @@ public class TestsForGameSessionObject {
         assert allLoadedIn.equals(Boolean.TRUE) && gameSession.getNumberOfPlayersLoadedIn() == 4;
     }
 
+    @Test
+    public void testThatStartRoundMethodInitializesAllDataStructures() {
+        GameSession gameSession = GameSessionTestsUtil.createReadyLobby("IUI552");
+        assert gameSession.getRoomKey().equals("IUI552");
 
+        // Load in all the players to start the game
+        List<GamePlayer> copyOfPlayers = new ArrayList<>();
+        gameSession.getPlayers().forEach(player -> {
+            var copy = player.copy(); copyOfPlayers.add(copy);
+        });
+
+        Boolean loadedIn = false;
+        for(int i = 0; i < copyOfPlayers.size(); i++) {
+            loadedIn = gameSession.loadedIntoGame(copyOfPlayers.get(i));
+
+            assert (i == copyOfPlayers.size() - 1) == loadedIn;
+        }
+    }
 }
