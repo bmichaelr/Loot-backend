@@ -131,6 +131,7 @@ let lobby;
 let initialLoad = true;
 let ready = false;
 let allReady = false;
+let gameBeginning = false;
 
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -176,6 +177,8 @@ function handlePlayersInLobby(parsedData) {
 
     if(allReady) {
         beginGameStartThings();
+    } else if(gameBeginning) {
+        cancelGameBeginningCountdown();
     }
 }
 
@@ -207,8 +210,18 @@ function handleGamePlay(gameUpdate) {
     const parsedData = JSON.parse(stringData);
 }
 
+function cancelGameBeginningCountdown() {
+    allReady = false;
+    gameBeginning = false;
+    document.getElementById("readyBtn").style.backgroundColor = "#007bff";
+    const gameCounter = document.getElementById("gameCounter");
+    gameCounter.style.display = "none";
+    gameCounter.innerText = "Game starting in 3...";
+}
+
 async function beginGameStartThings() {
     allReady = true;
+    gameBeginning = true;
     document.getElementById("readyBtn").style.backgroundColor = "gray";
 
     const gameCounter = document.getElementById("gameCounter");
