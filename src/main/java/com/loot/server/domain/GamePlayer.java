@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DialectOverride;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,6 +22,9 @@ public class GamePlayer {
 
     @JsonProperty
     private Boolean ready;
+
+    @JsonProperty
+    private Boolean loadedIn;
 
     @JsonProperty
     private Boolean isSafe;
@@ -62,5 +66,20 @@ public class GamePlayer {
     @Override
     public int hashCode() {
         return id.hashCode() + name.hashCode();
+    }
+
+    @JsonIgnore
+    @Override
+    public String toString(){
+        return "Game Player : {\n\tname : " + this.name + ",\n\tid : " + this.id + ",\n\tready : " + this.ready
+                + ",\n\tloadedIn: " + this.loadedIn + ",\n\tsafe : " + this.isSafe + "\n}";
+    }
+
+    @JsonIgnore
+    public GamePlayer copy() {
+        return GamePlayer.builder()
+                .name(this.name)
+                .id(this.id)
+                .build();
     }
 }

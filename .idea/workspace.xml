@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForCardsInHandObject.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/HandOfCards.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/HandOfCards.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTests.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTestsUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/domain/GamePlayer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTestsUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTestsUtil.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,21 +81,8 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="JUnit.TestsForCardsInHandObject.testDrawingCardMethod">
-    <configuration name="GameSession" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.socket.logic.GameSession" />
-      <module name="server" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.loot.server.socket.logic.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="TestsForCardsInHandObject.testDrawingCardMethod" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="JUnit.TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady">
+    <configuration name="TestsForGameSessionObject" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -103,8 +91,71 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardsInHandObject" />
-      <option name="METHOD_NAME" value="testDrawingCardMethod" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestsForGameSessionObject.testThatAddingPlayersWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="METHOD_NAME" value="testThatAddingPlayersWorks" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestsForGameSessionObject.testThatChangingReadyStatusWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="METHOD_NAME" value="testThatChangingReadyStatusWorks" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestsForGameSessionObject.testThatLoadingInPlayersWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="METHOD_NAME" value="testThatLoadingInPlayersWorks" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="METHOD_NAME" value="testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -123,24 +174,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="ServerApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
-      <module name="server" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="com.loot.server.ServerApplication" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.loot.server.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="JUnit.TestsForCardsInHandObject.testDrawingCardMethod" />
-        <item itemvalue="Application.GameSession" />
-        <item itemvalue="Spring Boot.ServerApplication" />
+        <item itemvalue="JUnit.TestsForGameSessionObject.testThatLobbiesWithVaryingSizesCanStartTheGameIfAllReady" />
+        <item itemvalue="JUnit.TestsForGameSessionObject.testThatLoadingInPlayersWorks" />
+        <item itemvalue="JUnit.TestsForGameSessionObject" />
+        <item itemvalue="JUnit.TestsForGameSessionObject.testThatChangingReadyStatusWorks" />
+        <item itemvalue="JUnit.TestsForGameSessionObject.testThatAddingPlayersWorks" />
       </list>
     </recent_temporary>
   </component>

@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.jpa.repository.query.JSqlParserUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,20 +145,15 @@ public class GameSession implements IGameSession{
             boolean isReady = player.getReady();
 
             if(!wasReady && isReady) {
-                numberOfReadyPlayers++;
+                numberOfReadyPlayers += 1;
                 playerToAlter.setReady(true);
             } else if(wasReady && !isReady) {
-                numberOfReadyPlayers--;
+                numberOfReadyPlayers -= 1;
                 playerToAlter.setReady(false);
             }
         }
 
-        boolean ready =  numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
-        if(ready) {
-            playersInRound = new ArrayList<>(players);
-            dealInitialCards();
-        }
-        return ready;
+        return numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
     }
 
     /*
@@ -165,28 +161,31 @@ public class GameSession implements IGameSession{
      */
     @Override
     public void addPlayer(GamePlayer player) {
+        if(lobbyIsFull()) {
+            return;
+        }
+
         numberOfPlayers += 1;
         player.setReady(false);
         players.add(player);
     }
 
-    public boolean lobbyIsFull() {
-        return numberOfPlayers >= maxPlayers;
+    /**
+     * this function will be used to sync players when they are loading in to a new round
+     * @param player that has successfully loaded in
+     */
+    public Boolean loadedIntoGame(GamePlayer player) {
+        if(!players.contains(player)){
+            // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
+            return false;
+        }
+
+        players.get(players.indexOf(player)).setLoadedIn(true);
+        numberOfPlayersLoadedIn += 1;
+        return numberOfPlayersLoadedIn == players.size();
     }
 
-    public static void main(String[] args) {
-        GameSession gameSession = new GameSession("ABC123");
-        GamePlayer player1 = new GamePlayer(PlayerDto.builder().id(1L).name("Ben").build());
-        GamePlayer player2 = new GamePlayer(PlayerDto.builder().id(2L).name("Josh").build());
-        GamePlayer player3 = new GamePlayer(PlayerDto.builder().id(3L).name("Ian").build());
-        GamePlayer player4 = new GamePlayer(PlayerDto.builder().id(4L).name("Kenna").build());
-
-        gameSession.addPlayer(player1);
-        gameSession.addPlayer(player2);
-        gameSession.addPlayer(player3);
-        gameSession.addPlayer(player4);
-
-        Card card = gameSession.dealCard(player1);
-        System.out.println(card);
+    public boolean lobbyIsFull() {
+        return numberOfPlayers >= maxPlayers;
     }
 }
