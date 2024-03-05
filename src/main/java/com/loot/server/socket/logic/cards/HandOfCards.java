@@ -9,8 +9,8 @@ import java.util.Objects;
 @NoArgsConstructor
 public class HandOfCards {
 
-    private Integer holdingCard;
-    private Integer drawnCard;
+    private Integer holdingCard = -1;
+    private Integer drawnCard = -1;
 
     public HandOfCards(Integer cardPower) {
         holdingCard = cardPower;
@@ -23,10 +23,14 @@ public class HandOfCards {
      */
     public void playedCard(Integer power) {
         // If they played the card drawn, do nothing
-        if(Objects.equals(drawnCard, power)) return;
+        if(Objects.equals(drawnCard, power)) {
+            drawnCard = -1;
+            return;
+        }
 
         // If they played the card they were holding, update the held card
         holdingCard = drawnCard;
+        drawnCard = -1;
     }
 
     /**
@@ -61,5 +65,10 @@ public class HandOfCards {
         holdingCard = -1;
         drawnCard = -1;
         return tmp;
+    }
+
+    @Override
+    public String toString() {
+        return "Hand of Cards:\n\tHolding Card: " + holdingCard + "\n\tDrawn Card: " + drawnCard;
     }
 }

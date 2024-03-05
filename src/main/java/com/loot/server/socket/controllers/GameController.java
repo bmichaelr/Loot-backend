@@ -110,9 +110,9 @@ public class GameController {
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         GameSession gameSession = gameSessions.get(roomKey);
 
-        Card dealtCard = gameSession.dealInitialCard(player);
-        TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
-        messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
+        //Card dealtCard = gameSession.dealInitialCard(player);
+        //TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
+        //messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
     }
 
     @MessageMapping("/playCard")
