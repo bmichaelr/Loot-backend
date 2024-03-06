@@ -13,6 +13,17 @@ import java.util.Random;
 // To test the logic
 public class TestGameLogic {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_PURPLE = "\u001B[35m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+
+
     GameSession gameSession;
     Random rand = new Random();
 
@@ -34,9 +45,26 @@ public class TestGameLogic {
             var player = gameSession.playersTurn();
             gameSession.dealCard(player);
             var handOfCards = gameSession.getCardsInHand().get(player);
+            System.out.println(ANSI_RED + "ROUND ITERATION: " + ANSI_RESET + " Player playing = " + ANSI_BLUE + player.getName() + ANSI_RESET + ", Card In Hand = " + ANSI_BLUE + handOfCards.getCardInHand() + ANSI_RESET + ", Drawn Card: " + ANSI_BLUE + handOfCards.getDrawnCard() + ANSI_RESET);
             assert handOfCards.hasTwoCards();
             PlayedCard cardToPlay = createPlayedCardObjectHelper(player);
             assert validateCardPlayed(player, cardToPlay);
+        }
+
+        if(gameSession.getPlayersInRound().size() > 1) {
+            var index = 0;
+            var maxCard = 0;
+            for(int i = 0; i < gameSession.getPlayersInRound().size(); ++i) {
+                var player = gameSession.getPlayersInRound().get(i);
+                var cardPower = gameSession.getCardsInHand().get(player).getHoldingCard();
+                if(cardPower > maxCard) {
+                    maxCard = cardPower;
+                    index = i;
+                }
+            }
+            System.out.println(ANSI_GREEN + "THE PLAYER WHO WON = " + gameSession.getPlayersInRound().get(index) + ANSI_RESET);
+        } else {
+            System.out.println(ANSI_GREEN + "THE PLAYER WHO WON = " + gameSession.getPlayersInRound().get(0) + ANSI_RESET);
         }
     }
 
@@ -44,7 +72,7 @@ public class TestGameLogic {
         // Randomly choose to play either the card in hand or the drawn card
         var handOfCards = gameSession.getCardsInHand().get(currentlyPlaying);
         int cardToPlay = rand.nextBoolean() ? handOfCards.getHoldingCard() : handOfCards.getDrawnCard();
-        handOfCards.playedCard(cardToPlay);
+        //handOfCards.playedCard(cardToPlay);
 
         PlayedCard playedCard;
         if(isSingleActionCard(cardToPlay)) {
@@ -54,6 +82,15 @@ public class TestGameLogic {
         } else { // It is the potted plant, e.g. the guessing card
             playedCard = new GuessingCard(cardToPlay, rand.nextInt(2,9), randomPlayer(currentlyPlaying, false));
         }
+        System.out.println(ANSI_YELLOW + "The card being played:");
+        if(playedCard instanceof GuessingCard guessingCard) {
+            System.out.println("\tGUESS CARD: power = " + guessingCard.getPower() + ", card guessed = " + guessingCard.getGuessedCard() + ", guessed on = " + guessingCard.getGuessedOn().getName());
+        } else if (playedCard instanceof TargetedEffectCard targetedEffectCard) {
+            System.out.println("TARGETED CARD: power = " + targetedEffectCard.getPower() + ", played on = " + targetedEffectCard.getPlayedOn().getName());
+        } else {
+            System.out.println("NORMAL CARD: power = " + playedCard.getPower());
+        }
+        System.out.println(ANSI_RESET);
         return playedCard;
     }
 
@@ -173,6 +210,8 @@ public class TestGameLogic {
 
     private void turnLog(GamePlayer player, PlayedCard card) {
         // Log some cool information
+        System.out.println("Player playing this turn: " + player.getName() + ", playing card: " + card.getPower());
+        System.out.println("GameSession Object Dump\n:" + gameSession);
     }
 
     private String assertionLog(String assertion) {

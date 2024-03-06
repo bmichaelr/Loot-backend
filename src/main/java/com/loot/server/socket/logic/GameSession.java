@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.repository.query.JSqlParserUtils;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,10 +70,10 @@ public class GameSession implements IGameSession{
                     var powerOfOpponentCard = cardsInHand.get(opponent).getCardInHand();
                     if(powerOfOpponentCard > powerOfPlayedCard) {
                         playersInRound.remove(playerActing);
-                        playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
+                        playedCards.get(playerActing).add(Card.cardFromPower(cardsInHand.get(playerActing).discardHand()));
                     } else if(powerOfOpponentCard < powerOfPlayedCard) {
                         playersInRound.remove(opponent);
-                        playedCards.get(opponent).add(Card.cardFromPower(powerOfOpponentCard));
+                        playedCards.get(opponent).add(Card.cardFromPower(cardsInHand.get(opponent).discardHand()));
                     }
                     // On tie, nothing happens
                 }
@@ -162,7 +163,7 @@ public class GameSession implements IGameSession{
         }
 
         var dealtCard = cardStack.drawCard();
-        cardsInHand.get(player).setDrawnCard(dealtCard);
+        cardsInHand.get(player).drawCard(dealtCard);
         return Card.cardFromPower(dealtCard);
     }
 
@@ -220,5 +221,36 @@ public class GameSession implements IGameSession{
 
     public boolean lobbyIsFull() {
         return numberOfPlayers >= maxPlayers;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Metadata:    RoomKey: ").append(roomKey).append(", MaxPlayers: ").append(maxPlayers);
+        stringBuilder.append(", MinPlayers: ").append(minPlayers).append(", NumberOfPlayers: ").append(numberOfPlayers);
+        stringBuilder.append(", NumberOfReadyPlayers: ").append(numberOfReadyPlayers).append(", TurnIndex: ").append(turnIndex);
+        stringBuilder.append(", NumberOfPlayersLoadedIn: ").append(numberOfPlayersLoadedIn).append(", GameIsOver: ").append(gameIsOver).append("\n");
+        stringBuilder.append("Players in Lobby:\n");
+        for(var player : players) {
+            stringBuilder.append("\tName: ").append(player.getName()).append(", IsSafe: ").append(player.getIsSafe()).append("\n");
+        }
+        stringBuilder.append("Players In Round:\n");
+        for(var player : playersInRound) {
+            stringBuilder.append("\tName: ").append(player.getName()).append(", IsSafe: ").append(player.getIsSafe()).append("\n");
+        }
+        stringBuilder.append("Cards In Hand:\n");
+        for(var player : cardsInHand.keySet()) {
+            stringBuilder.append("\tPlayer (").append(player.getName()).append("), Cards: InHand = ");
+            stringBuilder.append(cardsInHand.get(player).getHoldingCard()).append(", Drawn = ");
+            stringBuilder.append(cardsInHand.get(player).getDrawnCard()).append("\n");
+        }
+        stringBuilder.append("Played Cards:\n");
+        for(var player : playedCards.keySet()) {
+            stringBuilder.append("\tPlayer (").append(player.getName()).append("), Cards: ");
+            for(var card : playedCards.get(player)) stringBuilder.append(card.getName()).append("(").append(card.getPower()).append("), ");
+            stringBuilder.append("\n");
+        }
+
+        return stringBuilder.toString();
     }
 }
