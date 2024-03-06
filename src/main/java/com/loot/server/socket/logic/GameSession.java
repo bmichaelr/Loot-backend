@@ -123,8 +123,12 @@ public class GameSession implements IGameSession{
         playedCards = new HashMap<>();
         cardsInHand = new HashMap<>();
 
-        players.forEach(gamePlayer -> playedCards.put(gamePlayer, new ArrayList<>()));
-        players.forEach(gamePlayer -> cardsInHand.put(gamePlayer, new HandOfCards(cardStack.drawCard())));
+        // Fill the DS with starting point information
+        for(var player : players) {
+            playedCards.put(player, new ArrayList<>());
+            cardsInHand.put(player, new HandOfCards(cardStack.drawCard()));
+            playersInRound.add(player);
+        }
     }
 
     @Override

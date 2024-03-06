@@ -227,6 +227,6 @@ public class TestsForGameSessionObject {
         assert gameSession.getCardsInHand() != null;
         assert gameSession.getPlayedCards() != null;
         assert gameSession.getCardStack() != null;
-        //assert gameSession.getPlayersInRound().size() == gameSession.getPlayers().size();
+        assert gameSession.getPlayersInRound().size() == gameSession.getPlayers().size();
     }
 }
