@@ -35,6 +35,7 @@ public class GameSession implements IGameSession{
     private int numberOfReadyPlayers = 0;
     private int turnIndex = 0;
     private int numberOfPlayersLoadedIn = 0;
+    private boolean gameIsOver = false;
 
     private CardStack cardStack;
     //private PlayerHandler playerHandler;
@@ -113,10 +114,16 @@ public class GameSession implements IGameSession{
                 case 8 -> playersInRound.remove(playerActing);
             }
         }
+
+        if(playersInRound.size() == 1 || cardStack.deckIsEmpty()){
+            // TODO : do something else here, some sort of response to tell the client side the game is over
+            gameIsOver = true;
+        }
     }
 
     @Override
     public void startRound() {
+        gameIsOver = false;
         cardStack = new CardStack();
         cardStack.shuffle();
         playersInRound = new ArrayList<>(players.size());
@@ -129,6 +136,23 @@ public class GameSession implements IGameSession{
             cardsInHand.put(player, new HandOfCards(cardStack.drawCard()));
             playersInRound.add(player);
         }
+    }
+
+    public void removePlayerFromRound(GamePlayer playerToRemove) {
+        var index = playersInRound.indexOf(playerToRemove);
+        if(index < turnIndex) {
+            turnIndex -= 1;
+        }
+        playersInRound.remove(playerToRemove);
+    }
+
+    public GamePlayer playersTurn() {
+        if(turnIndex >= playersInRound.size()) {
+            turnIndex = 0;
+        }
+        var player = playersInRound.get(turnIndex);
+        turnIndex += 1;
+        return player;
     }
 
     @Override
