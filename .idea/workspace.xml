@@ -4,9 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< Updated upstream
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" afterDir="false" />
     </list>
+=======
+    <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="" />
+>>>>>>> Stashed changes
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -201,7 +205,7 @@
       <workItem from="1709058427650" duration="60000" />
       <workItem from="1709058489964" duration="3878000" />
       <workItem from="1709222182321" duration="942000" />
-      <workItem from="1709596890074" duration="2801000" />
+      <workItem from="1709596890074" duration="3661000" />
     </task>
     <servers />
   </component>
