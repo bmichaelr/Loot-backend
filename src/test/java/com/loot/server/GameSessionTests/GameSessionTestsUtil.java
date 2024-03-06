@@ -45,4 +45,17 @@ public class GameSessionTestsUtil {
 
         return gameSession;
     }
+
+    public static GameSession createStartedGame(String roomKey) {
+        GameSession gameSession = createReadyLobby(roomKey);
+        List<GamePlayer> copyOfPlayers = new ArrayList<>();
+        gameSession.getPlayers().forEach(player -> {
+            var copy = player.copy(); copyOfPlayers.add(copy);
+        });
+        for (var copyOfPlayer : copyOfPlayers) {
+            gameSession.loadedIntoGame(copyOfPlayer);
+        }
+        gameSession.startRound();
+        return gameSession;
+    }
 }

@@ -5,7 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9d9f9f35-3c29-4511-920b-076133c90061" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestsForGameSessionObject.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/GameSession.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/HandOfCards.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/HandOfCards.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/GuessingCard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/GuessingCard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TargetedEffectCard.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/loot/server/socket/logic/cards/impl/TargetedEffectCard.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTestsUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/GameSessionTestsUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestGameLogic.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/com/loot/server/GameSessionTests/TestGameLogic.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,28 +62,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.GameSession.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;sprint1__backend__turnActionManagement&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;spring.configuration.checksum&quot;: &quot;cf1e8c14e54505f60aa10ceb8d5d8ab3&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.GameSession.executor": "Run",
+    "JUnit.TestGameLogic.testThatGameLogicIsWorkingAsExpected.executor": "Run",
+    "JUnit.TestsForGameSessionObject.testPlayerTurnCycling.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "sprint1__backend__turnActionManagement",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "spring.configuration.checksum": "cf1e8c14e54505f60aa10ceb8d5d8ab3",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager" selected="JUnit.TestsForGameSessionObject.testThatStartRoundMethodInitializesAllDataStructures">
+}]]></component>
+  <component name="RunManager" selected="JUnit.TestGameLogic.testThatGameLogicIsWorkingAsExpected">
+    <configuration name="TestGameLogic.testThatGameLogicIsWorkingAsExpected" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestGameLogic" />
+      <option name="METHOD_NAME" value="testThatGameLogicIsWorkingAsExpected" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="TestsForCardStack" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
@@ -109,7 +133,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestsForCardStack.testThatTheCardRemovalWorks" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+    <configuration name="TestsForGameSessionObject.testPlayerTurnCycling" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="server" />
       <extension name="coverage">
         <pattern>
@@ -118,24 +142,8 @@
         </pattern>
       </extension>
       <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
-      <option name="METHOD_NAME" value="testThatTheCardRemovalWorks" />
-      <option name="TEST_OBJECT" value="method" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="TestsForCardStack.testThatThereAre15DrawableCardsBeforeDeckEmpty" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
-      <module name="server" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.loot.server.GameSessionTests.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="com.loot.server.GameSessionTests" />
-      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForCardStack" />
-      <option name="METHOD_NAME" value="testThatThereAre15DrawableCardsBeforeDeckEmpty" />
+      <option name="MAIN_CLASS_NAME" value="com.loot.server.GameSessionTests.TestsForGameSessionObject" />
+      <option name="METHOD_NAME" value="testPlayerTurnCycling" />
       <option name="TEST_OBJECT" value="method" />
       <method v="2">
         <option name="Make" enabled="true" />
@@ -172,11 +180,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="JUnit.TestGameLogic.testThatGameLogicIsWorkingAsExpected" />
+        <item itemvalue="JUnit.TestsForGameSessionObject.testPlayerTurnCycling" />
         <item itemvalue="JUnit.TestsForGameSessionObject.testThatStartRoundMethodInitializesAllDataStructures" />
         <item itemvalue="JUnit.TestsForCardStack" />
         <item itemvalue="JUnit.TestsForCardStack.testThatReshuffleWorks" />
-        <item itemvalue="JUnit.TestsForCardStack.testThatTheCardRemovalWorks" />
-        <item itemvalue="JUnit.TestsForCardStack.testThatThereAre15DrawableCardsBeforeDeckEmpty" />
       </list>
     </recent_temporary>
   </component>

@@ -80,7 +80,7 @@ public class GameSession implements IGameSession{
                     // Net Troll action here
                     var discardedCard = cardsInHand.get(opponent).discardHand();
                     playedCards.get(opponent).add(Card.cardFromPower(discardedCard));
-                    if(cardStack.deckIsEmpty()) {
+                    if(cardStack.deckIsEmpty() || discardedCard.equals(8)) {
                         playersInRound.remove(opponent);
                     } else {
                         cardsInHand.get(opponent).drawCard(cardStack.drawCard());

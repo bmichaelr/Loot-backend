@@ -38,9 +38,6 @@ public class HandOfCards {
      * @return int of card in hand
      */
     public Integer getCardInHand() {
-        if(holdingCard == -1) {
-            throw new RuntimeException("This person is no longer in the game!");
-        }
         return holdingCard;
     }
 
@@ -65,6 +62,10 @@ public class HandOfCards {
         holdingCard = -1;
         drawnCard = -1;
         return tmp;
+    }
+
+    public boolean hasTwoCards() {
+        return holdingCard != -1 && drawnCard != -1;
     }
 
     @Override
