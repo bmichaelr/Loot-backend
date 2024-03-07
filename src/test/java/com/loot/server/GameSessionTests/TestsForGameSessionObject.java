@@ -30,7 +30,6 @@ public class TestsForGameSessionObject {
     public void testThatChangingReadyStatusWorks() {
         GameSession gameSession = GameSessionTestsUtil.createGameRoom("ABC123", 4);
         assert gameSession.getRoomKey().equals("ABC123");
-        assert gameSession.lobbyIsFull();
         assert gameSession.getNumberOfPlayers() == 4;
 
         // Validate that all players are false when initially added
@@ -293,5 +292,31 @@ public class TestsForGameSessionObject {
         assert player.equals(player4);
         player = gameSession.nextTurn();
         assert player.equals(player2);
+    }
+
+    @Test
+    public void turnTest() {
+        GameSession gameSession = GameSessionTestsUtil.createStartedGame("KEY898989");
+
+        GamePlayer player1 = gameSession.getPlayers().get(0).copy();
+        GamePlayer player2 = gameSession.getPlayers().get(1).copy();
+        GamePlayer player3 = gameSession.getPlayers().get(2).copy();
+        GamePlayer player4 = gameSession.getPlayers().get(3).copy();
+
+        var player = gameSession.nextTurn();
+        assert player.equals(player1);
+        assert gameSession.getTurnIndex() == 1;
+
+        player = gameSession.nextTurn();
+        assert player.equals(player2);
+        assert gameSession.getTurnIndex() == 2;
+
+        player = gameSession.nextTurn();
+        assert player.equals(player3);
+        assert gameSession.getTurnIndex() == 3;
+        gameSession.removePlayerFromRound(player);
+
+        player = gameSession.nextTurn();
+        assert player.equals(player4);
     }
 }

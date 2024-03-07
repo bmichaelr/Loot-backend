@@ -65,14 +65,13 @@ public class GameController {
             return;
         }
 
-        if(gameSession.lobbyIsFull()) {
+        // Get the player and add them to the game session
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
+        var additionStatus = gameSession.addPlayer(player);
+        if(additionStatus.equals(Boolean.FALSE)) {
             sendErrorMessage(request, "The lobby is already at maximum capacity.");
             return;
         }
-
-        // Get the player and add them to the game session
-        GamePlayer player = new GamePlayer(request.getPlayerDto());
-        gameSession.addPlayer(player);
 
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);

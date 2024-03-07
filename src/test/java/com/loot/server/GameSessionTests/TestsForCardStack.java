@@ -31,7 +31,7 @@ public class TestsForCardStack {
             assert !cardStack.deckIsEmpty();
             var card = cardStack.drawCard();
             numberOfCards += 1;
-            System.out.println(Card.cardFromPower(card));
+            System.out.println(Card.fromPower(card));
         }
 
         assert numberOfCards == 15;

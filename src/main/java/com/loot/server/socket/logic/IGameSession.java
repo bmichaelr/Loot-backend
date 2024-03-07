@@ -63,12 +63,7 @@ public interface IGameSession {
     /**
      * Add a player to the lobby. This call should always be preceded by a call to isLobbyFull
      * @param player to add to the lobby
+     * @return true if the addition was successful, false if not
      */
-    void addPlayer(GamePlayer player);
-
-    /**
-     * Check if the lobby is full
-     * @return true if full, false if not
-     */
-    Boolean lobbyIsFull();
+    Boolean addPlayer(GamePlayer player);
 }

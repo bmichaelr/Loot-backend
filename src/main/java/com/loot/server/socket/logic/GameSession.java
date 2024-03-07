@@ -35,7 +35,7 @@ public class GameSession implements IGameSession{
     private int numberOfPlayersLoadedIn = 0;                    // This is used for synchronization across devices
     private boolean gameIsOver = false;                         // Flag indicating the game is over
 
-    private CardStack cardStack;
+    private CardStack cardStack;                                // The stack of card used in the round
 
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
@@ -44,78 +44,77 @@ public class GameSession implements IGameSession{
 
     @Override
     public void playCard(GamePlayer playerActing, PlayedCard card) {
-        // Get the power of the played card, then remove card from players hand and add it to their played cards
-        // This line removes any lingering wishing ring effects
         playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(false);
 
-        var powerOfPlayedCard = card.getPower();
+        // Play the card
+        int powerOfPlayedCard = card.getPower();
         cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
-        var powerOfPlayerOtherCard = cardsInHand.get(playerActing).getHoldingCard();
-        playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
+        playedCards.get(playerActing).add(Card.fromPower(powerOfPlayedCard));
+
+        // Get the other card they have
+        int powerOfPlayerOtherCard = cardsInHand.get(playerActing).getHoldingCard();
 
         if(card instanceof TargetedEffectCard effectCard) {
-            var opponent = effectCard.getPlayedOn();
-            switch(powerOfPlayedCard) {
-                case 2 -> {
-                    // Do maul rat action here -- send the player who played the card the description of the persons card
-                    Card cardInHand = Card.cardFromPower(cardsInHand.get(opponent).getCardInHand());
-                    // Show them this card! some sort of response needed here...
-                    // TODO ^
-                }
-                case 3 -> {
-                    // Do duck of doom action here --
-                    var powerOfOpponentCard = cardsInHand.get(opponent).getCardInHand();
-                    if(powerOfOpponentCard > powerOfPlayerOtherCard) {
-                        playersInRound.remove(playerActing);
-                        playedCards.get(playerActing).add(Card.cardFromPower(cardsInHand.get(playerActing).discardHand()));
-                    } else if(powerOfOpponentCard < powerOfPlayerOtherCard) {
-                        playersInRound.remove(opponent);
-                        playedCards.get(opponent).add(Card.cardFromPower(cardsInHand.get(opponent).discardHand()));
-                    }
-                    // On tie, nothing happens
-                }
-                case 5 -> {
-                    // Net Troll action here
-                    var discardedCard = cardsInHand.get(opponent).discardHand();
-                    playedCards.get(opponent).add(Card.cardFromPower(discardedCard));
-                    if(cardStack.deckIsEmpty() || discardedCard.equals(8)) {
-                        playersInRound.remove(opponent);
-                    } else {
-                        cardsInHand.get(opponent).drawCard(cardStack.drawCard());
-                    }
-                }
-                case 6 -> {
-                    // Do gazebo action here
-                    var opponentCard = cardsInHand.get(opponent).discardHand();
-                    var playerHand = cardsInHand.get(playerActing).discardHand();
-                    cardsInHand.get(opponent).drawCard(playerHand);
-                    cardsInHand.get(playerActing).drawCard(opponentCard);
-                }
-            }
+            playTargetedEffectCard(effectCard, powerOfPlayerOtherCard, playerActing);
         } else if(card instanceof GuessingCard guessingCard) {
-            // Do potted plant action here
-            // e.g. get the guessed id, check if they have the guessed card, then send some result
-            var opponent = guessingCard.getGuessedOn();
-            var guessedCard = guessingCard.getGuessedCard();
-            if(cardsInHand.get(opponent).getCardInHand().equals(guessedCard)) {
-                // They guessed right
-                var cardToDiscard = cardsInHand.get(opponent).discardHand();
-                playedCards.get(opponent).add(Card.cardFromPower(cardToDiscard));
-                playersInRound.remove(opponent);
-            }
-            // if they guessed wrong nothing happens
+            playGuessingCard(guessingCard);
         } else {
             switch (card.getPower()) {
                 // Wishing Ring action
                 case 4 -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
                 // Loot action
-                case 8 -> playersInRound.remove(playerActing);
+                case 8 -> removePlayerFromRound(playerActing);
             }
         }
 
         if(playersInRound.size() == 1 || cardStack.deckIsEmpty()) {
             // TODO : do something else here, some sort of response to tell the client side the game is over
             gameIsOver = true;
+        }
+    }
+
+    private void playTargetedEffectCard(TargetedEffectCard card, int playersCard, GamePlayer playerActing) {
+        var opponent = card.getPlayedOn();
+        var playedCard = card.getPower();
+
+        switch(playedCard) {
+            case 2 -> { // Maul rat action here
+                Card cardInHand = Card.fromPower(cardsInHand.get(opponent).getCardInHand());
+                // Show them this card! some sort of response needed here...
+                // TODO ^
+            }
+            case 3 -> { // Duck of doom action here
+                int powerOfOpponentCard = cardsInHand.get(opponent).getCardInHand();
+                if(powerOfOpponentCard > playersCard) {
+                    removePlayerFromRound(playerActing);
+                } else if(powerOfOpponentCard < playersCard) {
+                    removePlayerFromRound(opponent);
+                }
+            }
+            case 5 -> { // Net Troll action here
+                var discardedCard = cardsInHand.get(opponent).discardHand();
+                playedCards.get(opponent).add(Card.fromPower(discardedCard));
+                if(cardStack.deckIsEmpty() || discardedCard.equals(8)) {
+                    removePlayerFromRound(opponent);
+                } else {
+                    cardsInHand.get(opponent).drawCard(cardStack.drawCard());
+                }
+            }
+            case 6 -> { // Do gazebo action here
+                var opponentCard = cardsInHand.get(opponent).discardHand();
+                var playerHand = cardsInHand.get(playerActing).discardHand();
+                cardsInHand.get(opponent).drawCard(playerHand);
+                cardsInHand.get(playerActing).drawCard(opponentCard);
+            }
+        }
+    }
+
+    private void playGuessingCard(GuessingCard guessingCard) {
+        // Potted plant action here
+        var opponent = guessingCard.getGuessedOn();
+        var guessedCard = guessingCard.getGuessedCard();
+        if(cardsInHand.get(opponent).getCardInHand().equals(guessedCard)) {
+            removePlayerFromRound(opponent);
         }
     }
 
@@ -143,8 +142,13 @@ public class GameSession implements IGameSession{
             turnIndex -= 1;
         }
         playersInRound.remove(playerToRemove);
+        if(cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
+            var card = cardsInHand.get(playerToRemove).discardHand();
+            playedCards.get(playerToRemove).add(Card.fromPower(card));
+        }
     }
 
+    @Override
     public GamePlayer nextTurn() {
         if(turnIndex >= playersInRound.size()) {
             turnIndex = 0;
@@ -162,44 +166,41 @@ public class GameSession implements IGameSession{
 
         var dealtCard = cardStack.drawCard();
         cardsInHand.get(player).drawCard(dealtCard);
-        return Card.cardFromPower(dealtCard);
+        return Card.fromPower(dealtCard);
     }
 
     @Override
     public Boolean changePlayerReadyStatus(GamePlayer player) {
-        GamePlayer playerToAlter = players.stream()
-                .filter(playerInRoom -> playerInRoom.getId().equals(player.getId()))
-                .findFirst()
-                .orElse(null);
+        if(!players.contains(player)) {
+            // TODO throw some error here
+        }
 
-        if(playerToAlter != null) {
-            boolean wasReady = playerToAlter.getReady();
-            boolean isReady = player.getReady();
+        GamePlayer playerToAlter = players.get(players.indexOf(player));
 
-            if(!wasReady && isReady) {
-                numberOfReadyPlayers += 1;
-                playerToAlter.setReady(true);
-            } else if(wasReady && !isReady) {
-                numberOfReadyPlayers -= 1;
-                playerToAlter.setReady(false);
-            }
+        boolean wasReady = playerToAlter.getReady();
+        boolean isReady = player.getReady();
+
+        if(!wasReady && isReady) {
+            numberOfReadyPlayers += 1;
+            playerToAlter.setReady(true);
+        } else if(wasReady && !isReady) {
+            numberOfReadyPlayers -= 1;
+            playerToAlter.setReady(false);
         }
 
         return numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
     }
 
-    /*
-     * increment the number of players by one and set ready to false since they just joined
-     */
     @Override
-    public void addPlayer(GamePlayer player) {
-        if(lobbyIsFull()) {
-            return;
+    public Boolean addPlayer(GamePlayer player) {
+        if(numberOfPlayers >= maxPlayers) {
+            return Boolean.FALSE;
         }
 
         numberOfPlayers += 1;
         player.setReady(false);
         players.add(player);
+        return Boolean.TRUE;
     }
 
     @Override
@@ -212,11 +213,6 @@ public class GameSession implements IGameSession{
         players.get(players.indexOf(player)).setLoadedIn(true);
         numberOfPlayersLoadedIn += 1;
         return numberOfPlayersLoadedIn == players.size();
-    }
-
-    @Override
-    public Boolean lobbyIsFull() {
-        return numberOfPlayers >= maxPlayers;
     }
 
     @Override
