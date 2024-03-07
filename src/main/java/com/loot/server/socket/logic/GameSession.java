@@ -1,7 +1,6 @@
 package com.loot.server.socket.logic;
 
 import com.loot.server.domain.GamePlayer;
-import com.loot.server.domain.dto.PlayerDto;
 import com.loot.server.socket.logic.cards.Card;
 import com.loot.server.socket.logic.cards.CardStack;
 import com.loot.server.socket.logic.cards.HandOfCards;
@@ -12,9 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.repository.query.JSqlParserUtils;
 
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,21 +22,20 @@ import java.util.List;
 @AllArgsConstructor
 public class GameSession implements IGameSession{
 
-    private List<GamePlayer> players;
-    private List<GamePlayer> playersInRound;
-    private HashMap<GamePlayer, HandOfCards> cardsInHand;
-    private HashMap<GamePlayer, List<Card>> playedCards;
-    private String roomKey;
-    private int maxPlayers = 4;
-    private int minPlayers = 2;
-    private int numberOfPlayers = 0;
-    private int numberOfReadyPlayers = 0;
-    private int turnIndex = 0;
-    private int numberOfPlayersLoadedIn = 0;
-    private boolean gameIsOver = false;
+    private List<GamePlayer> players;                           // Store the list of all players in the game
+    private List<GamePlayer> playersInRound;                    // Use by round basis, all players still in
+    private HashMap<GamePlayer, HandOfCards> cardsInHand;       // The cards each player is holding
+    private HashMap<GamePlayer, List<Card>> playedCards;        // List of all the played cards
+    private String roomKey;                                     // The room key that identifies the game session
+    private int maxPlayers = 4;                                 // Maximum players allowed in the lobby
+    private final int minPlayers = 2;                           // Minimum amount of players (CANT BE CHANGED)
+    private int numberOfPlayers = 0;                            // Keep track of the amount of players
+    private int numberOfReadyPlayers = 0;                       // Keep track of the amount of ready players
+    private int turnIndex = 0;                                  // Keep track of the turn index (who's turn it is)
+    private int numberOfPlayersLoadedIn = 0;                    // This is used for synchronization across devices
+    private boolean gameIsOver = false;                         // Flag indicating the game is over
 
     private CardStack cardStack;
-    //private PlayerHandler playerHandler;
 
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
@@ -54,6 +50,7 @@ public class GameSession implements IGameSession{
 
         var powerOfPlayedCard = card.getPower();
         cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
+        var powerOfPlayerOtherCard = cardsInHand.get(playerActing).getHoldingCard();
         playedCards.get(playerActing).add(Card.cardFromPower(powerOfPlayedCard));
 
         if(card instanceof TargetedEffectCard effectCard) {
@@ -68,10 +65,10 @@ public class GameSession implements IGameSession{
                 case 3 -> {
                     // Do duck of doom action here --
                     var powerOfOpponentCard = cardsInHand.get(opponent).getCardInHand();
-                    if(powerOfOpponentCard > powerOfPlayedCard) {
+                    if(powerOfOpponentCard > powerOfPlayerOtherCard) {
                         playersInRound.remove(playerActing);
                         playedCards.get(playerActing).add(Card.cardFromPower(cardsInHand.get(playerActing).discardHand()));
-                    } else if(powerOfOpponentCard < powerOfPlayedCard) {
+                    } else if(powerOfOpponentCard < powerOfPlayerOtherCard) {
                         playersInRound.remove(opponent);
                         playedCards.get(opponent).add(Card.cardFromPower(cardsInHand.get(opponent).discardHand()));
                     }
@@ -116,7 +113,7 @@ public class GameSession implements IGameSession{
             }
         }
 
-        if(playersInRound.size() == 1 || cardStack.deckIsEmpty()){
+        if(playersInRound.size() == 1 || cardStack.deckIsEmpty()) {
             // TODO : do something else here, some sort of response to tell the client side the game is over
             gameIsOver = true;
         }
@@ -139,6 +136,7 @@ public class GameSession implements IGameSession{
         }
     }
 
+    @Override
     public void removePlayerFromRound(GamePlayer playerToRemove) {
         var index = playersInRound.indexOf(playerToRemove);
         if(index < turnIndex) {
@@ -147,7 +145,7 @@ public class GameSession implements IGameSession{
         playersInRound.remove(playerToRemove);
     }
 
-    public GamePlayer playersTurn() {
+    public GamePlayer nextTurn() {
         if(turnIndex >= playersInRound.size()) {
             turnIndex = 0;
         }
@@ -204,10 +202,7 @@ public class GameSession implements IGameSession{
         players.add(player);
     }
 
-    /**
-     * this function will be used to sync players when they are loading in to a new round
-     * @param player that has successfully loaded in
-     */
+    @Override
     public Boolean loadedIntoGame(GamePlayer player) {
         if(!players.contains(player)){
             // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
@@ -219,7 +214,8 @@ public class GameSession implements IGameSession{
         return numberOfPlayersLoadedIn == players.size();
     }
 
-    public boolean lobbyIsFull() {
+    @Override
+    public Boolean lobbyIsFull() {
         return numberOfPlayers >= maxPlayers;
     }
 

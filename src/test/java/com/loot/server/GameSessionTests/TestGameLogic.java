@@ -42,7 +42,7 @@ public class TestGameLogic {
         }
 
         while(!gameSession.isGameIsOver()) {
-            var player = gameSession.playersTurn();
+            var player = gameSession.nextTurn();
             gameSession.dealCard(player);
             var handOfCards = gameSession.getCardsInHand().get(player);
             System.out.println(ANSI_RED + "ROUND ITERATION: " + ANSI_RESET + " Player playing = " + ANSI_BLUE + player.getName() + ANSI_RESET + ", Card In Hand = " + ANSI_BLUE + handOfCards.getCardInHand() + ANSI_RESET + ", Drawn Card: " + ANSI_BLUE + handOfCards.getDrawnCard() + ANSI_RESET);

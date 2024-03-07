@@ -240,58 +240,58 @@ public class TestsForGameSessionObject {
         GamePlayer player3 = gameSession.getPlayers().get(2).copy();
         GamePlayer player4 = gameSession.getPlayers().get(3).copy();
 
-        var player = gameSession.playersTurn();
+        var player = gameSession.nextTurn();
         assert player.equals(player1);
         assert gameSession.getTurnIndex() == 1;
 
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player2);
         assert gameSession.getTurnIndex() == 2;
 
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player3);
         assert gameSession.getTurnIndex() == 3;
 
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player4);
         assert gameSession.getTurnIndex() == 4;
 
         // Should be back to player 1 now, remove player 2 make sure we go to player three
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player1);
         assert gameSession.getTurnIndex() == 1;
         gameSession.removePlayerFromRound(player2);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player3);
 
         // now we have player1, player3, player4. remove player 4 and make sure we go back to player 1
         gameSession.removePlayerFromRound(player4);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player1);
         assert gameSession.getPlayersInRound().size() == 2;
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player3);
 
         // Remove all but player one, should oscillate between player1
         gameSession.removePlayerFromRound(player3);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player1);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player1);
 
         // Add back all the players : next player should be player 2
         // player list = player1, player2, player3, player4
         gameSession.getPlayersInRound().addAll(List.of(player2, player3, player4));
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player2);
 
         // remove player 1, make sure we correctly cycle to player3, then 4, then 2
         gameSession.removePlayerFromRound(player1);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player3);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player4);
-        player = gameSession.playersTurn();
+        player = gameSession.nextTurn();
         assert player.equals(player2);
     }
 }
