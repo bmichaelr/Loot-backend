@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import static com.loot.server.domain.cards.Card.CardPowers.POTTED_PLANT;
-import static com.loot.server.domain.cards.Card.cards.POTTED_PLANT;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
