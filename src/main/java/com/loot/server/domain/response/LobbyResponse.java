@@ -1,8 +1,8 @@
-package com.loot.server.domain;
+package com.loot.server.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loot.server.domain.dto.PlayerDto;
+import com.loot.server.domain.request.GamePlayer;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

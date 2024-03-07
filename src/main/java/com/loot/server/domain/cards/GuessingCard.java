@@ -1,9 +1,9 @@
-package com.loot.server.socket.logic.cards.impl;
+package com.loot.server.domain.cards;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loot.server.domain.GamePlayer;
+import com.loot.server.domain.request.GamePlayer;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)

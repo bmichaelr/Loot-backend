@@ -1,4 +1,4 @@
-package com.loot.server.domain;
+package com.loot.server.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

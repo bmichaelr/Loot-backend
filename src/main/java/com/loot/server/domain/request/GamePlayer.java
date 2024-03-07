@@ -1,4 +1,4 @@
-package com.loot.server.domain;
+package com.loot.server.domain.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DialectOverride;
 
 @NoArgsConstructor
 @AllArgsConstructor

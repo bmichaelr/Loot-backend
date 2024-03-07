@@ -1,6 +1,6 @@
 package com.loot.server.api;
 
-import com.loot.server.domain.PlayCardRequest;
+import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.entity.PlayerEntity;
 import com.loot.server.repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;

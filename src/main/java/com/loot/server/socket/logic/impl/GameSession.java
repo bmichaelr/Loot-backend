@@ -1,12 +1,11 @@
-package com.loot.server.socket.logic;
+package com.loot.server.socket.logic.impl;
 
-import com.loot.server.domain.GamePlayer;
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.CardStack;
-import com.loot.server.socket.logic.cards.HandOfCards;
-import com.loot.server.socket.logic.cards.impl.GuessingCard;
-import com.loot.server.socket.logic.cards.impl.PlayedCard;
-import com.loot.server.socket.logic.cards.impl.TargetedEffectCard;
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.cards.GuessingCard;
+import com.loot.server.domain.cards.PlayedCard;
+import com.loot.server.domain.cards.TargetedEffectCard;
+import com.loot.server.socket.logic.IGameSession;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +17,7 @@ import java.util.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameSession implements IGameSession{
+public class GameSession implements IGameSession {
 
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_RESET = "\u001B[0m";

@@ -1,7 +1,8 @@
-package com.loot.server.socket.logic.playerhandler;
+package com.loot.server.socket.logic.impl;
 
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.socket.logic.IPlayerHandler;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

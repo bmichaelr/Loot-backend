@@ -1,11 +1,11 @@
 package com.loot.server.GameSessionTests;
 
-import com.loot.server.domain.GamePlayer;
-import com.loot.server.socket.logic.GameSession;
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.impl.GuessingCard;
-import com.loot.server.socket.logic.cards.impl.PlayedCard;
-import com.loot.server.socket.logic.cards.impl.TargetedEffectCard;
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.cards.GuessingCard;
+import com.loot.server.domain.cards.PlayedCard;
+import com.loot.server.domain.cards.TargetedEffectCard;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;

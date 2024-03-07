@@ -1,13 +1,8 @@
 package com.loot.server.socket.logic;
 
-import com.loot.server.domain.GamePlayer;
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.impl.PlayedCard;
-
-/*
-/ IGameSession interface
-/ Template for the GameSession object which controls gameplay logic
-*/
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.cards.PlayedCard;
 
 public interface IGameSession {
 

@@ -1,13 +1,15 @@
-package com.loot.server.socket.controllers;
+package com.loot.server.socket;
 
 import java.util.*;
 
-import com.loot.server.domain.*;
 import com.loot.server.domain.entity.ErrorResponse;
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.LobbyRequest;
+import com.loot.server.domain.request.PlayCardRequest;
+import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameService;
-import com.loot.server.socket.logic.GameSession;
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.impl.PlayedCard;
+import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.domain.cards.PlayedCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;

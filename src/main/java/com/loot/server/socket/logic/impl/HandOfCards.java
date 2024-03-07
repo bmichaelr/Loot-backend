@@ -1,5 +1,6 @@
-package com.loot.server.socket.logic.cards;
+package com.loot.server.socket.logic.impl;
 
+import com.loot.server.socket.logic.IHandOfCards;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,7 +8,7 @@ import java.util.Objects;
 
 @Data
 @NoArgsConstructor
-public class HandOfCards {
+public class HandOfCards implements IHandOfCards {
 
     private Integer holdingCard = -1;
     private Integer drawnCard = -1;
@@ -16,11 +17,7 @@ public class HandOfCards {
         holdingCard = cardPower;
     }
 
-    /**
-     * called when a player plays a card, determines if the holding card needs to be updated or left alone
-     * e.g. did they play the card they just drew or play the one they already had
-     * @param power of the played card
-     */
+    @Override
     public void playedCard(Integer power) {
         // If they played the card drawn, do nothing
         if(Objects.equals(drawnCard, power)) {
@@ -33,10 +30,7 @@ public class HandOfCards {
         drawnCard = -1;
     }
 
-    /**
-     * get the card that the person is currently holding
-     * @return int of card in hand
-     */
+    @Override
     public Integer getCardInHand() {
         if(holdingCard == -1) {
             throw new RuntimeException("Cannot get card from player, they have no card");
@@ -45,11 +39,7 @@ public class HandOfCards {
         return holdingCard;
     }
 
-    /**
-     * method called to draw a card for the player. if they have no card in their hand (e.g. they just discarded) then
-     * set the holding card to the drawn card, else we set the drawnCard to the new card
-     * @param cardPower of the drawn card
-     */
+    @Override
     public void drawCard(Integer cardPower) {
         if(holdingCard == -1) {
             holdingCard = cardPower;
@@ -58,9 +48,7 @@ public class HandOfCards {
         }
     }
 
-    /**
-     * method called to discard a persons hand (whether for net troll, or loot, or otherwise)
-     */
+    @Override
     public Integer discardHand() {
         var tmp = holdingCard;
         holdingCard = -1;
@@ -68,7 +56,8 @@ public class HandOfCards {
         return tmp;
     }
 
-    public boolean hasTwoCards() {
+    @Override
+    public Boolean hasTwoCards() {
         return holdingCard != -1 && drawnCard != -1;
     }
 

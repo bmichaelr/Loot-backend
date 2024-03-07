@@ -1,7 +1,7 @@
 package com.loot.server.GameSessionTests;
 
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.CardStack;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.socket.logic.impl.CardStack;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;

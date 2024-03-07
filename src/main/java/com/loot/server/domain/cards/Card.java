@@ -1,10 +1,13 @@
-package com.loot.server.socket.logic.cards;
+package com.loot.server.domain.cards;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import static com.loot.server.domain.cards.Card.CardPowers.POTTED_PLANT;
+import static com.loot.server.domain.cards.Card.cards.POTTED_PLANT;
 
 @Data
 @NoArgsConstructor
@@ -18,7 +21,7 @@ public class Card {
 
     private String description;
 
-    public static Card fromPower(int power) {
+    public static Card fromPower(final int power) {
         return switch (power) {
             case 1 -> pottedPlant();
             case 2 -> maulRat();
