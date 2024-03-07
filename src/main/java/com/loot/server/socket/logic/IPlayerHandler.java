@@ -1,7 +1,7 @@
-package com.loot.server.socket.logic.playerhandler;
+package com.loot.server.socket.logic;
 
 import com.loot.server.domain.dto.PlayerDto;
-import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.domain.cards.Card;
 
 public interface IPlayerHandler {
 

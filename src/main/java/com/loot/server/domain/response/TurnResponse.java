@@ -1,7 +1,7 @@
-package com.loot.server.domain;
+package com.loot.server.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loot.server.socket.logic.cards.Card;
+import com.loot.server.domain.cards.Card;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,10 +1,7 @@
-package com.loot.server.socket.logic.cards;
+package com.loot.server.domain.cards;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.loot.server.socket.logic.cards.impl.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,6 +17,26 @@ public class Card {
     private String name;
 
     private String description;
+
+    public static Card fromPower(final int power) {
+        return switch (power) {
+            case 1 -> pottedPlant();
+            case 2 -> maulRat();
+            case 3 -> duckOfDoom();
+            case 4 -> wishingRing();
+            case 5 -> netTroll();
+            case 6 -> dreadGazebo();
+            case 7 -> turboniumDragon();
+            case 8 -> loot();
+            default -> throw new IllegalStateException("Unexpected card value: " + power);
+        };
+    }
+
+    @JsonIgnore
+    @Override
+    public String toString() {
+        return "Card : {\n\tpower : " + power + ",\n\tname : " + name + ",\n\tdescription : " + description + "\n}";
+    }
 
     @JsonIgnore
     public static Card pottedPlant(){

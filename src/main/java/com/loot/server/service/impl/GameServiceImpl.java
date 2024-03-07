@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
 
-import com.loot.server.domain.GameCreationDto;
 import com.loot.server.service.GameService;
 import org.springframework.stereotype.Service;
 

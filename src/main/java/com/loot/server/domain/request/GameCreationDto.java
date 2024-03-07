@@ -1,13 +1,14 @@
-package com.loot.server.domain;
+package com.loot.server.domain.request;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Player {
-
-    String name;
+@Builder
+public class GameCreationDto {
+    private String roomKey;
 }

@@ -1,13 +1,15 @@
-package com.loot.server.socket.controllers;
+package com.loot.server.socket;
 
 import java.util.*;
 
-import com.loot.server.domain.*;
 import com.loot.server.domain.entity.ErrorResponse;
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.LobbyRequest;
+import com.loot.server.domain.request.PlayCardRequest;
+import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameService;
-import com.loot.server.socket.logic.GameSession;
-import com.loot.server.socket.logic.cards.Card;
-import com.loot.server.socket.logic.cards.impl.PlayedCard;
+import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.domain.cards.PlayedCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
@@ -65,14 +67,13 @@ public class GameController {
             return;
         }
 
-        if(gameSession.lobbyIsFull()) {
+        // Get the player and add them to the game session
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
+        var additionStatus = gameSession.addPlayer(player);
+        if(additionStatus.equals(Boolean.FALSE)) {
             sendErrorMessage(request, "The lobby is already at maximum capacity.");
             return;
         }
-
-        // Get the player and add them to the game session
-        GamePlayer player = new GamePlayer(request.getPlayerDto());
-        gameSession.addPlayer(player);
 
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
@@ -110,9 +111,9 @@ public class GameController {
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         GameSession gameSession = gameSessions.get(roomKey);
 
-        Card dealtCard = gameSession.dealInitialCard(player);
-        TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
-        messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
+        //Card dealtCard = gameSession.dealInitialCard(player);
+        //TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
+        //messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
     }
 
     @MessageMapping("/playCard")
