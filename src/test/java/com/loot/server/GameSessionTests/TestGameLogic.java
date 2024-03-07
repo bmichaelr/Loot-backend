@@ -41,30 +41,18 @@ public class TestGameLogic {
             assert hand.getCardInHand() != -1;
         }
 
-        while(!gameSession.isGameIsOver()) {
-            var player = gameSession.nextTurn();
-            gameSession.dealCard(player);
-            var handOfCards = gameSession.getCardsInHand().get(player);
-            System.out.println(ANSI_RED + "ROUND ITERATION: " + ANSI_RESET + " Player playing = " + ANSI_BLUE + player.getName() + ANSI_RESET + ", Card In Hand = " + ANSI_BLUE + handOfCards.getCardInHand() + ANSI_RESET + ", Drawn Card: " + ANSI_BLUE + handOfCards.getDrawnCard() + ANSI_RESET);
-            assert handOfCards.hasTwoCards();
-            PlayedCard cardToPlay = createPlayedCardObjectHelper(player);
-            assert validateCardPlayed(player, cardToPlay);
-        }
+        while (!gameSession.isGameIsOver()) {
+            gameSession.startRound();
 
-        if(gameSession.getPlayersInRound().size() > 1) {
-            var index = 0;
-            var maxCard = 0;
-            for(int i = 0; i < gameSession.getPlayersInRound().size(); ++i) {
-                var player = gameSession.getPlayersInRound().get(i);
-                var cardPower = gameSession.getCardsInHand().get(player).getHoldingCard();
-                if(cardPower > maxCard) {
-                    maxCard = cardPower;
-                    index = i;
-                }
+            while (!gameSession.isRoundIsOver()) {
+                var player = gameSession.nextTurn();
+                gameSession.dealCard(player);
+                var handOfCards = gameSession.getCardsInHand().get(player);
+                System.out.println(ANSI_RED + "ROUND ITERATION: " + ANSI_RESET + " Player playing = " + ANSI_BLUE + player.getName() + ANSI_RESET + ", Card In Hand = " + ANSI_BLUE + handOfCards.getCardInHand() + ANSI_RESET + ", Drawn Card: " + ANSI_BLUE + handOfCards.getDrawnCard() + ANSI_RESET);
+                assert handOfCards.hasTwoCards();
+                PlayedCard cardToPlay = createPlayedCardObjectHelper(player);
+                assert validateCardPlayed(player, cardToPlay);
             }
-            System.out.println(ANSI_GREEN + "THE PLAYER WHO WON = " + gameSession.getPlayersInRound().get(index) + ANSI_RESET);
-        } else {
-            System.out.println(ANSI_GREEN + "THE PLAYER WHO WON = " + gameSession.getPlayersInRound().get(0) + ANSI_RESET);
         }
     }
 
@@ -72,7 +60,6 @@ public class TestGameLogic {
         // Randomly choose to play either the card in hand or the drawn card
         var handOfCards = gameSession.getCardsInHand().get(currentlyPlaying);
         int cardToPlay = rand.nextBoolean() ? handOfCards.getHoldingCard() : handOfCards.getDrawnCard();
-        //handOfCards.playedCard(cardToPlay);
 
         PlayedCard playedCard;
         if(isSingleActionCard(cardToPlay)) {
@@ -122,6 +109,7 @@ public class TestGameLogic {
 
     // Massive function, not even going to bother with refactoring as this is a test function
     private Boolean validateCardPlayed(GamePlayer player, PlayedCard card) {
+        turnLog(player, card);
         var cih = gameSession.getCardsInHand();
         var pir = gameSession.getPlayersInRound();
         var ppc = gameSession.getPlayedCards();
@@ -204,7 +192,6 @@ public class TestGameLogic {
         };
 
         assert ppc.get(player).contains(Card.fromPower(card.getPower())) : assertionLog("the played card is now in the players played cards list");
-        turnLog(player, card);
         return true;
     }
 

@@ -12,9 +12,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Data
 @Builder
@@ -22,24 +20,32 @@ import java.util.List;
 @AllArgsConstructor
 public class GameSession implements IGameSession{
 
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_RESET = "\u001B[0m";
+
     private List<GamePlayer> players;                           // Store the list of all players in the game
     private List<GamePlayer> playersInRound;                    // Use by round basis, all players still in
     private HashMap<GamePlayer, HandOfCards> cardsInHand;       // The cards each player is holding
     private HashMap<GamePlayer, List<Card>> playedCards;        // List of all the played cards
+    private Map<GamePlayer, Integer> numberOfWins;
+
     private String roomKey;                                     // The room key that identifies the game session
     private int maxPlayers = 4;                                 // Maximum players allowed in the lobby
     private final int minPlayers = 2;                           // Minimum amount of players (CANT BE CHANGED)
     private int numberOfPlayers = 0;                            // Keep track of the amount of players
     private int numberOfReadyPlayers = 0;                       // Keep track of the amount of ready players
+    private int winsNeeded = 3;
     private int turnIndex = 0;                                  // Keep track of the turn index (who's turn it is)
     private int numberOfPlayersLoadedIn = 0;                    // This is used for synchronization across devices
     private boolean gameIsOver = false;                         // Flag indicating the game is over
+    private boolean roundIsOver = false;
 
     private CardStack cardStack;                                // The stack of card used in the round
 
     public GameSession(String roomKey) {
         this.roomKey = roomKey;
         players = new ArrayList<>();
+        numberOfWins = new HashMap<>();
     }
 
     @Override
@@ -69,7 +75,39 @@ public class GameSession implements IGameSession{
 
         if(playersInRound.size() == 1 || cardStack.deckIsEmpty()) {
             // TODO : do something else here, some sort of response to tell the client side the game is over
-            gameIsOver = true;
+            roundIsOver = true;
+            determineWinner();
+        }
+    }
+
+    private void determineWinner() {
+        GamePlayer winningPlayer;
+        if(playersInRound.size() == 1) {
+            winningPlayer = playersInRound.get(0);
+        } else { // Assuming there is more than one player still in
+            var index = 0;
+            var maxCard = 0;
+            for(int i = 0; i < playersInRound.size(); ++i) {
+                var player = playersInRound.get(i);
+                var cardPower = cardsInHand.get(player).getHoldingCard();
+                if(cardPower > maxCard) {
+                    maxCard = cardPower;
+                    index = i;
+                }
+            }
+            winningPlayer = playersInRound.get(index);
+        }
+        Optional<Integer> wins = Optional.ofNullable(numberOfWins.put(winningPlayer, numberOfWins.getOrDefault(winningPlayer, 0) + 1));
+        if(wins.isPresent()) {
+            int num = wins.get();
+            if(num+1 == winsNeeded) {
+                gameIsOver = true;
+                System.out.println(ANSI_CYAN + "WINNER OF GAME: " + winningPlayer.getName() + ", wins = " + (num+1) + ANSI_RESET);
+            } else {
+                System.out.println(ANSI_CYAN + "WINNER OF ROUND: " + winningPlayer.getName() + ", wins = " + (num+1) + ANSI_RESET);
+            }
+        } else {
+            System.out.println(ANSI_CYAN + "WINNER OF ROUND: " + winningPlayer.getName() + ", wins = 1" + ANSI_RESET);
         }
     }
 
@@ -120,6 +158,7 @@ public class GameSession implements IGameSession{
 
     @Override
     public void startRound() {
+        roundIsOver = false;
         gameIsOver = false;
         cardStack = new CardStack();
         cardStack.shuffle();
