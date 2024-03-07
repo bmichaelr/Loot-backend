@@ -37,6 +37,7 @@ public class GamePlayer {
         this.name = playerDto.getName();
         this.ready = false;
         this.isSafe = false;
+        this.loadedIn = false;
     }
 
     @JsonIgnore
@@ -45,6 +46,7 @@ public class GamePlayer {
         this.name = playerDto.getName();
         this.ready = ready;
         this.isSafe = false;
+        this.loadedIn = false;
     }
 
     @JsonIgnore
