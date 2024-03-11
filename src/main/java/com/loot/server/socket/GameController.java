@@ -80,6 +80,32 @@ public class GameController {
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
+    @MessageMapping("/leaveGame")
+    public void leaveGame(LobbyRequest request) {
+        Pair<Boolean, String> validation = validLobbyRequest(request, false);
+        if(!validation.getFirst()) {
+            sendErrorMessage(request, validation.getSecond());
+            return;
+        }
+
+        String roomKey = request.getRoomKey();
+        GameSession gameSession;
+        if((gameSession = gameSessions.get(roomKey)) == null) {
+            sendErrorMessage(request, "Given room key is not valid.");
+            return;
+        }
+
+        // Get the player and add them to the game session
+        GamePlayer player = new GamePlayer(request.getPlayerDto());
+        gameSession.removePlayer(player);
+
+        LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
+        messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+
+        System.out.println("Player: " + player.getName() + " has left room => " + roomKey);
+        System.out.println(gameSession.getPlayers());
+    }
+
     @MessageMapping("/ready")
     public void startGame(LobbyRequest request) {
         Pair<Boolean, String> validation = validLobbyRequest(request, false);

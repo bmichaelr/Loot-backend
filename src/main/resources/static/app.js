@@ -258,4 +258,7 @@ $(function () {
             sock_readyUp(player, roomKey, ready);
         }
     });
+    $("#leaveGame").click(() => {
+        sock_leaveGame(player, roomKey);
+    });
 });

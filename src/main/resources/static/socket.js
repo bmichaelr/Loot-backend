@@ -1,5 +1,5 @@
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://10.31.25.209:8080/game-websocket'
+    brokerURL: 'ws://localhost:8080/game-websocket'
 });
 
 stompClient.onWebSocketError = (error) => {
@@ -10,6 +10,8 @@ stompClient.onStompError = (frame) => {
     console.error('Broker reported error: ' + frame.headers['message']);
     console.error('Additional details: ' + frame.body);
 };
+
+let lobbyUpdates;
 
 let connected = false;
 // Function that is called when the user is connected to the websocket
@@ -48,6 +50,24 @@ function sock_joinGame(player, roomKey) {
     });
 }
 
+function sock_leaveGame(player, roomKey) {
+    if(lobbyUpdates) {
+        lobbyUpdates.unsubscribe();
+        lobbyUpdates = null
+    }
+
+    stompClient.publish({
+        destination: "/app/leaveGame",
+        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+    });
+
+    var lobbyDiv = document.getElementById("lobby-list");
+    lobbyDiv.style.display = "none";
+    var menuDiv = document.getElementById("div-menu-choices");
+    menuDiv.style.display = "contents";
+    initialLoad = true;
+}
+
 function sock_readyUp(player, roomKey, ready) {
     player.ready = ready;
     stompClient.publish({
@@ -57,7 +77,7 @@ function sock_readyUp(player, roomKey, ready) {
 }
 
 function sock_initGameRoomSubscription(roomKey) {
-    stompClient.subscribe('/topic/lobby/' + roomKey, (lobbyUpdates) => {
+    lobbyUpdates = stompClient.subscribe('/topic/lobby/' + roomKey, (lobbyUpdates) => {
         handleMatchmaking(lobbyUpdates);
     });
 }

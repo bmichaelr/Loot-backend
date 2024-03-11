@@ -241,6 +241,11 @@ public class GameSession implements IGameSession {
   }
 
   @Override
+  public void removePlayer(GamePlayer player) {
+    players.remove(player);
+  }
+
+  @Override
   public Boolean loadedIntoGame(GamePlayer player) {
     if (!players.contains(player)) {
       // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
