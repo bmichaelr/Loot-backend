@@ -19,7 +19,7 @@ function sock_connect(playerName) {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/matchmaking/' + playerName, (lobbyData) => {
+        stompClient.subscribe('/topic/matchmaking/'+playerName, (lobbyData) => {
             handleMatchmaking(lobbyData);
         });
         stompClient.subscribe("/topic/error/" + playerName, (error) => {
@@ -84,6 +84,7 @@ function sock_initGameRoomSubscription(roomKey) {
 
 // This function will be responsible for parsing the creation and login responses
 function handleMatchmaking(lobbyData) {
+
     const binaryData = lobbyData._binaryBody;
     const stringData = new TextDecoder().decode(binaryData);
     const parsedData = JSON.parse(stringData);

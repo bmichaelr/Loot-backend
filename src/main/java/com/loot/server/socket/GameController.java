@@ -2,6 +2,7 @@ package com.loot.server.socket;
 
 import java.util.*;
 
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
@@ -10,10 +11,13 @@ import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameService;
 import com.loot.server.socket.logic.impl.GameSession;
 import com.loot.server.domain.cards.PlayedCard;
+import org.aspectj.weaver.patterns.AndSignaturePattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -22,6 +26,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Controller
 @ComponentScan
 public class GameController {
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
 
     @Autowired
     private ObjectMapper mapper;
@@ -32,10 +39,12 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    private final Map<String, GameSession> gameSessions = new HashMap<>();
+    private final static Map<String, GameSession> gameSessions = new HashMap<>();
 
     @MessageMapping("/createGame")
-    public void createGame(LobbyRequest request) throws Exception {
+    public void createGame(@Payload LobbyRequest request, @Header("simpSessionId") String sessionId) {
+        System.out.println("Player name: " + request.getPlayerDto().getName() + ", session id: " + sessionId);
+
         Pair<Boolean, String> validation = validLobbyRequest(request, true);
         if(!validation.getFirst()) {
             sendErrorMessage(request, validation.getSecond());
@@ -53,7 +62,7 @@ public class GameController {
     }
 
     @MessageMapping("/joinGame")
-    public void joinGame(LobbyRequest request) {
+    public void joinGame(@Payload LobbyRequest request) {
         Pair<Boolean, String> validation = validLobbyRequest(request, false);
         if(!validation.getFirst()) {
             sendErrorMessage(request, validation.getSecond());
@@ -184,5 +193,30 @@ public class GameController {
         }
         ErrorResponse errorResponse = ErrorResponse.builder().details(error).build();
         messagingTemplate.convertAndSend("/topic/error/" + request.getPlayerDto().getName(), errorResponse);
+    }
+
+    public static void markedSessionCallback(String clientName, String clientRoomKey) {
+        System.out.println(ANSI_RED + "Received a callback for " + clientName + ANSI_RESET);
+        if(!gameSessions.containsKey(clientRoomKey)) {
+            return;
+        }
+
+        GameSession gameSession = gameSessions.get(clientRoomKey);
+        for(var player: gameSession.getPlayers()) {
+            if(player.getName().equals(clientName)) {
+                System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
+                gameSession.removePlayer(player);
+                break;
+            }
+        }
+        validateGameSession(gameSession);
+    }
+
+    private static void validateGameSession(GameSession gameSession) {
+        if (gameSession.getPlayers().isEmpty()) {
+            System.out.println(ANSI_RED + "Game session object with roomKey (" + gameSession.getRoomKey() + ") is empty, removing it..." + ANSI_RESET);
+            String roomKey = gameSession.getRoomKey();
+            gameSessions.remove(roomKey);
+        }
     }
 }

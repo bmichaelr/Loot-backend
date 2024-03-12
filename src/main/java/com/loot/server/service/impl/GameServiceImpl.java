@@ -5,12 +5,14 @@ import java.util.Random;
 import java.util.Set;
 
 import com.loot.server.service.GameService;
+import com.loot.server.service.SessionCacheService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameServiceImpl implements GameService{
 
-    private Set<String> inUseRoomKeys = new HashSet<>();
+    private final Set<String> inUseRoomKeys = new HashSet<>();
 
     @Override
     public String generateRoomKey() {
