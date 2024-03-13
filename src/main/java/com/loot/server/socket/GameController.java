@@ -64,7 +64,7 @@ public class GameController {
 
     @MessageMapping("/leaveGame")
     public void leaveGame(LobbyRequest request, @Header("simpSessionId") String sessionId) {
-        ResponseCode code = gameService.missingRequestParams(request, true);
+        ResponseCode code = gameService.missingRequestParams(request, false);
         if(code != ResponseCode.SUCCESS) {
             sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);
             return;
@@ -78,13 +78,14 @@ public class GameController {
 
     @MessageMapping("/ready")
     public void startGame(LobbyRequest request) {
-        ResponseCode code = gameService.missingRequestParams(request, true);
+        ResponseCode code = gameService.missingRequestParams(request, false);
         if(code != ResponseCode.SUCCESS) {
             sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);
             return;
         }
 
         String roomKey = request.getRoomKey();
+        gameService.changePlayerReadyStatus(request);
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }

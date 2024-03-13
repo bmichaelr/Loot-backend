@@ -158,6 +158,16 @@ function handlePlayersInLobby(parsedData) {
         });
     } else {
         console.log('in the else for handling players in lobby')
+        lobby.players.forEach(existingPlayer => {
+           const inLobby = players.find(player => player.id === existingPlayer.id);
+           if(!inLobby) {
+               const playerToRemove = document.getElementById('player-'+existingPlayer.id);
+               if(playerToRemove) {
+                   playerToRemove.remove();
+               }
+           }
+        });
+
         players.forEach(player => {
            if(document.getElementById('player-'+player.id)) {
                console.log(player)
@@ -175,6 +185,7 @@ function handlePlayersInLobby(parsedData) {
         });
     }
 
+    lobby.players = players;
     if(allReady) {
         beginGameStartThings();
     } else if(gameBeginning) {
