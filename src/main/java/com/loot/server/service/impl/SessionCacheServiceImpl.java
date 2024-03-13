@@ -1,6 +1,5 @@
 package com.loot.server.service.impl;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.socket.GameController;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -23,14 +22,22 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         sessionCache = new HashMap<>();
     }
 
-    private final static Map<String, Tuple<String, String>> sessionCache;
-    private final List<Tuple<String, LocalDateTime>> markedSessions = new ArrayList<>();
+    private final static Map<String, ClientTimePair<String, String>> sessionCache;
+    private final List<ClientTimePair<String, LocalDateTime>> markedSessions = new ArrayList<>();
 
 
     @Override
     public void cacheClientConnection(String clientName, String gameRoomKey, String simpSessionId) {
         System.out.println(ANSI_RED + "Caching client connection..." + ANSI_RESET);
-        sessionCache.put(simpSessionId, Tuple.of(clientName, gameRoomKey));
+        sessionCache.put(simpSessionId, ClientTimePair.of(clientName, gameRoomKey));
+    }
+
+    @Override
+    public void uncacheClientConnection(String simpSessionId) {
+        if(!sessionCache.containsKey(simpSessionId)) { return; }
+
+        sessionCache.remove(simpSessionId);
+        unmarkSessionId(simpSessionId);
     }
 
     @Override
@@ -38,8 +45,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         if(!sessionCache.containsKey(simpSessionId)) {
             return;
         }
-
-        markedSessions.add(Tuple.of(simpSessionId, LocalDateTime.now()));
+        markedSessions.add(ClientTimePair.of(simpSessionId, LocalDateTime.now()));
     }
 
     @Override
@@ -53,7 +59,6 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         if(!sessionCache.containsKey(simpSessionId)) {
             return;
         }
-
         unmarkSessionId(simpSessionId);
     }
 
@@ -104,17 +109,17 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         System.out.println("List of marked sessions: " + markedSessions);
     }
 
-    private static class Tuple<T, S> {
+    private static class ClientTimePair<T, S> {
         T key;
         S value;
 
-        public Tuple(T key, S value) {
+        public ClientTimePair(T key, S value) {
             this.key = key;
             this.value = value;
         }
 
-        public static <T, S> Tuple<T, S> of(T key, S value) {
-            return new Tuple<>(key, value);
+        public static <T, S> ClientTimePair<T, S> of(T key, S value) {
+            return new ClientTimePair<>(key, value);
         }
 
         @Override
@@ -123,7 +128,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
                 return false;
             }
 
-            var tuple = (Tuple<?, ?>) object;
+            var tuple = (ClientTimePair<?, ?>) object;
             return this.key.equals(tuple.key);
         }
 

@@ -4,6 +4,8 @@ public interface SessionCacheService {
 
     void cacheClientConnection(String clientName, String gameRoomKey, String simpSessionId);
 
+    void uncacheClientConnection(String simpSessionId);
+
     void markClientConnection(String simpSessionId);
 
     void newConnection(String simpSessionId);

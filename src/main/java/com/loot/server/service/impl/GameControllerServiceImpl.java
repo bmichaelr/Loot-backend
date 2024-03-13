@@ -6,55 +6,83 @@ import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameControllerService;
+import com.loot.server.service.SessionCacheService;
 import com.loot.server.socket.logic.impl.GameSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
 
+    @Autowired
+    private SessionCacheService sessionCacheService;
+
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
 
-    public enum LobbyStatus {
+    public enum ResponseCode {
         SUCCESS,
         LOBBY_FULL,
-        INVALID_KEY
+        INVALID_KEY,
+        MISSING_ROOM_KEY,
+        MISSING_PLAYER_PARAMS
     }
 
     @Override
-    public void createNewGameSession(LobbyRequest request) {
+    public void createNewGameSession(LobbyRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         gameSessionMap.put(roomKey, new GameSession(roomKey));
         gameSessionMap.get(roomKey).addPlayer(player);
+
+        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
     }
 
     @Override
-    public LobbyStatus joinCurrentGameSession(LobbyRequest request) {
-        String roomKey = request.getRoomKey();
-        GameSession gameSession;
-        if((gameSession = gameSessionMap.get(roomKey)) == null) {
-            return LobbyStatus.INVALID_KEY;
+    public ResponseCode joinCurrentGameSession(LobbyRequest request, String sessionId) {
+        ResponseCode responseCode;
+        if((responseCode = missingRequestParams(request, false)) != ResponseCode.SUCCESS) {
+            return responseCode;
         }
 
-        // Get the player and add them to the game session
+        String roomKey = request.getRoomKey();
+        GameSession gameSession = gameSessionMap.get(roomKey);
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         var additionStatus = gameSession.addPlayer(player);
         if(additionStatus.equals(Boolean.FALSE)) {
-            return LobbyStatus.LOBBY_FULL;
+            return ResponseCode.LOBBY_FULL;
         }
 
-        return LobbyStatus.SUCCESS;
+        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
+        return ResponseCode.SUCCESS;
     }
 
     @Override
     public void changePlayerReadyStatus(LobbyRequest request) {
-
+        String roomKey = request.getRoomKey();
+        GamePlayer player = new GamePlayer(request.getPlayerDto(), request.getPlayerDto().getReady());
+        GameSession gameSession = gameSessionMap.get(roomKey);
+        gameSession.changePlayerReadyStatus(player);
     }
 
     @Override
-    public LobbyResponse getInformationForLobby(String roomKey) {
-         return null;
+    public void removePlayerFromGameSession(LobbyRequest lobbyRequest, String sessionId) {
+        GamePlayer player = new GamePlayer(lobbyRequest.getPlayerDto());
+        var gameSession = gameSessionMap.get(lobbyRequest.getRoomKey());
+        gameSession.removePlayer(player);
+        sessionCacheService.uncacheClientConnection(sessionId);
+    }
+
+    @Override
+    public LobbyResponse getInformationForLobby(String roomKey, Boolean rFlag) {
+        var gameSession = gameSessionMap.get(roomKey);
+        var ready = gameSession.getNumberOfReadyPlayers() == gameSession.getNumberOfPlayers();
+
+        return LobbyResponse.builder()
+                .roomKey(roomKey)
+                .players(gameSession.getPlayers())
+                .allReady(rFlag ? Boolean.FALSE : ready)
+                .build();
     }
 
     @Override
@@ -87,6 +115,26 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public Boolean isValidRoomKey(String roomKey) {
         return inUseRoomKeys.contains(roomKey);
+    }
+
+    @Override
+    public ResponseCode missingRequestParams(Object data, Boolean createGame) {
+        if(data instanceof LobbyRequest lobbyRequest) {
+            if(!createGame && lobbyRequest.getRoomKey() == null) {
+                return ResponseCode.MISSING_ROOM_KEY;
+            }
+            if(lobbyRequest.getPlayerDto() == null || lobbyRequest.getPlayerDto().missingParam()) {
+                return ResponseCode.MISSING_PLAYER_PARAMS;
+            }
+
+            if(!createGame) {
+                String roomKey = lobbyRequest.getRoomKey();;
+                if(gameSessionMap.get(roomKey) == null) {
+                    return ResponseCode.INVALID_KEY;
+                }
+            }
+        }
+        return ResponseCode.SUCCESS;
     }
 
     private void printAllRoomKeys() {
