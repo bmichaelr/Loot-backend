@@ -1,7 +1,8 @@
 package com.loot.server.service.impl;
 
+import com.loot.server.service.ClientDisconnectionEvent;
 import com.loot.server.service.SessionCacheService;
-import com.loot.server.socket.GameController;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +25,11 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
     private final static Map<String, ClientTimePair<String, String>> sessionCache;
     private final List<ClientTimePair<String, LocalDateTime>> markedSessions = new ArrayList<>();
+    private final ApplicationEventPublisher eventPublisher;
 
+    public SessionCacheServiceImpl(ApplicationEventPublisher eventPublisher) {
+        this.eventPublisher = eventPublisher;
+    }
 
     @Override
     public void cacheClientConnection(String clientName, String gameRoomKey, String simpSessionId) {
@@ -55,7 +60,6 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
     @Override
     public void newConnection(String simpSessionId) {
-        // If the session is not cached, do nothing
         if(!sessionCache.containsKey(simpSessionId)) {
             return;
         }
@@ -89,7 +93,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
             if(secondsDiff > 60) {
                 System.out.println(ANSI_RED + "Found old session (" + session + "), killing..." + ANSI_RESET);
                 var tuple = sessionCache.get(session.key);
-                GameController.markedSessionCallback(tuple.key, tuple.value);
+                eventPublisher.publishEvent(new ClientDisconnectionEvent(this, tuple.key, tuple.value));
                 markedSessions.remove(session);
                 sessionCache.remove(session.key);
                 if (markedSessions.isEmpty()) {

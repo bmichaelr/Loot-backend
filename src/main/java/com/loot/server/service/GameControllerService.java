@@ -12,8 +12,9 @@ public interface GameControllerService {
      * first one put into the room, and their session id will be added to the cache.
      * @param request lobby request containing the player information
      * @param sessionId of the client connection
+     * @return the created room key
      */
-    void createNewGameSession(LobbyRequest request, String sessionId);
+    String createNewGameSession(LobbyRequest request, String sessionId);
 
     /**
      * Change the ready status for a certain player. E.g. someone has hit the ready/unready button
@@ -45,19 +46,10 @@ public interface GameControllerService {
     LobbyResponse getInformationForLobby(String roomKey, Boolean rFlag);
 
     /**
-     * Method called from SessionCacheService that indicates a marked client session has been terminated, forcing
-     * the game service to update that object accordingly
-     * @param clientName the name of the client who left or disconnected
-     * @param clientRoomKey the room key the client was previously associated to
-     */
-    void markedSessionCallback(String clientName, String clientRoomKey);
-
-    /**
      * Update a lobby when a client has disconnected and won't be reconnecting to the server
-     * @param lobbyRoomKey the room key that identifies the game session lobby
      * @param gameSession the game session related to the client
      */
-    void updateLobbyOnDisconnect(String lobbyRoomKey, GameSession gameSession);
+    void updateLobbyOnDisconnect(GameSession gameSession);
 
     /**
      * Forces a game session object to identify it's current state, and if it deems itself no longer needed

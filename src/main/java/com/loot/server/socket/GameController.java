@@ -2,6 +2,7 @@ package com.loot.server.socket;
 
 import java.util.*;
 
+import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.request.PlayCardRequest;
@@ -25,9 +26,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ComponentScan
 public class GameController {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-
     @Autowired
     private ObjectMapper mapper;
     @Autowired
@@ -43,9 +41,8 @@ public class GameController {
             return;
         }
 
-        String roomKey = request.getRoomKey();
         String clientName = request.getPlayerDto().getName();
-        gameService.createNewGameSession(request, sessionId);
+        String roomKey = gameService.createNewGameSession(request, sessionId);
         LobbyResponse response = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + clientName, response);
     }
@@ -127,39 +124,7 @@ public class GameController {
             case INVALID_KEY -> "The room key you entered is not valid";
             default -> "Unknown error occurred. Please try again";
         };
-        messagingTemplate.convertAndSend(destination, error);
-    }
-
-    public static void markedSessionCallback(String clientName, String clientRoomKey) {
-        System.out.println(ANSI_RED + "Received a callback for " + clientName + ANSI_RESET);
-        if(!gameSessions.containsKey(clientRoomKey)) {
-            return;
-        }
-
-        GameSession gameSession = gameSessions.get(clientRoomKey);
-        for(var player: gameSession.getPlayers()) {
-            if(player.getName().equals(clientName)) {
-                System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
-                gameSession.removePlayer(player);
-                updateLobbyOnDisconnect(clientRoomKey, gameSession);
-                break;
-            }
-        }
-        validateGameSession(gameSession);
-    }
-
-    private static void validateGameSession(GameSession gameSession) {
-        if (gameSession.getPlayers().isEmpty()) {
-            System.out.println(ANSI_RED + "Game session object with roomKey (" + gameSession.getRoomKey() + ") is empty, removing it..." + ANSI_RESET);
-            String roomKey = gameSession.getRoomKey();
-            gameSessions.remove(roomKey);
-        }
-
-        printDebug();
-    }
-
-    private static void updateLobbyOnDisconnect(String lobbyRoomKey, GameSession gameSession) {
-        LobbyResponse lobbyResponse = new LobbyResponse(lobbyRoomKey, gameSession.getPlayers(), false);
-        //messagingTemplate.convertAndSend("/topic/lobby/" + lobbyRoomKey, lobbyResponse);
+        ErrorResponse errorResponse = ErrorResponse.builder().details(error).build();
+        messagingTemplate.convertAndSend(destination, errorResponse);
     }
 }

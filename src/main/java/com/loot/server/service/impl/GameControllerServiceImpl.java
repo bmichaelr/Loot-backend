@@ -5,17 +5,26 @@ import java.util.*;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
+import com.loot.server.service.ClientDisconnectionEvent;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.socket.logic.impl.GameSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
 
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_RED = "\u001B[31m";
+
     @Autowired
     private SessionCacheService sessionCacheService;
+
+    @Autowired // not sure about keeping this in here, but for now it stays
+    private SimpMessagingTemplate simpMessagingTemplate;
 
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
@@ -29,13 +38,14 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public void createNewGameSession(LobbyRequest request, String sessionId) {
+    public String createNewGameSession(LobbyRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
         GamePlayer player = new GamePlayer(request.getPlayerDto());
         gameSessionMap.put(roomKey, new GameSession(roomKey));
         gameSessionMap.get(roomKey).addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
+        return roomKey;
     }
 
     @Override
@@ -71,6 +81,7 @@ public class GameControllerServiceImpl implements GameControllerService {
         var gameSession = gameSessionMap.get(lobbyRequest.getRoomKey());
         gameSession.removePlayer(player);
         sessionCacheService.uncacheClientConnection(sessionId);
+        validateGameSession(gameSession);
     }
 
     @Override
@@ -83,6 +94,44 @@ public class GameControllerServiceImpl implements GameControllerService {
                 .players(gameSession.getPlayers())
                 .allReady(rFlag ? Boolean.FALSE : ready)
                 .build();
+    }
+
+    @EventListener
+    public void clientDisconnectedCallback(ClientDisconnectionEvent clientDisconnectionEvent) {
+        String clientName = clientDisconnectionEvent.getClientName();
+        String clientRoomKey = clientDisconnectionEvent.getGameRoomKey();
+
+        System.out.println(ANSI_RED + "Received a callback for " + clientName + ANSI_RESET);
+        if(!gameSessionMap.containsKey(clientRoomKey)) {
+            return;
+        }
+
+        GameSession gameSession = gameSessionMap.get(clientRoomKey);
+        for(var player: gameSession.getPlayers()) {
+            if(player.getName().equals(clientName)) {
+                System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
+                gameSession.removePlayer(player);
+                updateLobbyOnDisconnect(gameSession);
+                break;
+            }
+        }
+        validateGameSession(gameSession);
+    }
+
+    @Override
+    public void updateLobbyOnDisconnect(GameSession gameSession) {
+        String roomKey = gameSession.getRoomKey();
+        LobbyResponse lobbyResponse = getInformationForLobby(roomKey, Boolean.TRUE);
+        simpMessagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+    }
+
+    @Override
+    public void validateGameSession(GameSession gameSession) {
+        if (gameSession.getPlayers().isEmpty()) {
+            System.out.println(ANSI_RED + "Game session object with roomKey (" + gameSession.getRoomKey() + ") is empty, removing it..." + ANSI_RESET);
+            String roomKey = gameSession.getRoomKey();
+            gameSessionMap.remove(roomKey);
+        }
     }
 
     @Override
@@ -110,11 +159,6 @@ public class GameControllerServiceImpl implements GameControllerService {
         // For debugging purposes
         printAllRoomKeys();
         return roomKey;
-    }
-
-    @Override
-    public Boolean isValidRoomKey(String roomKey) {
-        return inUseRoomKeys.contains(roomKey);
     }
 
     @Override
