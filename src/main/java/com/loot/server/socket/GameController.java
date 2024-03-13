@@ -74,7 +74,6 @@ public class GameController {
         }
 
         gameService.removePlayerFromGameSession(request, sessionId);
-
         String roomKey = request.getRoomKey();
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.TRUE);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
