@@ -2,16 +2,15 @@ package com.loot.server.socket;
 
 import java.util.*;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.domain.entity.ErrorResponse;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
-import com.loot.server.service.GameService;
+import com.loot.server.service.GameControllerService;
+import com.loot.server.service.SessionCacheService;
 import com.loot.server.socket.logic.impl.GameSession;
 import com.loot.server.domain.cards.PlayedCard;
-import org.aspectj.weaver.patterns.AndSignaturePattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.util.Pair;
@@ -34,7 +33,10 @@ public class GameController {
     private ObjectMapper mapper;
 
     @Autowired
-    private GameService gameService;
+    private GameControllerService gameService;
+
+    @Autowired
+    private SessionCacheService sessionCacheService;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -43,13 +45,13 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload LobbyRequest request, @Header("simpSessionId") String sessionId) {
-        System.out.println("Player name: " + request.getPlayerDto().getName() + ", session id: " + sessionId);
-
         Pair<Boolean, String> validation = validLobbyRequest(request, true);
         if(!validation.getFirst()) {
             sendErrorMessage(request, validation.getSecond());
             return;
         }
+
+        gameService.create
 
         // Create the room key, create the game session, add the player
         String roomKey = gameService.getRoomKeyForNewGame();
@@ -59,10 +61,11 @@ public class GameController {
 
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, List.of(player), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + player.getName(), lobbyResponse);
+        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
     }
 
     @MessageMapping("/joinGame")
-    public void joinGame(@Payload LobbyRequest request) {
+    public void joinGame(@Payload LobbyRequest request, @Header("simpSessionId") String sessionId) {
         Pair<Boolean, String> validation = validLobbyRequest(request, false);
         if(!validation.getFirst()) {
             sendErrorMessage(request, validation.getSecond());
@@ -87,6 +90,7 @@ public class GameController {
         LobbyResponse lobbyResponse = new LobbyResponse(roomKey, gameSession.getPlayers(), false);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + request.getPlayerDto().getName(), lobbyResponse);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
     }
 
     @MessageMapping("/leaveGame")
@@ -162,13 +166,13 @@ public class GameController {
     }
 
     // TODO : move helper function to service class
-    public void printDebug() {
+    static void printDebug() {
         for(GameSession session : gameSessions.values()) {
             if (session.getPlayers() == null) {
-                System.out.println("room key(" + session.getRoomKey() + ") has no players...");
+                System.out.println("Room key(" + session.getRoomKey() + ") has no players...");
                 continue;
             }
-            System.out.println("game id = " + session.getRoomKey() + ", players = " + session.getPlayers());
+            System.out.println("Game id = " + session.getRoomKey() + ", players = " + session.getPlayers());
         }
     }
 
@@ -206,6 +210,7 @@ public class GameController {
             if(player.getName().equals(clientName)) {
                 System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
                 gameSession.removePlayer(player);
+                updateLobbyOnDisconnect(clientRoomKey, gameSession);
                 break;
             }
         }
@@ -218,5 +223,12 @@ public class GameController {
             String roomKey = gameSession.getRoomKey();
             gameSessions.remove(roomKey);
         }
+
+        printDebug();
+    }
+
+    private static void updateLobbyOnDisconnect(String lobbyRoomKey, GameSession gameSession) {
+        LobbyResponse lobbyResponse = new LobbyResponse(lobbyRoomKey, gameSession.getPlayers(), false);
+        //messagingTemplate.convertAndSend("/topic/lobby/" + lobbyRoomKey, lobbyResponse);
     }
 }

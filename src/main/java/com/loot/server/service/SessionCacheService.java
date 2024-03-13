@@ -6,5 +6,7 @@ public interface SessionCacheService {
 
     void markClientConnection(String simpSessionId);
 
+    void newConnection(String simpSessionId);
+
     Boolean clientConnectionExists(String simpSessionId);
 }

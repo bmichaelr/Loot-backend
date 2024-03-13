@@ -17,10 +17,11 @@ public class SessionEventListener {
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
-        System.out.println("Message: " + event.getMessage());
         StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String username = stompHeaderAccessor.getFirstNativeHeader("username");
-        System.out.println("Received a session connected event for user (" + username + "): " + event);
+
+        var simpSessionId = stompHeaderAccessor.getSessionId();
+        System.out.println("Received a session connected event for new client with session id "+simpSessionId+"...");
+        sessionCacheService.newConnection(simpSessionId);
     }
 
     @EventListener

@@ -29,6 +29,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
     @Override
     public void cacheClientConnection(String clientName, String gameRoomKey, String simpSessionId) {
+        System.out.println(ANSI_RED + "Caching client connection..." + ANSI_RESET);
         sessionCache.put(simpSessionId, Tuple.of(clientName, gameRoomKey));
     }
 
@@ -46,25 +47,61 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         return sessionCache.containsKey(simpSessionId);
     }
 
+    @Override
+    public void newConnection(String simpSessionId) {
+        // If the session is not cached, do nothing
+        if(!sessionCache.containsKey(simpSessionId)) {
+            return;
+        }
+
+        unmarkSessionId(simpSessionId);
+    }
+
+    private void unmarkSessionId(String simpSessionId) {
+        for(var session : markedSessions) {
+            if (session.key.equals(simpSessionId)) {
+                markedSessions.remove(session);
+                break;
+            }
+        }
+    }
+
     @Scheduled(cron = "*/30 * * * * *")
     private void killExpiredSessions() {
         System.out.println(ANSI_RED + "Running session kill..." + ANSI_RESET);
+        memDump();
+        if(markedSessions.isEmpty()){
+            return;
+        }
 
         LocalDateTime currentTime = LocalDateTime.now();
 
-        markedSessions.forEach(session -> {
+        for(var session : markedSessions) {
             var markedTime = session.value;
             var lapsedTime = Duration.between(markedTime, currentTime);
-            var minutesDiff = Math.abs(lapsedTime.toMinutes());
-            if(minutesDiff > 1) {
+            var secondsDiff = Math.abs(lapsedTime.toSeconds());
+            System.out.println(ANSI_RED + "For session entry " + session.key + ", markedTime = " + markedTime + ", currentTime = " + currentTime + ", timeLapsed = " + secondsDiff);
+            if(secondsDiff > 60) {
                 System.out.println(ANSI_RED + "Found old session (" + session + "), killing..." + ANSI_RESET);
                 var tuple = sessionCache.get(session.key);
                 GameController.markedSessionCallback(tuple.key, tuple.value);
                 markedSessions.remove(session);
+                sessionCache.remove(session.key);
+                if (markedSessions.isEmpty()) {
+                    break;
+                }
             }
-        });
+        }
+    }
 
-        System.out.println(ANSI_RED + "Finished running session kill function..." + ANSI_RESET);
+    private void memDump() {
+        System.out.print("Session Cache: {");
+        for(var key : sessionCache.keySet()) {
+            System.out.print("[" + key + ", " + sessionCache.get(key).toString()+ "], ");
+        }
+        System.out.println("}");
+
+        System.out.println("List of marked sessions: " + markedSessions);
     }
 
     private static class Tuple<T, S> {
@@ -88,6 +125,11 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
             var tuple = (Tuple<?, ?>) object;
             return this.key.equals(tuple.key);
+        }
+
+        @Override
+        public String toString() {
+            return "[key = " + key.toString() + ", value = " + value.toString() + "]";
         }
     }
 }
