@@ -20,7 +20,7 @@ public class PlayCardRequest {
     private String roomKey;
 
     @JsonProperty
-    private PlayerDto player;
+    private GamePlayer player;
 
     @JsonProperty
     private PlayedCard card;
