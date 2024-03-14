@@ -1,11 +1,11 @@
-package com.loot.server.socket.logic.impl;
+package com.loot.server.logic.impl;
 
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.GuessingCard;
 import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.cards.TargetedEffectCard;
 import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.socket.logic.IGameSession;
+import com.loot.server.logic.IGameSession;
 
 import java.util.*;
 
@@ -210,6 +210,8 @@ public class GameSession implements IGameSession {
   public Boolean changePlayerReadyStatus(GamePlayer player) {
     if (!players.contains(player)) {
       // TODO throw some error here
+      System.out.println("Unable to find player(" + player + ") in list of => " + this.getPlayers());
+      return false;
     }
 
     GamePlayer playerToAlter = players.get(players.indexOf(player));

@@ -1,4 +1,4 @@
-package com.loot.server.socket;
+package com.loot.server;
 
 import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.service.SessionCacheService;

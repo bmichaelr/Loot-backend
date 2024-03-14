@@ -1,4 +1,4 @@
-package com.loot.server.socket;
+package com.loot.server;
 
 import com.loot.server.domain.response.ErrorResponse;
 import com.loot.server.domain.request.LobbyRequest;
@@ -68,7 +68,9 @@ public class GameController {
         gameService.removePlayerFromGameSession(request, sessionId);
         String roomKey = request.getRoomKey();
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.TRUE);
-        messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+        if(lobbyResponse != null) { // possibly null if the game session object is removed on last player departure
+            messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+        }
     }
 
     @MessageMapping("/ready")

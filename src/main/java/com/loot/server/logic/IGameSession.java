@@ -1,4 +1,4 @@
-package com.loot.server.socket.logic;
+package com.loot.server.logic;
 
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.cards.Card;

@@ -3,7 +3,7 @@ package com.loot.server.service;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
-import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession;
 
 public interface GameControllerService {
 

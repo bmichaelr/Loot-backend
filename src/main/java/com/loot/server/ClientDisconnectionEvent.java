@@ -1,4 +1,4 @@
-package com.loot.server.service;
+package com.loot.server;
 
 import lombok.Getter;
 import lombok.Setter;

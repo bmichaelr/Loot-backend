@@ -1,6 +1,6 @@
 package com.loot.server.service.impl;
 
-import com.loot.server.service.ClientDisconnectionEvent;
+import com.loot.server.ClientDisconnectionEvent;
 import com.loot.server.service.SessionCacheService;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;

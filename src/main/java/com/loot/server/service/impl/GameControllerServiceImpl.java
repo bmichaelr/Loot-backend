@@ -2,13 +2,12 @@ package com.loot.server.service.impl;
 
 import java.util.*;
 
-import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
-import com.loot.server.service.ClientDisconnectionEvent;
+import com.loot.server.ClientDisconnectionEvent;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
-import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

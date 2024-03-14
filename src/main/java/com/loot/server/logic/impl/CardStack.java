@@ -1,6 +1,6 @@
-package com.loot.server.socket.logic.impl;
+package com.loot.server.logic.impl;
 
-import com.loot.server.socket.logic.ICardStack;
+import com.loot.server.logic.ICardStack;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 

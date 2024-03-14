@@ -1,7 +1,7 @@
 package com.loot.server.GameSessionTests;
 
 import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;

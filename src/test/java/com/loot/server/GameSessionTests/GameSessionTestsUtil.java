@@ -1,7 +1,7 @@
 package com.loot.server.GameSessionTests;
 
 import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.socket.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,18 @@ import java.util.UUID;
 
 public class GameSessionTestsUtil {
 
+    private static final UUID p1UUID = UUID.randomUUID();
+    private static final UUID p2UUID = UUID.randomUUID();
+    private static final UUID p3UUID = UUID.randomUUID();
+    private static final UUID p4UUID = UUID.randomUUID();
+
+
     public static List<GamePlayer> createPlayers() {
         return List.of(
-                GamePlayer.builder().name("Player 1").id(UUID.randomUUID()).build(),
-                GamePlayer.builder().name("Player 2").id(UUID.randomUUID()).build(),
-                GamePlayer.builder().name("Player 3").id(UUID.randomUUID()).build(),
-                GamePlayer.builder().name("Player 4").id(UUID.randomUUID()).build()
+                GamePlayer.builder().name("Player 1").id(p1UUID).build(),
+                GamePlayer.builder().name("Player 2").id(p2UUID).build(),
+                GamePlayer.builder().name("Player 3").id(p3UUID).build(),
+                GamePlayer.builder().name("Player 4").id(p4UUID).build()
         );
     }
 
