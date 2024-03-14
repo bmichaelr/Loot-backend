@@ -5,15 +5,16 @@ import com.loot.server.socket.logic.impl.GameSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class GameSessionTestsUtil {
 
     public static List<GamePlayer> createPlayers() {
         return List.of(
-                GamePlayer.builder().name("Player 1").id(1L).build(),
-                GamePlayer.builder().name("Player 2").id(2L).build(),
-                GamePlayer.builder().name("Player 3").id(3L).build(),
-                GamePlayer.builder().name("Player 4").id(4L).build()
+                GamePlayer.builder().name("Player 1").id(UUID.randomUUID()).build(),
+                GamePlayer.builder().name("Player 2").id(UUID.randomUUID()).build(),
+                GamePlayer.builder().name("Player 3").id(UUID.randomUUID()).build(),
+                GamePlayer.builder().name("Player 4").id(UUID.randomUUID()).build()
         );
     }
 

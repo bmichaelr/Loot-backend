@@ -1,19 +1,12 @@
 package com.loot.server.socket;
 
-import java.util.*;
-
-import com.loot.server.domain.entity.ErrorResponse;
-import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.response.ErrorResponse;
 import com.loot.server.domain.request.LobbyRequest;
-import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
-import com.loot.server.socket.logic.impl.GameSession;
-import com.loot.server.domain.cards.PlayedCard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.data.util.Pair;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -21,6 +14,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.util.UUID;
 
 @Controller
 @ComponentScan
@@ -37,28 +32,28 @@ public class GameController {
     public void createGame(LobbyRequest request, @Header("simpSessionId") String sessionId) {
         ResponseCode code = gameService.missingRequestParams(request, true);
         if(code != ResponseCode.SUCCESS) {
-            sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);
+            sendErrorMessage("/topic/error/" + request.getPlayer().getId(), code);
             return;
         }
 
-        String clientName = request.getPlayerDto().getName();
+        UUID clientUUID = request.getPlayer().getId();
         String roomKey = gameService.createNewGameSession(request, sessionId);
         LobbyResponse response = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
-        messagingTemplate.convertAndSend("/topic/matchmaking/" + clientName, response);
+        messagingTemplate.convertAndSend("/topic/matchmaking/" + clientUUID, response);
     }
 
     @MessageMapping("/joinGame")
     public void joinGame(@Payload LobbyRequest request, @Header("simpSessionId") String sessionId) {
         ResponseCode responseCode = gameService.joinCurrentGameSession(request, sessionId);
         if(responseCode != ResponseCode.SUCCESS) {
-            sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), responseCode);
+            sendErrorMessage("/topic/error/" + request.getPlayer().getId(), responseCode);
             return;
         }
 
         String roomKey = request.getRoomKey();
-        String clientName = request.getPlayerDto().getName();
+        UUID clientUUID = request.getPlayer().getId();
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
-        messagingTemplate.convertAndSend("/topic/matchmaking/" + clientName, lobbyResponse);
+        messagingTemplate.convertAndSend("/topic/matchmaking/" + clientUUID, lobbyResponse);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
@@ -66,7 +61,7 @@ public class GameController {
     public void leaveGame(LobbyRequest request, @Header("simpSessionId") String sessionId) {
         ResponseCode code = gameService.missingRequestParams(request, false);
         if(code != ResponseCode.SUCCESS) {
-            sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);
+            sendErrorMessage("/topic/error/" + request.getPlayer().getId(), code);
             return;
         }
 
@@ -80,7 +75,7 @@ public class GameController {
     public void startGame(LobbyRequest request) {
         ResponseCode code = gameService.missingRequestParams(request, false);
         if(code != ResponseCode.SUCCESS) {
-            sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);
+            sendErrorMessage("/topic/error/" + request.getPlayer().getName(), code);
             return;
         }
 

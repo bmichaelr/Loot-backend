@@ -67,4 +67,9 @@ public class GamePlayer {
                 .id(this.id)
                 .build();
     }
+
+    @JsonIgnore
+    public Boolean missingParam() {
+        return this.getName() == null || this.getId() == null;
+    }
 }

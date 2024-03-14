@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class TestsForGameSessionObject {
 
@@ -21,7 +22,7 @@ public class TestsForGameSessionObject {
         }
 
         // Now the lobby is full, try to add another player and it should fail
-        GamePlayer gamePlayer = GamePlayer.builder().name("Player 5").id(5L).build();
+        GamePlayer gamePlayer = GamePlayer.builder().name("Player 5").id(UUID.randomUUID()).build();
         gameSession.addPlayer(gamePlayer);
         assert !(gameSession.getPlayers().contains(gamePlayer));
     }

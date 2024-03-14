@@ -52,7 +52,7 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public String createNewGameSession(LobbyRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
-        GamePlayer player = new GamePlayer(request.getPlayerDto());
+        var player = request.getPlayer();
 
         addToGameSessionMap(roomKey, new GameSession(roomKey));
         var gameSession = getFromGameSessionMap(roomKey);
@@ -71,7 +71,7 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         String roomKey = request.getRoomKey();
         var gameSession = getFromGameSessionMap(roomKey);
-        var player = new GamePlayer(request.getPlayerDto());
+        var player = request.getPlayer();
         var additionStatus = gameSession.addPlayer(player);
         if(additionStatus.equals(Boolean.FALSE)) {
             return ResponseCode.LOBBY_FULL;
@@ -84,14 +84,14 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public void changePlayerReadyStatus(LobbyRequest request) {
         String roomKey = request.getRoomKey();
-        GamePlayer player = new GamePlayer(request.getPlayerDto(), request.getPlayerDto().getReady());
-        GameSession gameSession = getFromGameSessionMap(roomKey);
+        var player = request.getPlayer();
+        var gameSession = getFromGameSessionMap(roomKey);
         gameSession.changePlayerReadyStatus(player);
     }
 
     @Override
     public void removePlayerFromGameSession(LobbyRequest lobbyRequest, String sessionId) {
-        GamePlayer player = new GamePlayer(lobbyRequest.getPlayerDto());
+        var player = lobbyRequest.getPlayer();
         var gameSession = getFromGameSessionMap(lobbyRequest.getRoomKey());
         gameSession.removePlayer(player);
         sessionCacheService.uncacheClientConnection(sessionId);
@@ -181,7 +181,7 @@ public class GameControllerServiceImpl implements GameControllerService {
             if(!createGame && lobbyRequest.getRoomKey() == null) {
                 return ResponseCode.MISSING_ROOM_KEY;
             }
-            if(lobbyRequest.getPlayerDto() == null || lobbyRequest.getPlayerDto().missingParam()) {
+            if(lobbyRequest.getPlayer() == null || lobbyRequest.getPlayer().missingParam()) {
                 return ResponseCode.MISSING_PLAYER_PARAMS;
             }
 
