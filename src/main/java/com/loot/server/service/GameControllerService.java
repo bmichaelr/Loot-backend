@@ -19,8 +19,9 @@ public interface GameControllerService {
     /**
      * Change the ready status for a certain player. E.g. someone has hit the ready/unready button
      * @param request lobby request containing player information and room key
+     * @return flag indicating if all players are ready or not
      */
-    void changePlayerReadyStatus(LobbyRequest request);
+    Boolean changePlayerReadyStatus(LobbyRequest request);
 
     /**
      * Requested by the client when they wish to leave a lobby.

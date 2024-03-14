@@ -82,11 +82,11 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public void changePlayerReadyStatus(LobbyRequest request) {
+    public Boolean changePlayerReadyStatus(LobbyRequest request) {
         String roomKey = request.getRoomKey();
         var player = request.getPlayer();
         var gameSession = getFromGameSessionMap(roomKey);
-        gameSession.changePlayerReadyStatus(player);
+        return gameSession.changePlayerReadyStatus(player);
     }
 
     @Override
@@ -99,14 +99,17 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public LobbyResponse getInformationForLobby(String roomKey, Boolean rFlag) {
+    public LobbyResponse getInformationForLobby(String roomKey, Boolean allReady) {
         var gameSession = getFromGameSessionMap(roomKey);
-        var ready = gameSession.getNumberOfReadyPlayers() == gameSession.getNumberOfPlayers();
+        if(gameSession == null) {
+            System.out.println("Unable to retrieve game session with roomKey: " + roomKey);
+            return null;
+        }
 
         return LobbyResponse.builder()
                 .roomKey(roomKey)
                 .players(gameSession.getPlayers())
-                .allReady(rFlag ? Boolean.FALSE : ready)
+                .allReady(allReady)
                 .build();
     }
 

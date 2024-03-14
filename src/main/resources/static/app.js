@@ -113,7 +113,7 @@ class Player {
     constructor(name) {
         this.name = name;
         this.ready = false;
-        this.id = Math.floor(Math.random() * 1000); // Generate a random integer for the ID
+        this.id = crypto.randomUUID();
     }
 }
 
@@ -139,7 +139,7 @@ window.onload = function () {
 
     console.log('Player name:', playerName);
     player = new Player(playerName);
-    sock_connect(playerName);
+    sock_connect(player.id);
 };
 
 // <div className="player-item">

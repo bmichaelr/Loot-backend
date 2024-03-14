@@ -15,14 +15,14 @@ let lobbyUpdates;
 
 let connected = false;
 // Function that is called when the user is connected to the websocket
-function sock_connect(playerName) {
+function sock_connect(playerId) {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/matchmaking/'+playerName, (lobbyData) => {
+        stompClient.subscribe('/topic/matchmaking/'+playerId, (lobbyData) => {
             handleMatchmaking(lobbyData);
         });
-        stompClient.subscribe("/topic/error/" + playerName, (error) => {
+        stompClient.subscribe("/topic/error/" + playerId, (error) => {
            handleError(error);
         });
 
@@ -40,14 +40,14 @@ function sock_createGame(player) {
     console.log("Data to send: ", JSON.stringify({playerDto: player}))
     stompClient.publish({
         destination: "/app/createGame",
-        body: JSON.stringify({ playerDto: player })
+        body: JSON.stringify({ player: player })
     });
 }
 
 function sock_joinGame(player, roomKey) {
     stompClient.publish({
         destination: "/app/joinGame",
-        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+        body: JSON.stringify({ player: player, roomKey: roomKey })
     });
 }
 
@@ -59,7 +59,7 @@ function sock_leaveGame(player, roomKey) {
 
     stompClient.publish({
         destination: "/app/leaveGame",
-        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+        body: JSON.stringify({ player: player, roomKey: roomKey })
     });
 
     var lobbyDiv = document.getElementById("lobby-list");
@@ -73,7 +73,7 @@ function sock_readyUp(player, roomKey, ready) {
     player.ready = ready;
     stompClient.publish({
         destination: "/app/ready",
-        body: JSON.stringify({ playerDto: player, roomKey: roomKey })
+        body: JSON.stringify({ player: player, roomKey: roomKey })
     });
 }
 

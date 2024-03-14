@@ -80,8 +80,8 @@ public class GameController {
         }
 
         String roomKey = request.getRoomKey();
-        gameService.changePlayerReadyStatus(request);
-        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
+        Boolean ready = gameService.changePlayerReadyStatus(request);
+        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, ready);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
