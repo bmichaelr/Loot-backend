@@ -9,6 +9,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -17,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class GamePlayer {
 
     @JsonProperty
-    private Long id;
+    private UUID id;
 
     @JsonProperty
     private Boolean ready;
@@ -30,24 +32,6 @@ public class GamePlayer {
 
     @JsonProperty
     private String name;
-
-    @JsonIgnore
-    public GamePlayer(PlayerDto playerDto) {
-        this.id = playerDto.getId();
-        this.name = playerDto.getName();
-        this.ready = false;
-        this.isSafe = false;
-        this.loadedIn = false;
-    }
-
-    @JsonIgnore
-    public GamePlayer(PlayerDto playerDto, boolean ready) {
-        this.id = playerDto.getId();
-        this.name = playerDto.getName();
-        this.ready = ready;
-        this.isSafe = false;
-        this.loadedIn = false;
-    }
 
     @JsonIgnore
     @Override

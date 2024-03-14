@@ -14,7 +14,7 @@ import lombok.*;
 public class LobbyRequest {
 
 	@JsonProperty
-	private PlayerDto playerDto;
+	private GamePlayer player;
 
 	@JsonProperty
 	private String roomKey;
