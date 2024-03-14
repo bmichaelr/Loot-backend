@@ -34,7 +34,7 @@ public class GameController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/createGame")
-    public void createGame(@Payload LobbyRequest request, @Header("simpSessionId") String sessionId) {
+    public void createGame(LobbyRequest request, @Header("simpSessionId") String sessionId) {
         ResponseCode code = gameService.missingRequestParams(request, true);
         if(code != ResponseCode.SUCCESS) {
             sendErrorMessage("/topic/error/" + request.getPlayerDto().getName(), code);

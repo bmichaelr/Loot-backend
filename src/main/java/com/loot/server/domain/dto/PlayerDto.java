@@ -27,7 +27,6 @@ public class PlayerDto {
     @JsonProperty
     private String image;
 
-
     @JsonIgnore
     public boolean missingParam(){
         return id == null || name == null;

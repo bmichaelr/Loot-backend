@@ -37,6 +37,7 @@ function disconnect() {
 }
 
 function sock_createGame(player) {
+    console.log("Data to send: ", JSON.stringify({playerDto: player}))
     stompClient.publish({
         destination: "/app/createGame",
         body: JSON.stringify({ playerDto: player })
