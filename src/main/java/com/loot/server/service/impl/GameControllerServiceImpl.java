@@ -37,12 +37,26 @@ public class GameControllerServiceImpl implements GameControllerService {
         MISSING_PLAYER_PARAMS
     }
 
+    synchronized private void addToGameSessionMap(String key, GameSession gameSession) {
+        gameSessionMap.put(key, gameSession);
+    }
+
+    synchronized private GameSession getFromGameSessionMap(String key) {
+        return gameSessionMap.get(key);
+    }
+
+    synchronized private void removeFromGameSessionMap(String key) {
+        gameSessionMap.remove(key);
+    }
+
     @Override
     public String createNewGameSession(LobbyRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
         GamePlayer player = new GamePlayer(request.getPlayerDto());
-        gameSessionMap.put(roomKey, new GameSession(roomKey));
-        gameSessionMap.get(roomKey).addPlayer(player);
+
+        addToGameSessionMap(roomKey, new GameSession(roomKey));
+        var gameSession = getFromGameSessionMap(roomKey);
+        gameSession.addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
         return roomKey;
@@ -56,8 +70,8 @@ public class GameControllerServiceImpl implements GameControllerService {
         }
 
         String roomKey = request.getRoomKey();
-        GameSession gameSession = gameSessionMap.get(roomKey);
-        GamePlayer player = new GamePlayer(request.getPlayerDto());
+        var gameSession = getFromGameSessionMap(roomKey);
+        var player = new GamePlayer(request.getPlayerDto());
         var additionStatus = gameSession.addPlayer(player);
         if(additionStatus.equals(Boolean.FALSE)) {
             return ResponseCode.LOBBY_FULL;
@@ -71,14 +85,14 @@ public class GameControllerServiceImpl implements GameControllerService {
     public void changePlayerReadyStatus(LobbyRequest request) {
         String roomKey = request.getRoomKey();
         GamePlayer player = new GamePlayer(request.getPlayerDto(), request.getPlayerDto().getReady());
-        GameSession gameSession = gameSessionMap.get(roomKey);
+        GameSession gameSession = getFromGameSessionMap(roomKey);
         gameSession.changePlayerReadyStatus(player);
     }
 
     @Override
     public void removePlayerFromGameSession(LobbyRequest lobbyRequest, String sessionId) {
         GamePlayer player = new GamePlayer(lobbyRequest.getPlayerDto());
-        var gameSession = gameSessionMap.get(lobbyRequest.getRoomKey());
+        var gameSession = getFromGameSessionMap(lobbyRequest.getRoomKey());
         gameSession.removePlayer(player);
         sessionCacheService.uncacheClientConnection(sessionId);
         validateGameSession(gameSession);
@@ -86,7 +100,7 @@ public class GameControllerServiceImpl implements GameControllerService {
 
     @Override
     public LobbyResponse getInformationForLobby(String roomKey, Boolean rFlag) {
-        var gameSession = gameSessionMap.get(roomKey);
+        var gameSession = getFromGameSessionMap(roomKey);
         var ready = gameSession.getNumberOfReadyPlayers() == gameSession.getNumberOfPlayers();
 
         return LobbyResponse.builder()
@@ -102,11 +116,11 @@ public class GameControllerServiceImpl implements GameControllerService {
         String clientRoomKey = clientDisconnectionEvent.getGameRoomKey();
 
         System.out.println(ANSI_RED + "Received a callback for " + clientName + ANSI_RESET);
-        if(!gameSessionMap.containsKey(clientRoomKey)) {
+        var gameSession = getFromGameSessionMap(clientRoomKey);
+        if(gameSession == null) {
             return;
         }
 
-        GameSession gameSession = gameSessionMap.get(clientRoomKey);
         for(var player: gameSession.getPlayers()) {
             if(player.getName().equals(clientName)) {
                 System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
@@ -130,7 +144,7 @@ public class GameControllerServiceImpl implements GameControllerService {
         if (gameSession.getPlayers().isEmpty()) {
             System.out.println(ANSI_RED + "Game session object with roomKey (" + gameSession.getRoomKey() + ") is empty, removing it..." + ANSI_RESET);
             String roomKey = gameSession.getRoomKey();
-            gameSessionMap.remove(roomKey);
+            removeFromGameSessionMap(roomKey);
         }
     }
 
