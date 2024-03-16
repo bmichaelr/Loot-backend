@@ -173,7 +173,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public void removePlayerFromRound(GamePlayer playerToRemove) {
+  synchronized public void removePlayerFromRound(GamePlayer playerToRemove) {
     var index = playersInRound.indexOf(playerToRemove);
     if (index < turnIndex) {
       turnIndex -= 1;
@@ -207,7 +207,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public Boolean changePlayerReadyStatus(GamePlayer player) {
+  synchronized public Boolean changePlayerReadyStatus(GamePlayer player) {
     if (!players.contains(player)) {
       // TODO throw some error here
       System.out.println("Unable to find player(" + player + ") in list of => " + this.getPlayers());
@@ -227,11 +227,15 @@ public class GameSession implements IGameSession {
       playerToAlter.setReady(false);
     }
 
+    return allPlayersReady();
+  }
+
+  public boolean allPlayersReady() {
     return numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
   }
 
   @Override
-  public Boolean addPlayer(GamePlayer player) {
+  synchronized public Boolean addPlayer(GamePlayer player) {
     if (numberOfPlayers >= maxPlayers) {
       return Boolean.FALSE;
     }
@@ -244,7 +248,15 @@ public class GameSession implements IGameSession {
 
   @Override
   public void removePlayer(GamePlayer player) {
-    players.remove(player);
+    boolean success = players.remove(player);
+
+    if(success) {
+      numberOfPlayers -= 1;
+      numberOfReadyPlayers = 0;
+      for (var p : players) {
+        p.setReady(false);
+      }
+    }
   }
 
   @Override

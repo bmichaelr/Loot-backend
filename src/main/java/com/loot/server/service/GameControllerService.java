@@ -41,10 +41,9 @@ public interface GameControllerService {
     /**
      * Retrieve the information about a currently instantiated game session
      * @param roomKey that identifies the game session
-     * @param rFlag flag that indicates if the ready variable should be false or computed
      * @return lobby response object containing list of players and if they are all ready
      */
-    LobbyResponse getInformationForLobby(String roomKey, Boolean rFlag);
+    LobbyResponse getInformationForLobby(String roomKey);
 
     /**
      * Update a lobby when a client has disconnected and won't be reconnecting to the server

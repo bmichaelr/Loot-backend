@@ -3,15 +3,10 @@ package com.loot.server.service.impl;
 import com.loot.server.ClientDisconnectionEvent;
 import com.loot.server.service.SessionCacheService;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SessionCacheServiceImpl implements SessionCacheService {
@@ -20,11 +15,10 @@ public class SessionCacheServiceImpl implements SessionCacheService {
     public static final String ANSI_RED = "\u001B[31m";
 
     static {
-        sessionCache = new HashMap<>();
+        sessionCache = new ConcurrentHashMap<>();
     }
 
-    private final static Map<String, ClientTimePair<String, String>> sessionCache;
-    private final List<ClientTimePair<String, LocalDateTime>> markedSessions = new ArrayList<>();
+    private final static ConcurrentHashMap<String, ConcurrentPair<UUID, String>> sessionCache;
     private final ApplicationEventPublisher eventPublisher;
 
     public SessionCacheServiceImpl(ApplicationEventPublisher eventPublisher) {
@@ -32,75 +26,24 @@ public class SessionCacheServiceImpl implements SessionCacheService {
     }
 
     @Override
-    public void cacheClientConnection(String clientName, String gameRoomKey, String simpSessionId) {
+    public void cacheClientConnection(UUID clientUUID, String gameRoomKey, String simpSessionId) {
         System.out.println(ANSI_RED + "Caching client connection..." + ANSI_RESET);
-        sessionCache.put(simpSessionId, ClientTimePair.of(clientName, gameRoomKey));
+        sessionCache.put(simpSessionId, ConcurrentPair.of(clientUUID, gameRoomKey));
+
+        memDump();
     }
 
     @Override
     public void uncacheClientConnection(String simpSessionId) {
         if(!sessionCache.containsKey(simpSessionId)) { return; }
 
-        sessionCache.remove(simpSessionId);
-        unmarkSessionId(simpSessionId);
-    }
-
-    @Override
-    public void markClientConnection(String simpSessionId) {
-        if(!sessionCache.containsKey(simpSessionId)) {
-            return;
+        var clientInformation = sessionCache.remove(simpSessionId);
+        if(clientInformation != null) {
+            System.out.println(ANSI_RED + "Removed client connection => " + clientInformation + ANSI_RESET);
+            eventPublisher.publishEvent(new ClientDisconnectionEvent(this, clientInformation.getKey(), clientInformation.getValue()));
         }
-        markedSessions.add(ClientTimePair.of(simpSessionId, LocalDateTime.now()));
-    }
 
-    @Override
-    public Boolean clientConnectionExists(String simpSessionId) {
-        return sessionCache.containsKey(simpSessionId);
-    }
-
-    @Override
-    public void newConnection(String simpSessionId) {
-        if(!sessionCache.containsKey(simpSessionId)) {
-            return;
-        }
-        unmarkSessionId(simpSessionId);
-    }
-
-    private void unmarkSessionId(String simpSessionId) {
-        for(var session : markedSessions) {
-            if (session.key.equals(simpSessionId)) {
-                markedSessions.remove(session);
-                break;
-            }
-        }
-    }
-
-    @Scheduled(cron = "*/30 * * * * *")
-    private void killExpiredSessions() {
-        System.out.println(ANSI_RED + "Running session kill..." + ANSI_RESET);
         memDump();
-        if(markedSessions.isEmpty()){
-            return;
-        }
-
-        LocalDateTime currentTime = LocalDateTime.now();
-
-        for(var session : markedSessions) {
-            var markedTime = session.value;
-            var lapsedTime = Duration.between(markedTime, currentTime);
-            var secondsDiff = Math.abs(lapsedTime.toSeconds());
-            System.out.println(ANSI_RED + "For session entry " + session.key + ", markedTime = " + markedTime + ", currentTime = " + currentTime + ", timeLapsed = " + secondsDiff);
-            if(secondsDiff > 60) {
-                System.out.println(ANSI_RED + "Found old session (" + session + "), killing..." + ANSI_RESET);
-                var tuple = sessionCache.get(session.key);
-                eventPublisher.publishEvent(new ClientDisconnectionEvent(this, tuple.key, tuple.value));
-                markedSessions.remove(session);
-                sessionCache.remove(session.key);
-                if (markedSessions.isEmpty()) {
-                    break;
-                }
-            }
-        }
     }
 
     private void memDump() {
@@ -109,31 +52,45 @@ public class SessionCacheServiceImpl implements SessionCacheService {
             System.out.print("[" + key + ", " + sessionCache.get(key).toString()+ "], ");
         }
         System.out.println("}");
-
-        System.out.println("List of marked sessions: " + markedSessions);
     }
 
-    private static class ClientTimePair<T, S> {
-        T key;
-        S value;
+    private static class ConcurrentPair<T, S> {
+        volatile private T key;
+        volatile private S value;
 
-        public ClientTimePair(T key, S value) {
+        public ConcurrentPair(T key, S value) {
             this.key = key;
             this.value = value;
         }
 
-        public static <T, S> ClientTimePair<T, S> of(T key, S value) {
-            return new ClientTimePair<>(key, value);
+        public static <T, S> ConcurrentPair<T, S> of(T key, S value) {
+            return new ConcurrentPair<>(key, value);
+        }
+
+        synchronized public T getKey() {
+            return this.key;
+        }
+
+        synchronized public S getValue() {
+            return this.value;
+        }
+
+        synchronized void setKey(T key) {
+            this.key = key;
+        }
+
+        synchronized void setValue(S value) {
+            this.value = value;
         }
 
         @Override
-        public boolean equals(Object object) {
+        synchronized public boolean equals(Object object) {
             if(object == null || this.getClass() != object.getClass()) {
                 return false;
             }
 
-            var tuple = (ClientTimePair<?, ?>) object;
-            return this.key.equals(tuple.key);
+            var tuple = (ConcurrentPair<?, ?>) object;
+            return this.getKey().equals(tuple.getKey());
         }
 
         @Override
@@ -141,4 +98,48 @@ public class SessionCacheServiceImpl implements SessionCacheService {
             return "[key = " + key.toString() + ", value = " + value.toString() + "]";
         }
     }
+
+//    private static class SessionMonitoringThread extends Thread {
+//        private final ConcurrentLinkedQueue<ConcurrentPair<String, LocalDateTime>> markedSessions;
+//        private final ApplicationEventPublisher applicationEventPublisher;
+//        private boolean running;
+//
+//        public SessionMonitoringThread(ConcurrentLinkedQueue<ConcurrentPair<String, LocalDateTime>> markedSessions, ApplicationEventPublisher applicationEventPublisher) {
+//            this.markedSessions = markedSessions;
+//            this.applicationEventPublisher = applicationEventPublisher;
+//            running = false;
+//        }
+//
+//        @Override
+//        public void run() {
+//            while(running) {
+//                if(!markedSessions.isEmpty()) {
+//                    System.out.println(ANSI_RED + "Checking the queue for old sessions..." + ANSI_RESET);
+//                    var currentTime = LocalDateTime.now();
+//                    var iterator = markedSessions.iterator();
+//                    while(iterator.hasNext()) {
+//                        var pair = iterator.next();
+//                        var oldTime = pair.getValue();
+//                        long secondsElapsed = Duration.between(currentTime, oldTime).toSeconds();
+//                        if(secondsElapsed >= 30) {
+//                            System.out.println("Found old session => " + pair);
+//                            applicationEventPublisher.publishEvent(new ClientDisconnectionEvent(this, ));
+//                            iterator.remove();
+//                        }
+//                    }
+//                } else {
+//                    stopThread();
+//                }
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                }
+//            }
+//        }
+//
+//        synchronized public void stopThread() {
+//            this.running = false;
+//        }
+//    }
 }

@@ -2,6 +2,7 @@ package com.loot.server.service.impl;
 
 import java.util.*;
 
+import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.ClientDisconnectionEvent;
@@ -57,7 +58,7 @@ public class GameControllerServiceImpl implements GameControllerService {
         var gameSession = getFromGameSessionMap(roomKey);
         gameSession.addPlayer(player);
 
-        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
+        sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
         return roomKey;
     }
 
@@ -76,7 +77,7 @@ public class GameControllerServiceImpl implements GameControllerService {
             return ResponseCode.LOBBY_FULL;
         }
 
-        sessionCacheService.cacheClientConnection(player.getName(), roomKey, sessionId);
+        sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
         return ResponseCode.SUCCESS;
     }
 
@@ -98,7 +99,7 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public LobbyResponse getInformationForLobby(String roomKey, Boolean allReady) {
+    public LobbyResponse getInformationForLobby(String roomKey) {
         var gameSession = getFromGameSessionMap(roomKey);
         if(gameSession == null) {
             System.out.println("Unable to retrieve game session with roomKey: " + roomKey);
@@ -108,24 +109,24 @@ public class GameControllerServiceImpl implements GameControllerService {
         return LobbyResponse.builder()
                 .roomKey(roomKey)
                 .players(gameSession.getPlayers())
-                .allReady(allReady)
+                .allReady(gameSession.allPlayersReady())
                 .build();
     }
 
     @EventListener
     public void clientDisconnectedCallback(ClientDisconnectionEvent clientDisconnectionEvent) {
-        String clientName = clientDisconnectionEvent.getClientName();
+        UUID clientUUID = clientDisconnectionEvent.getClientUUID();
         String clientRoomKey = clientDisconnectionEvent.getGameRoomKey();
 
-        System.out.println(ANSI_RED + "Received a callback for " + clientName + ANSI_RESET);
+        System.out.println(ANSI_RED + "Received a callback for " + clientUUID + ANSI_RESET);
         var gameSession = getFromGameSessionMap(clientRoomKey);
         if(gameSession == null) {
             return;
         }
 
         for(var player: gameSession.getPlayers()) {
-            if(player.getName().equals(clientName)) {
-                System.out.println(ANSI_RED + "Removing client (" + clientName + ") from room." + ANSI_RESET);
+            if(player.getId().equals(clientUUID)) {
+                System.out.println(ANSI_RED + "Removing client (" + clientUUID + ") from room (" + clientRoomKey + ")." + ANSI_RESET);
                 gameSession.removePlayer(player);
                 updateLobbyOnDisconnect(gameSession);
                 break;
@@ -137,7 +138,7 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public void updateLobbyOnDisconnect(GameSession gameSession) {
         String roomKey = gameSession.getRoomKey();
-        LobbyResponse lobbyResponse = getInformationForLobby(roomKey, Boolean.TRUE);
+        LobbyResponse lobbyResponse = getInformationForLobby(roomKey);
         simpMessagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 

@@ -38,7 +38,7 @@ public class GameController {
 
         UUID clientUUID = request.getPlayer().getId();
         String roomKey = gameService.createNewGameSession(request, sessionId);
-        LobbyResponse response = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
+        LobbyResponse response = gameService.getInformationForLobby(roomKey);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + clientUUID, response);
     }
 
@@ -52,7 +52,7 @@ public class GameController {
 
         String roomKey = request.getRoomKey();
         UUID clientUUID = request.getPlayer().getId();
-        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.FALSE);
+        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
         messagingTemplate.convertAndSend("/topic/matchmaking/" + clientUUID, lobbyResponse);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
@@ -67,7 +67,7 @@ public class GameController {
 
         gameService.removePlayerFromGameSession(request, sessionId);
         String roomKey = request.getRoomKey();
-        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, Boolean.TRUE);
+        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
         if(lobbyResponse != null) { // possibly null if the game session object is removed on last player departure
             messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
         }
@@ -83,7 +83,7 @@ public class GameController {
 
         String roomKey = request.getRoomKey();
         Boolean ready = gameService.changePlayerReadyStatus(request);
-        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey, ready);
+        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 

@@ -1,8 +1,8 @@
 package com.loot.server;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.service.SessionCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
@@ -15,20 +15,31 @@ public class SessionEventListener {
     @Autowired
     private SessionCacheService sessionCacheService;
 
+    private boolean applicationShuttingDown = false; // Debug variable
+
+    @EventListener
+    public void onApplicationEvent(ContextClosedEvent closedEvent) {
+        applicationShuttingDown = true;
+
+        System.out.println("Application is shutting down. Performing cleanup and terminating channels...");
+
+    }
+
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         var simpSessionId = stompHeaderAccessor.getSessionId();
         System.out.println("Received a session connected event for new client with session id "+simpSessionId+"...");
-        sessionCacheService.newConnection(simpSessionId);
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        String simpSessionId = event.getSessionId();
-        sessionCacheService.markClientConnection(simpSessionId);
+        if(applicationShuttingDown) {
+            return;
+        }
 
-        System.out.println(ANSIConstants.RED_FG + "A client session with id(" + simpSessionId + ") has been marked." + ANSIConstants.RESET);
+        String simpSessionId = event.getSessionId();
+        sessionCacheService.uncacheClientConnection(simpSessionId);
     }
 }
