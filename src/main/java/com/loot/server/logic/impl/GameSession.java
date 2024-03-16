@@ -1,11 +1,11 @@
-package com.loot.server.socket.logic.impl;
+package com.loot.server.logic.impl;
 
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.GuessingCard;
 import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.cards.TargetedEffectCard;
 import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.socket.logic.IGameSession;
+import com.loot.server.logic.IGameSession;
 
 import java.util.*;
 
@@ -173,7 +173,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public void removePlayerFromRound(GamePlayer playerToRemove) {
+  synchronized public void removePlayerFromRound(GamePlayer playerToRemove) {
     var index = playersInRound.indexOf(playerToRemove);
     if (index < turnIndex) {
       turnIndex -= 1;
@@ -207,9 +207,11 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public Boolean changePlayerReadyStatus(GamePlayer player) {
+  synchronized public Boolean changePlayerReadyStatus(GamePlayer player) {
     if (!players.contains(player)) {
       // TODO throw some error here
+      System.out.println("Unable to find player(" + player + ") in list of => " + this.getPlayers());
+      return false;
     }
 
     GamePlayer playerToAlter = players.get(players.indexOf(player));
@@ -225,11 +227,15 @@ public class GameSession implements IGameSession {
       playerToAlter.setReady(false);
     }
 
+    return allPlayersReady();
+  }
+
+  public boolean allPlayersReady() {
     return numberOfReadyPlayers == players.size() && numberOfReadyPlayers >= minPlayers;
   }
 
   @Override
-  public Boolean addPlayer(GamePlayer player) {
+  synchronized public Boolean addPlayer(GamePlayer player) {
     if (numberOfPlayers >= maxPlayers) {
       return Boolean.FALSE;
     }
@@ -238,6 +244,19 @@ public class GameSession implements IGameSession {
     player.setReady(false);
     players.add(player);
     return Boolean.TRUE;
+  }
+
+  @Override
+  public void removePlayer(GamePlayer player) {
+    boolean success = players.remove(player);
+
+    if(success) {
+      numberOfPlayers -= 1;
+      numberOfReadyPlayers = 0;
+      for (var p : players) {
+        p.setReady(false);
+      }
+    }
   }
 
   @Override

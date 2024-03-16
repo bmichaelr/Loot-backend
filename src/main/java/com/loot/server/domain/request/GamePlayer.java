@@ -3,11 +3,12 @@ package com.loot.server.domain.request;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.loot.server.domain.dto.PlayerDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class GamePlayer {
 
     @JsonProperty
-    private Long id;
+    private UUID id;
 
     @JsonProperty
     private Boolean ready;
@@ -30,24 +31,6 @@ public class GamePlayer {
 
     @JsonProperty
     private String name;
-
-    @JsonIgnore
-    public GamePlayer(PlayerDto playerDto) {
-        this.id = playerDto.getId();
-        this.name = playerDto.getName();
-        this.ready = false;
-        this.isSafe = false;
-        this.loadedIn = false;
-    }
-
-    @JsonIgnore
-    public GamePlayer(PlayerDto playerDto, boolean ready) {
-        this.id = playerDto.getId();
-        this.name = playerDto.getName();
-        this.ready = ready;
-        this.isSafe = false;
-        this.loadedIn = false;
-    }
 
     @JsonIgnore
     @Override
@@ -82,5 +65,10 @@ public class GamePlayer {
                 .name(this.name)
                 .id(this.id)
                 .build();
+    }
+
+    @JsonIgnore
+    public Boolean missingParam() {
+        return this.getName() == null || this.getId() == null;
     }
 }

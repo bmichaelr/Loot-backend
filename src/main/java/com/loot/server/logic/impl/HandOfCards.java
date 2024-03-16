@@ -1,6 +1,6 @@
-package com.loot.server.socket.logic.impl;
+package com.loot.server.logic.impl;
 
-import com.loot.server.socket.logic.IHandOfCards;
+import com.loot.server.logic.IHandOfCards;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

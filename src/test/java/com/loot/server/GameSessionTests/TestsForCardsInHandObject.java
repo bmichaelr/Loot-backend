@@ -1,6 +1,6 @@
 package com.loot.server.GameSessionTests;
 
-import com.loot.server.socket.logic.impl.HandOfCards;
+import com.loot.server.logic.impl.HandOfCards;
 import org.junit.jupiter.api.Test;
 
 public class TestsForCardsInHandObject {

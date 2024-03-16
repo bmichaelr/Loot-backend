@@ -1,4 +1,4 @@
-package com.loot.server.domain.entity;
+package com.loot.server.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;

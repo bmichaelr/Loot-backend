@@ -1,4 +1,4 @@
-package com.loot.server.socket.logic;
+package com.loot.server.logic;
 
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.cards.Card;
@@ -61,4 +61,11 @@ public interface IGameSession {
      * @return true if the addition was successful, false if not
      */
     Boolean addPlayer(GamePlayer player);
+
+    /**
+     * Removes a player from the lobby. Normally this should only be called if the user disconnects from
+     * the lobby itself, not mid-game.
+     * @param player to remove from the lobby
+     */
+    void removePlayer(GamePlayer player);
 }

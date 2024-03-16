@@ -1,4 +1,4 @@
-package com.loot.server.socket.logic;
+package com.loot.server.logic;
 
 public interface ICardStack {
 

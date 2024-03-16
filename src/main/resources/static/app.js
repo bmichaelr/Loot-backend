@@ -113,7 +113,7 @@ class Player {
     constructor(name) {
         this.name = name;
         this.ready = false;
-        this.id = Math.floor(Math.random() * 1000); // Generate a random integer for the ID
+        this.id = crypto.randomUUID();
     }
 }
 
@@ -139,7 +139,7 @@ window.onload = function () {
 
     console.log('Player name:', playerName);
     player = new Player(playerName);
-    sock_connect(playerName);
+    sock_connect(player.id);
 };
 
 // <div className="player-item">
@@ -158,6 +158,16 @@ function handlePlayersInLobby(parsedData) {
         });
     } else {
         console.log('in the else for handling players in lobby')
+        lobby.players.forEach(existingPlayer => {
+           const inLobby = players.find(player => player.id === existingPlayer.id);
+           if(!inLobby) {
+               const playerToRemove = document.getElementById('player-'+existingPlayer.id);
+               if(playerToRemove) {
+                   playerToRemove.remove();
+               }
+           }
+        });
+
         players.forEach(player => {
            if(document.getElementById('player-'+player.id)) {
                console.log(player)
@@ -175,6 +185,7 @@ function handlePlayersInLobby(parsedData) {
         });
     }
 
+    lobby.players = players;
     if(allReady) {
         beginGameStartThings();
     } else if(gameBeginning) {
@@ -257,5 +268,8 @@ $(function () {
             document.getElementById("readyBtn").innerText = (ready) ? "Unready" : "Ready up";
             sock_readyUp(player, roomKey, ready);
         }
+    });
+    $("#leaveGame").click(() => {
+        sock_leaveGame(player, roomKey);
     });
 });
