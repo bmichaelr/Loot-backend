@@ -2,13 +2,17 @@ package com.loot.server.service.impl;
 
 import java.util.*;
 
+import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
+import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.ClientDisconnectionEvent;
+import com.loot.server.domain.response.TurnUpdateResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.logic.impl.GameSession;
+import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -82,11 +86,56 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public Boolean changePlayerReadyStatus(LobbyRequest request) {
+    public void changePlayerReadyStatus(LobbyRequest request) {
         String roomKey = request.getRoomKey();
         var player = request.getPlayer();
         var gameSession = getFromGameSessionMap(roomKey);
-        return gameSession.changePlayerReadyStatus(player);
+        gameSession.changePlayerReadyStatus(player);
+    }
+
+    @Override
+    public Boolean playerLoadedIn(String roomKey, GamePlayer player) {
+        var gameSession = getFromGameSessionMap(roomKey);
+        var roundStarted = gameSession.loadedIntoGame(player);
+        if(roundStarted) {
+            gameSession.startRound();
+        }
+        return roundStarted;
+    }
+
+    public List<Pair<UUID, Card>> getFirstCards(String roomKey) {
+        var gameSession = getFromGameSessionMap(roomKey);
+
+        List<Pair<UUID, Card>> cards = new ArrayList<>();
+        var dealtCardsMap = gameSession.getCardsInHand();
+        for(var player : dealtCardsMap.keySet()) {
+            cards.add(Pair.of(player.getId(), Card.fromPower(dealtCardsMap.get(player).getCardInHand())));
+        }
+        return cards;
+    }
+
+    @Override
+    public TurnUpdateResponse playCard(PlayCardRequest playCardRequest) {
+        var player = playCardRequest.getPlayer();
+        var card = playCardRequest.getCard();
+        var gameSession = getFromGameSessionMap(playCardRequest.getRoomKey());
+
+        String message = gameSession.playCard(player, card);
+        return TurnUpdateResponse.builder()
+                .message(message)
+                .gameOver(gameSession.isGameIsOver())
+                .roundOver(gameSession.isRoundIsOver())
+                .cards(gameSession.getPlayedCards())
+                .build();
+    }
+
+    @Override
+    public Pair<GamePlayer, Card> nextTurn(String roomKey) {
+        var gameSession = getFromGameSessionMap(roomKey);
+
+        var player = gameSession.nextTurn();
+        var card = gameSession.dealCard(player);
+        return Pair.of(player, card);
     }
 
     @Override

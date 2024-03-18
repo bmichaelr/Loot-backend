@@ -12,7 +12,7 @@ public interface IGameSession {
      * @param playerActing the player who is playing the card
      * @param card the card that has been played
      */
-    void playCard(GamePlayer playerActing, PlayedCard card);
+    String playCard(GamePlayer playerActing, PlayedCard card);
 
     /**
      * Called to start the round. This will instantiate all the data structures and reset any variables that

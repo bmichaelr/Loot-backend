@@ -1,10 +1,14 @@
 package com.loot.server;
 
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.ErrorResponse;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
+import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.messaging.handler.annotation.Header;
@@ -77,42 +81,56 @@ public class GameController {
     public void startGame(LobbyRequest request) {
         ResponseCode code = gameService.missingRequestParams(request, false);
         if(code != ResponseCode.SUCCESS) {
-            sendErrorMessage("/topic/error/" + request.getPlayer().getName(), code);
+            sendErrorMessage("/topic/error/" + request.getPlayer().getId(), code);
             return;
         }
 
         String roomKey = request.getRoomKey();
-        Boolean ready = gameService.changePlayerReadyStatus(request);
+        gameService.changePlayerReadyStatus(request);
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
-    @MessageMapping("/loadedIntoGame")
+    @MessageMapping("/game/loadedIn")
     public void loadedIntoGame(LobbyRequest request) {
-//        Pair<Boolean, String> validation = validLobbyRequest(request, false);
-//        if(!validation.getFirst()) {
-//            sendErrorMessage(request, validation.getSecond());
-//            return;
-//        }
-//
-//        String roomKey = request.getRoomKey();
-//        GamePlayer player = new GamePlayer(request.getPlayerDto());
-//        GameSession gameSession = gameSessions.get(roomKey);
-//
-//        //Card dealtCard = gameSession.dealInitialCard(player);
-//        //TurnResponse turnResponse = TurnResponse.builder().card(dealtCard).myTurn(false).build();
-//        //messagingTemplate.convertAndSend("/topic/gameplay/"+player.getId()+"/"+roomKey, turnResponse);
+        ResponseCode code = gameService.missingRequestParams(request, false);
+        if(code != ResponseCode.SUCCESS) {
+            sendErrorMessage("/topic/error/" + request.getPlayer().getId(), code);
+            return;
+        }
+
+        String roomKey = request.getRoomKey();
+        var player = request.getPlayer();
+        Boolean roundHasBegun = gameService.playerLoadedIn(roomKey, player);
+        if (roundHasBegun) {
+             var dealtCards = gameService.getFirstCards(roomKey);
+             for(Pair<UUID, Card> pair : dealtCards) {
+                 messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft(), pair.getRight());
+             }
+
+             // Send the message here?
+            messagingTemplate.convertAndSend("/topic/game/update/" + roomKey, "_ is starting the game");
+        }
     }
 
-//    @MessageMapping("/playCard")
-//    public void playCard(PlayCardRequest playCardRequest) {
-//        // TODO : add in error checking
-//
-//        GamePlayer player = new GamePlayer(playCardRequest.getPlayer());
-//        GameSession gameSession = gameSessions.get(playCardRequest.getRoomKey());
-//        PlayedCard cardPlayed = playCardRequest.getCard();
-//        gameSession.playCard(player, cardPlayed);
-//    }
+    @MessageMapping("/game/playCard")
+    public void playCard(PlayCardRequest playCardRequest) {
+        ResponseCode code = gameService.missingRequestParams(playCardRequest, false);
+        if(code != ResponseCode.SUCCESS) {
+            sendErrorMessage("/topic/error/" + playCardRequest.getPlayer().getId(), code);
+            return;
+        }
+
+        String roomKey = playCardRequest.getRoomKey();
+        var response = gameService.playCard(playCardRequest);
+        messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);
+
+        // send new ?
+        if(!response.getGameOver() || !response.getRoundOver()) {
+            Pair<GamePlayer, Card> pair = gameService.nextTurn(roomKey);
+            messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft().getId(), pair.getRight());
+        }
+    }
 
     private void sendErrorMessage(String destination, ResponseCode responseCode) {
         String error = switch (responseCode) {

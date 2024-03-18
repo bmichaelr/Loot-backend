@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GameSession implements IGameSession {
 
-  public static final String ANSI_CYAN = "\u001B[36m";
+  public static final String ANSI_CYAN  = "\u001B[36m";
   public static final String ANSI_RESET = "\u001B[0m";
 
   private List<GamePlayer> players;                           // Store the list of all players in the game
@@ -47,7 +47,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public void playCard(GamePlayer playerActing, PlayedCard card) {
+  public String playCard(GamePlayer playerActing, PlayedCard card) {
     playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(false);
 
     // Play the card
@@ -65,7 +65,10 @@ public class GameSession implements IGameSession {
     } else {
       switch (card.getPower()) {
         // Wishing Ring action
-        case 4 -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        case 4 -> {
+          playersInRound.get(playersInRound.indexOf(playerActing)).setStatus("Safe (Wishing Ring)");
+          playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        }
         // Loot action
         case 8 -> removePlayerFromRound(playerActing);
       }
@@ -76,6 +79,8 @@ public class GameSession implements IGameSession {
       roundIsOver = true;
       determineWinner();
     }
+
+    return String.format("%s played %s", playerActing.getName(), Card.fromPower(powerOfPlayedCard).getName());
   }
 
   private void determineWinner() {
@@ -178,6 +183,7 @@ public class GameSession implements IGameSession {
     if (index < turnIndex) {
       turnIndex -= 1;
     }
+    playersInRound.get(index).setStatus("Out");
     playersInRound.remove(playerToRemove);
     if (cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
       var card = cardsInHand.get(playerToRemove).discardHand();
@@ -260,7 +266,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public Boolean loadedIntoGame(GamePlayer player) {
+  synchronized public Boolean loadedIntoGame(GamePlayer player) {
     if (!players.contains(player)) {
       // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
       return false;

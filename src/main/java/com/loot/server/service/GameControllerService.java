@@ -1,9 +1,17 @@
 package com.loot.server.service;
 
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
+import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
+import com.loot.server.domain.response.TurnUpdateResponse;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
 import com.loot.server.logic.impl.GameSession;
+import org.modelmapper.internal.Pair;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface GameControllerService {
 
@@ -21,7 +29,7 @@ public interface GameControllerService {
      * @param request lobby request containing player information and room key
      * @return flag indicating if all players are ready or not
      */
-    Boolean changePlayerReadyStatus(LobbyRequest request);
+    void changePlayerReadyStatus(LobbyRequest request);
 
     /**
      * Requested by the client when they wish to leave a lobby.
@@ -44,6 +52,14 @@ public interface GameControllerService {
      * @return lobby response object containing list of players and if they are all ready
      */
     LobbyResponse getInformationForLobby(String roomKey);
+
+    List<Pair<UUID, Card>> getFirstCards(String roomKey);
+
+    TurnUpdateResponse playCard(PlayCardRequest playCardRequest);
+
+    Pair<GamePlayer, Card> nextTurn(String roomKey);
+
+    Boolean playerLoadedIn(String roomKey, GamePlayer player);
 
     /**
      * Update a lobby when a client has disconnected and won't be reconnecting to the server

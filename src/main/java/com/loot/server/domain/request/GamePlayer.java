@@ -24,6 +24,9 @@ public class GamePlayer {
     private Boolean ready;
 
     @JsonProperty
+    private String status;
+
+    @JsonProperty
     private Boolean loadedIn;
 
     @JsonProperty
