@@ -5,6 +5,7 @@ import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.ErrorResponse;
 import com.loot.server.domain.request.LobbyRequest;
+import com.loot.server.domain.response.GameStartResponse;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
@@ -109,7 +110,13 @@ public class GameController {
              }
 
              // Send the message here?
-            messagingTemplate.convertAndSend("/topic/game/update/" + roomKey, "_ is starting the game");
+            Pair<GamePlayer, Card> pair = gameService.nextTurn(roomKey);
+            GameStartResponse startResponse = GameStartResponse.builder()
+                    .message(pair.getLeft().getName() + " is starting the round.")
+                    .startingPlayer(pair.getLeft().getId())
+                    .build();
+            messagingTemplate.convertAndSend("/topic/game/update/" + roomKey, startResponse);
+            messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft().getId(), pair.getRight());
         }
     }
 
@@ -126,7 +133,7 @@ public class GameController {
         messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);
 
         // send new ?
-        if(!response.getGameOver() || !response.getRoundOver()) {
+        if(!response.getGameOver() && !response.getRoundOver()) {
             Pair<GamePlayer, Card> pair = gameService.nextTurn(roomKey);
             messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft().getId(), pair.getRight());
         }

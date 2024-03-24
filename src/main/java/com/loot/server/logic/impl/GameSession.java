@@ -201,6 +201,10 @@ public class GameSession implements IGameSession {
     return player;
   }
 
+  public GamePlayer nextPlayersTurn() {
+    return playersInRound.get(turnIndex);
+  }
+
   @Override
   public Card dealCard(GamePlayer player) {
     if (cardStack.deckIsEmpty()) {

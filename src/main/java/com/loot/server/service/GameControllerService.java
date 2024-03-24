@@ -59,6 +59,8 @@ public interface GameControllerService {
 
     Pair<GamePlayer, Card> nextTurn(String roomKey);
 
+    GamePlayer getNextPlayersTurn(String roomKey);
+
     Boolean playerLoadedIn(String roomKey, GamePlayer player);
 
     /**

@@ -127,11 +127,16 @@ class Lobby {
     }
 }
 
+function getPlayer(name)  {
+    return lobby.players.find(player => player.name === name);
+}
+
 let lobby;
 let initialLoad = true;
 let ready = false;
 let allReady = false;
 let gameBeginning = false;
+var gameClearedToStart = false;
 
 window.onload = function () {
     const urlParams = new URLSearchParams(window.location.search);
@@ -187,8 +192,10 @@ function handlePlayersInLobby(parsedData) {
 
     lobby.players = players;
     if(allReady) {
+        gameClearedToStart = true;
         beginGameStartThings();
     } else if(gameBeginning) {
+        gameClearedToStart = false;
         cancelGameBeginningCountdown();
     }
 }
@@ -230,6 +237,14 @@ function cancelGameBeginningCountdown() {
     gameCounter.innerText = "Game starting in 3...";
 }
 
+async function displayGameMessage(msg) {
+    const messageDiv = document.getElementById("gameMessages");
+    messageDiv.innerText = msg
+
+    await sleep(4000)
+    messageDiv.innerText = "";
+}
+
 async function beginGameStartThings() {
     allReady = true;
     gameBeginning = true;
@@ -243,7 +258,43 @@ async function beginGameStartThings() {
     gameCounter.innerText = "Game starting in 1...";
     await sleep(1000);
     gameCounter.innerText = "Game starting now!";
+    if(gameClearedToStart) {
+        setupRound();
+        const playButton = document.getElementById("playCard");
+        playButton.disabled = true;
+        playButton.style.backgroundColor = "gray";
+        const lobbyDiv = document.getElementById("lobby-list")
+        lobbyDiv.style.display = "none"
+        const gameDiv = document.getElementById("game")
+        gameDiv.style.display = "contents"
+    }
     // Josh, put the new html page activation here and set the current one to none
+}
+
+function setupRound() {
+    document.querySelector("tbody").innerHTML = lobby.players.map(player => createPlayerRow(player, null)).join("");
+    sock_subscribeToGameChannels(roomKey, player);
+}
+
+function createPlayerRow(player, cards) {
+    let handContent;
+    if(cards) {
+        const handCards = cards.map((power, index) => {
+                `<div class="hand-card" style="z-index: ${index}"><div class="card-number">${power}</div></div>`
+            }
+        );
+        handContent = handCards.length ? handCards.join("") : "None";
+    } else {
+        handContent = "None";
+    }
+
+    return `
+        <tr>
+          <td>${player.name}</td>
+          <td>${player.status ? player.status : "Waiting"}</td>
+          <td><div class="hand" id="${player.id}">${handContent}</div></td>
+        </tr>
+      `;
 }
 
 function sleep(ms = 0) {
@@ -272,4 +323,31 @@ $(function () {
     $("#leaveGame").click(() => {
         sock_leaveGame(player, roomKey);
     });
+    $("#playCard").click(() => {
+        let cardNumber = parseInt(prompt("Enter the card to play:"));
+        switch (cardNumber) {
+            case 1:
+                let guessedCard = prompt("Enter card number to guess:")
+                let playerName = prompt("Enter in player name to guess on:")
+                playGuessingCard(cardNumber, guessedCard, playerName);
+                break;
+            case 2:
+            case 3:
+            case 5:
+            case 6:
+                let player = prompt("Enter player name to play on:")
+                playTargetedCard(player, cardNumber);
+                break;
+            case 4:
+            case 7:
+            case 8:
+                playSingleCard(cardNumber);
+                break;
+            default:
+                console.log("Invalid card number");
+        }
+        const btn = document.getElementById("playCard");
+        btn.disabled = true;
+        btn.style.backgroundColor = "gray"
+    })
 });

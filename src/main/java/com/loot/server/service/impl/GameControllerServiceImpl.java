@@ -139,6 +139,12 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
+    public GamePlayer getNextPlayersTurn(String roomKey) {
+        var gameSession = getFromGameSessionMap(roomKey);
+        return gameSession.nextPlayersTurn();
+    }
+
+    @Override
     public void removePlayerFromGameSession(LobbyRequest lobbyRequest, String sessionId) {
         var player = lobbyRequest.getPlayer();
         var gameSession = getFromGameSessionMap(lobbyRequest.getRoomKey());
