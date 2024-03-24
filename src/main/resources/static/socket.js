@@ -1,5 +1,5 @@
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://localhost:8080/game-websocket'
+    brokerURL: 'ws://ciloot.lol:8080/game-websocket'
 });
 
 stompClient.onWebSocketError = (error) => {
