@@ -33,6 +33,18 @@ public class GameController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
+    @MessageMapping("/loadAvailableServers")
+    public void getAvailableServers(GamePlayer playerRequesting) {
+        System.out.println("Received call for server endpoint: " + playerRequesting);
+        if(playerRequesting.getId() == null) {
+            return;
+        }
+
+        var clientId = playerRequesting.getId();
+        var response = gameService.getListOfServers();
+        messagingTemplate.convertAndSend("/topic/matchmaking/servers/" + clientId, response);
+    }
+
     @MessageMapping("/createGame")
     public void createGame(LobbyRequest request, @Header("simpSessionId") String sessionId) {
         ResponseCode code = gameService.missingRequestParams(request, true);

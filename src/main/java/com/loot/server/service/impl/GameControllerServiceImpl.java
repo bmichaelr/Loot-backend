@@ -8,6 +8,7 @@ import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.ClientDisconnectionEvent;
+import com.loot.server.domain.response.ServerData;
 import com.loot.server.domain.response.TurnUpdateResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
@@ -49,6 +50,10 @@ public class GameControllerServiceImpl implements GameControllerService {
         return gameSessionMap.get(key);
     }
 
+    synchronized private List<GameSession> getAllGameSessions() {
+        return List.copyOf(gameSessionMap.values());
+    }
+
     synchronized private void removeFromGameSessionMap(String key) {
         gameSessionMap.remove(key);
     }
@@ -56,9 +61,10 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public String createNewGameSession(LobbyRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
+        String roomName = request.getRoomKey();
         var player = request.getPlayer();
 
-        addToGameSessionMap(roomKey, new GameSession(roomKey));
+        addToGameSessionMap(roomKey, new GameSession(roomKey, roomName));
         var gameSession = getFromGameSessionMap(roomKey);
         gameSession.addPlayer(player);
 
@@ -251,6 +257,34 @@ public class GameControllerServiceImpl implements GameControllerService {
             }
         }
         return ResponseCode.SUCCESS;
+    }
+
+    @Override
+    public List<ServerData> getListOfServers() {
+        final List<ServerData> currentServers = new ArrayList<>();
+        getAllGameSessions().forEach(gameSession -> {
+            String status;
+            int maxPlayers = gameSession.getMaxPlayers(), actualPlayers = gameSession.getNumberOfPlayers();
+            if(gameSession.isGameInProgress()) {
+                status = "In Progress";
+            } else if(actualPlayers >= maxPlayers) {
+                status = "Full";
+            } else {
+                status = "Available";
+            }
+
+            currentServers.add(
+                    ServerData.builder()
+                            .name(gameSession.getName())
+                            .key(gameSession.getRoomKey())
+                            .maximumPlayers(maxPlayers)
+                            .numberOfPlayers(actualPlayers)
+                            .status(status)
+                            .build()
+            );
+        });
+
+        return currentServers;
     }
 
     private void printAllRoomKeys() {

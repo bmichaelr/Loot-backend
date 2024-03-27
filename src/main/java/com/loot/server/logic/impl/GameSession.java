@@ -28,6 +28,7 @@ public class GameSession implements IGameSession {
   private Map<GamePlayer, Integer> numberOfWins;
 
   private String roomKey;                                     // The room key that identifies the game session
+  private String name;                                        // The name of the room
   private int maxPlayers = 4;                                 // Maximum players allowed in the lobby
   private final int minPlayers = 2;                           // Minimum amount of players (CANT BE CHANGED)
   private int numberOfPlayers = 0;                            // Keep track of the amount of players
@@ -37,11 +38,13 @@ public class GameSession implements IGameSession {
   private int numberOfPlayersLoadedIn = 0;                    // This is used for synchronization across devices
   private boolean gameIsOver = false;                         // Flag indicating the game is over
   private boolean roundIsOver = false;
+  private boolean gameInProgress = false;
 
   private CardStack cardStack;                                // The stack of card used in the round
 
-  public GameSession(String roomKey) {
+  public GameSession(String roomKey, String name) {
     this.roomKey = roomKey;
+    this.name = name;
     players = new ArrayList<>();
     numberOfWins = new HashMap<>();
   }
@@ -161,8 +164,11 @@ public class GameSession implements IGameSession {
 
   @Override
   public void startRound() {
+    if(!gameInProgress) {
+      gameInProgress = true;
+    }
+
     roundIsOver = false;
-    gameIsOver = false;
     cardStack = new CardStack();
     cardStack.shuffle();
     playersInRound = new ArrayList<>(players.size());

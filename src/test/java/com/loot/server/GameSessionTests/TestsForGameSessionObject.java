@@ -12,7 +12,7 @@ public class TestsForGameSessionObject {
 
     @Test
     public void testThatAddingPlayersWorks() {
-        GameSession gameSession = new GameSession("ABC123");
+        GameSession gameSession = new GameSession("ABC123", "Boogers");
         List<GamePlayer> playersToAdd = GameSessionTestsUtil.createPlayers();
         playersToAdd.forEach(gameSession::addPlayer);
 

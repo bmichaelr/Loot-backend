@@ -303,8 +303,9 @@ function sleep(ms = 0) {
 
 $(function () {
     $("#createGameBtn").click(() => {
-        if (connected && player) {
-            sock_createGame(player)
+        let name = prompt("Enter game room name:");
+        if (connected && player && name) {
+            sock_createGame(player, name);
         }
     });
     $("#joinGameBtn").click(() => {

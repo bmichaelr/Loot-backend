@@ -36,13 +36,13 @@ public class GameSessionTestsUtil {
     }
 
     public static GameSession createGameRoom(String roomKey, int numberOfPlayers) {
-        GameSession gameSession = new GameSession(roomKey);
+        GameSession gameSession = new GameSession(roomKey, "Some room Name");
         addPlayersToGameRoom(gameSession, numberOfPlayers);
         return gameSession;
     }
 
     public static GameSession createReadyLobby(String roomKey) {
-        GameSession gameSession = new GameSession(roomKey);
+        GameSession gameSession = new GameSession(roomKey, "Room Name");
         createPlayers().forEach(gameSession::addPlayer);
         List<GamePlayer> playerListCopy = new ArrayList<>(createPlayers());
         playerListCopy.forEach(gamePlayer -> {

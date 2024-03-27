@@ -5,9 +5,11 @@ import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.LobbyRequest;
 import com.loot.server.domain.request.PlayCardRequest;
 import com.loot.server.domain.response.LobbyResponse;
+import com.loot.server.domain.response.ServerData;
 import com.loot.server.domain.response.TurnUpdateResponse;
 import com.loot.server.service.impl.GameControllerServiceImpl.ResponseCode;
 import com.loot.server.logic.impl.GameSession;
+import org.apache.catalina.Server;
 import org.modelmapper.internal.Pair;
 
 import java.util.List;
@@ -75,6 +77,12 @@ public interface GameControllerService {
      * @param gameSession the game session to do a health check on
      */
     void validateGameSession(GameSession gameSession);
+
+    /**
+     * Return a list of information about all the current servers that are available
+     * @return list of server data
+     */
+    List<ServerData> getListOfServers();
 
     /**
      * Randomly generate a new room key from a set of allowed characters
