@@ -8,15 +8,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse {
+public class ServerData {
 
     @JsonProperty
-    public String details;
+    private String name;
 
     @JsonProperty
-    private int code;
+    private String key;
+
+    @JsonProperty
+    private Integer maximumPlayers;
+
+    @JsonProperty
+    private Integer numberOfPlayers;
+
+    @JsonProperty
+    private String status;
+
 }

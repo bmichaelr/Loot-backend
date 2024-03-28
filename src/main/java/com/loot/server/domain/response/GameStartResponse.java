@@ -7,16 +7,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+import java.util.UUID;
+
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse {
+public class GameStartResponse {
 
     @JsonProperty
-    public String details;
+    private String message;
 
     @JsonProperty
-    private int code;
+    private UUID startingPlayer;
 }

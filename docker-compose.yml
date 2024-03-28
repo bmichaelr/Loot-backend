@@ -1,21 +1,11 @@
 version: '3.3'
 
 services:
-  db:
-    image: mysql
-    restart: always
-
-    environment:
-      MYSQL_DATABASE: 'db'
-      MYSQL_ROOT_PASSWORD: 'password'
-
-    ports:
-      - '3306:3306'
-
-    expose:
-      - '3306'
-
+  websocket:
+    image: openjdk:20-ea-1-jdk
+    container_name: loot-websocket
     volumes:
-      - my-db:/var/lib/mysql
-volumes:
-  my-db:
+      - ./target/c350-loot.jar:/app/java-application.jar
+    ports:
+      - "8080:8080"
+    command: [ "java", "-jar", "java-application.jar" ]

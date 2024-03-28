@@ -50,3 +50,70 @@ button {
 .ready-status {
     font-size: 20px;
 }
+
+/* Container for the deck of cards to make it centered*/
+.card-deck-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+/* Container for the card stack */
+.card-stack {
+    width: 150px;
+    height: 200px;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin-bottom: 50px;
+    text-align: center;
+    line-height: 200px;
+    font-weight: bold;
+}
+
+/* Table for players */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Table headers */
+th {
+    text-align: left;
+    padding: 10px;
+    border: 1px solid lightgray;
+}
+
+/* Table cells (players) */
+td {
+    padding: 10px;
+    border: 1px solid lightgray;
+}
+
+/* Player name */
+.player-name {
+    font-weight: bold;
+}
+
+/* Container for cards in hand */
+.hand {
+    display: flex;
+    overflow: hidden; /* Hide overflowing cards */
+}
+
+/* Individual card in hand */
+.hand-card {
+    width: 75px;
+    height: 100px;
+    border: 1px solid black; /* Solid border for better visibility */
+    border-radius: 5px;
+    background: gray;
+    margin-right: -50px; /* Overlap cards slightly */
+    position: relative; /* Allow positioning of number */
+}
+
+/* Number on the card */
+.hand-card .card-number {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    font-weight: bold;
+}

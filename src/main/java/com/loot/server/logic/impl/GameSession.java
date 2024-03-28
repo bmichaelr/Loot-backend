@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GameSession implements IGameSession {
 
-  public static final String ANSI_CYAN = "\u001B[36m";
+  public static final String ANSI_CYAN  = "\u001B[36m";
   public static final String ANSI_RESET = "\u001B[0m";
 
   private List<GamePlayer> players;                           // Store the list of all players in the game
@@ -28,6 +28,7 @@ public class GameSession implements IGameSession {
   private Map<GamePlayer, Integer> numberOfWins;
 
   private String roomKey;                                     // The room key that identifies the game session
+  private String name;                                        // The name of the room
   private int maxPlayers = 4;                                 // Maximum players allowed in the lobby
   private final int minPlayers = 2;                           // Minimum amount of players (CANT BE CHANGED)
   private int numberOfPlayers = 0;                            // Keep track of the amount of players
@@ -37,17 +38,19 @@ public class GameSession implements IGameSession {
   private int numberOfPlayersLoadedIn = 0;                    // This is used for synchronization across devices
   private boolean gameIsOver = false;                         // Flag indicating the game is over
   private boolean roundIsOver = false;
+  private boolean gameInProgress = false;
 
   private CardStack cardStack;                                // The stack of card used in the round
 
-  public GameSession(String roomKey) {
+  public GameSession(String roomKey, String name) {
     this.roomKey = roomKey;
+    this.name = name;
     players = new ArrayList<>();
     numberOfWins = new HashMap<>();
   }
 
   @Override
-  public void playCard(GamePlayer playerActing, PlayedCard card) {
+  public String playCard(GamePlayer playerActing, PlayedCard card) {
     playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(false);
 
     // Play the card
@@ -65,7 +68,10 @@ public class GameSession implements IGameSession {
     } else {
       switch (card.getPower()) {
         // Wishing Ring action
-        case 4 -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        case 4 -> {
+          playersInRound.get(playersInRound.indexOf(playerActing)).setStatus("Safe (Wishing Ring)");
+          playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        }
         // Loot action
         case 8 -> removePlayerFromRound(playerActing);
       }
@@ -76,6 +82,8 @@ public class GameSession implements IGameSession {
       roundIsOver = true;
       determineWinner();
     }
+
+    return String.format("%s played %s", playerActing.getName(), Card.fromPower(powerOfPlayedCard).getName());
   }
 
   private void determineWinner() {
@@ -156,8 +164,11 @@ public class GameSession implements IGameSession {
 
   @Override
   public void startRound() {
+    if(!gameInProgress) {
+      gameInProgress = true;
+    }
+
     roundIsOver = false;
-    gameIsOver = false;
     cardStack = new CardStack();
     cardStack.shuffle();
     playersInRound = new ArrayList<>(players.size());
@@ -178,6 +189,7 @@ public class GameSession implements IGameSession {
     if (index < turnIndex) {
       turnIndex -= 1;
     }
+    playersInRound.get(index).setStatus("Out");
     playersInRound.remove(playerToRemove);
     if (cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
       var card = cardsInHand.get(playerToRemove).discardHand();
@@ -195,6 +207,10 @@ public class GameSession implements IGameSession {
     return player;
   }
 
+  public GamePlayer nextPlayersTurn() {
+    return playersInRound.get(turnIndex);
+  }
+
   @Override
   public Card dealCard(GamePlayer player) {
     if (cardStack.deckIsEmpty()) {
@@ -208,12 +224,6 @@ public class GameSession implements IGameSession {
 
   @Override
   synchronized public Boolean changePlayerReadyStatus(GamePlayer player) {
-    if (!players.contains(player)) {
-      // TODO throw some error here
-      System.out.println("Unable to find player(" + player + ") in list of => " + this.getPlayers());
-      return false;
-    }
-
     GamePlayer playerToAlter = players.get(players.indexOf(player));
 
     boolean wasReady = playerToAlter.getReady();
@@ -235,19 +245,14 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  synchronized public Boolean addPlayer(GamePlayer player) {
-    if (numberOfPlayers >= maxPlayers) {
-      return Boolean.FALSE;
-    }
-
+  synchronized public void addPlayer(GamePlayer player) {
     numberOfPlayers += 1;
     player.setReady(false);
     players.add(player);
-    return Boolean.TRUE;
   }
 
   @Override
-  public void removePlayer(GamePlayer player) {
+  synchronized public void removePlayer(GamePlayer player) {
     boolean success = players.remove(player);
 
     if(success) {
@@ -260,12 +265,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  public Boolean loadedIntoGame(GamePlayer player) {
-    if (!players.contains(player)) {
-      // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
-      return false;
-    }
-
+  synchronized public Boolean loadedIntoGame(GamePlayer player) {
     players.get(players.indexOf(player)).setLoadedIn(true);
     numberOfPlayersLoadedIn += 1;
     return numberOfPlayersLoadedIn == players.size();

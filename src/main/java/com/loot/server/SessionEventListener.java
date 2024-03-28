@@ -22,7 +22,6 @@ public class SessionEventListener {
         applicationShuttingDown = true;
 
         System.out.println("Application is shutting down. Performing cleanup and terminating channels...");
-
     }
 
     @EventListener

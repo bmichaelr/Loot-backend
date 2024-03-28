@@ -1,18 +1,26 @@
 package com.loot.server.GameSessionTests;
 
+import com.loot.server.domain.request.GameInteractionRequest;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.logic.impl.GameSession;
+import com.loot.server.service.ErrorCheckingService;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@SpringBootTest
 public class TestsForGameSessionObject {
+
+    @Autowired
+    private ErrorCheckingService errorCheckingService;
 
     @Test
     public void testThatAddingPlayersWorks() {
-        GameSession gameSession = new GameSession("ABC123");
+        GameSession gameSession = new GameSession("ABC123", "Boogers");
         List<GamePlayer> playersToAdd = GameSessionTestsUtil.createPlayers();
         playersToAdd.forEach(gameSession::addPlayer);
 
@@ -20,11 +28,6 @@ public class TestsForGameSessionObject {
         for(var player : playersToAdd) {
             assert gameSession.getPlayers().contains(player);
         }
-
-        // Now the lobby is full, try to add another player and it should fail
-        GamePlayer gamePlayer = GamePlayer.builder().name("Player 5").id(UUID.randomUUID()).build();
-        gameSession.addPlayer(gamePlayer);
-        assert !(gameSession.getPlayers().contains(gamePlayer));
     }
 
     @Test
