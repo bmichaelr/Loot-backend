@@ -224,12 +224,6 @@ public class GameSession implements IGameSession {
 
   @Override
   synchronized public Boolean changePlayerReadyStatus(GamePlayer player) {
-    if (!players.contains(player)) {
-      // TODO throw some error here
-      System.out.println("Unable to find player(" + player + ") in list of => " + this.getPlayers());
-      return false;
-    }
-
     GamePlayer playerToAlter = players.get(players.indexOf(player));
 
     boolean wasReady = playerToAlter.getReady();
@@ -251,19 +245,14 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  synchronized public Boolean addPlayer(GamePlayer player) {
-    if (numberOfPlayers >= maxPlayers) {
-      return Boolean.FALSE;
-    }
-
+  synchronized public void addPlayer(GamePlayer player) {
     numberOfPlayers += 1;
     player.setReady(false);
     players.add(player);
-    return Boolean.TRUE;
   }
 
   @Override
-  public void removePlayer(GamePlayer player) {
+  synchronized public void removePlayer(GamePlayer player) {
     boolean success = players.remove(player);
 
     if(success) {
@@ -277,11 +266,6 @@ public class GameSession implements IGameSession {
 
   @Override
   synchronized public Boolean loadedIntoGame(GamePlayer player) {
-    if (!players.contains(player)) {
-      // TODO : these types of safe checking may or may not be needed depending on how well we trust the frontend
-      return false;
-    }
-
     players.get(players.indexOf(player)).setLoadedIn(true);
     numberOfPlayersLoadedIn += 1;
     return numberOfPlayersLoadedIn == players.size();

@@ -40,7 +40,7 @@ function sock_createGame(player, name) {
     console.log("Data to send: ", JSON.stringify({playerDto: player}))
     stompClient.publish({
         destination: "/app/createGame",
-        body: JSON.stringify({ player: player, roomKey: name })
+        body: JSON.stringify({ player: player, roomName: name })
     });
 }
 

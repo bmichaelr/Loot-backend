@@ -2,6 +2,7 @@ package com.loot.server.service.impl;
 
 import com.loot.server.ClientDisconnectionEvent;
 import com.loot.server.service.SessionCacheService;
+import lombok.Data;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
@@ -54,6 +55,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
         System.out.println("}");
     }
 
+    @Data
     private static class ConcurrentPair<T, S> {
         volatile private T key;
         volatile private S value;
@@ -65,22 +67,6 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
         public static <T, S> ConcurrentPair<T, S> of(T key, S value) {
             return new ConcurrentPair<>(key, value);
-        }
-
-        synchronized public T getKey() {
-            return this.key;
-        }
-
-        synchronized public S getValue() {
-            return this.value;
-        }
-
-        synchronized void setKey(T key) {
-            this.key = key;
-        }
-
-        synchronized void setValue(S value) {
-            this.value = value;
         }
 
         @Override

@@ -3,9 +3,7 @@ package com.loot.server.service.impl;
 import java.util.*;
 
 import com.loot.server.domain.cards.Card;
-import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.domain.request.LobbyRequest;
-import com.loot.server.domain.request.PlayCardRequest;
+import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.LobbyResponse;
 import com.loot.server.ClientDisconnectionEvent;
 import com.loot.server.domain.response.ServerData;
@@ -34,14 +32,6 @@ public class GameControllerServiceImpl implements GameControllerService {
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
 
-    public enum ResponseCode {
-        SUCCESS,
-        LOBBY_FULL,
-        INVALID_KEY,
-        MISSING_ROOM_KEY,
-        MISSING_PLAYER_PARAMS
-    }
-
     synchronized private void addToGameSessionMap(String key, GameSession gameSession) {
         gameSessionMap.put(key, gameSession);
     }
@@ -59,9 +49,9 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public String createNewGameSession(LobbyRequest request, String sessionId) {
+    public String createNewGameSession(CreateGameRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
-        String roomName = request.getRoomKey();
+        String roomName = request.getRoomName();
         var player = request.getPlayer();
 
         addToGameSessionMap(roomKey, new GameSession(roomKey, roomName));
@@ -73,26 +63,33 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public ResponseCode joinCurrentGameSession(LobbyRequest request, String sessionId) {
-        ResponseCode responseCode;
-        if((responseCode = missingRequestParams(request, false)) != ResponseCode.SUCCESS) {
-            return responseCode;
-        }
-
+    public void joinCurrentGameSession(JoinGameRequest request, String sessionId) {
         String roomKey = request.getRoomKey();
-        var gameSession = getFromGameSessionMap(roomKey);
-        var player = request.getPlayer();
-        var additionStatus = gameSession.addPlayer(player);
-        if(additionStatus.equals(Boolean.FALSE)) {
-            return ResponseCode.LOBBY_FULL;
-        }
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        GamePlayer player = request.getPlayer();
+        gameSession.addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
-        return ResponseCode.SUCCESS;
     }
 
     @Override
-    public void changePlayerReadyStatus(LobbyRequest request) {
+    public Boolean gameAbleToBeJoined(String roomKey) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        if(gameSession == null) {
+            return Boolean.FALSE;
+        }
+
+        if(gameSession.getNumberOfPlayers() == gameSession.getMaxPlayers()) {
+            return Boolean.FALSE;
+        }
+        if(gameSession.isGameInProgress()) {
+            return Boolean.FALSE;
+        }
+        return Boolean.TRUE;
+    }
+
+    @Override
+    public void changePlayerReadyStatus(GameInteractionRequest request) {
         String roomKey = request.getRoomKey();
         var player = request.getPlayer();
         var gameSession = getFromGameSessionMap(roomKey);
@@ -151,9 +148,9 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public void removePlayerFromGameSession(LobbyRequest lobbyRequest, String sessionId) {
-        var player = lobbyRequest.getPlayer();
-        var gameSession = getFromGameSessionMap(lobbyRequest.getRoomKey());
+    public void removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId) {
+        var player = gameInteractionRequest.getPlayer();
+        var gameSession = getFromGameSessionMap(gameInteractionRequest.getRoomKey());
         gameSession.removePlayer(player);
         sessionCacheService.uncacheClientConnection(sessionId);
         validateGameSession(gameSession);
@@ -215,7 +212,7 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public String generateRoomKey() {
         String allowedCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
-        final int keyLength = 8;
+        final int keyLength = 5;
         final int length = allowedCharacters.length() - 1;
 
         StringBuilder key = new StringBuilder();
@@ -234,29 +231,7 @@ public class GameControllerServiceImpl implements GameControllerService {
             roomKey = generateRoomKey();
         } while(inUseRoomKeys.contains(roomKey));
         inUseRoomKeys.add(roomKey);
-        // For debugging purposes
-        printAllRoomKeys();
         return roomKey;
-    }
-
-    @Override
-    public ResponseCode missingRequestParams(Object data, Boolean createGame) {
-        if(data instanceof LobbyRequest lobbyRequest) {
-            if(!createGame && lobbyRequest.getRoomKey() == null) {
-                return ResponseCode.MISSING_ROOM_KEY;
-            }
-            if(lobbyRequest.getPlayer() == null || lobbyRequest.getPlayer().missingParam()) {
-                return ResponseCode.MISSING_PLAYER_PARAMS;
-            }
-
-            if(!createGame) {
-                String roomKey = lobbyRequest.getRoomKey();;
-                if(gameSessionMap.get(roomKey) == null) {
-                    return ResponseCode.INVALID_KEY;
-                }
-            }
-        }
-        return ResponseCode.SUCCESS;
     }
 
     @Override
@@ -272,7 +247,6 @@ public class GameControllerServiceImpl implements GameControllerService {
             } else {
                 status = "Available";
             }
-
             currentServers.add(
                     ServerData.builder()
                             .name(gameSession.getName())
@@ -286,17 +260,4 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         return currentServers;
     }
-
-    private void printAllRoomKeys() {
-        System.out.print("Current room keys: [");
-        int index = 0;
-        for(String key : inUseRoomKeys) {
-            System.out.print(key);
-            if(index++ != inUseRoomKeys.size() - 1){
-                System.out.print(", ");
-            }
-        }
-        System.out.println("]");
-    }
-    
 }

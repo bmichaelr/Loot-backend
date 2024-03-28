@@ -1,4 +1,4 @@
-package com.loot.server.domain.response;
+package com.loot.server.domain.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,11 +12,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ErrorResponse {
+public class CreateGameRequest {
 
-    @JsonProperty
-    public String details;
+  @JsonProperty
+  private String roomName;
 
-    @JsonProperty
-    private int code;
+  @JsonProperty
+  private GamePlayer player;
+
 }

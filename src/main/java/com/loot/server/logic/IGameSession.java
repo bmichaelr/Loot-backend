@@ -56,11 +56,10 @@ public interface IGameSession {
     Boolean changePlayerReadyStatus(GamePlayer player);
 
     /**
-     * Add a player to the lobby. This call should always be preceded by a call to isLobbyFull
+     * Add a player to the lobby.
      * @param player to add to the lobby
-     * @return true if the addition was successful, false if not
      */
-    Boolean addPlayer(GamePlayer player);
+    void addPlayer(GamePlayer player);
 
     /**
      * Removes a player from the lobby. Normally this should only be called if the user disconnects from
