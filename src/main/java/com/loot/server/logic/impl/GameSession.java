@@ -69,7 +69,6 @@ public class GameSession implements IGameSession {
       switch (card.getPower()) {
         // Wishing Ring action
         case 4 -> {
-          playersInRound.get(playersInRound.indexOf(playerActing)).setStatus("Safe (Wishing Ring)");
           playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
         }
         // Loot action
@@ -189,7 +188,7 @@ public class GameSession implements IGameSession {
     if (index < turnIndex) {
       turnIndex -= 1;
     }
-    playersInRound.get(index).setStatus("Out");
+    playersInRound.get(index).setIsOut(true);
     playersInRound.remove(playerToRemove);
     if (cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
       var card = cardsInHand.get(playerToRemove).discardHand();
@@ -266,7 +265,6 @@ public class GameSession implements IGameSession {
 
   @Override
   synchronized public Boolean loadedIntoGame(GamePlayer player) {
-    players.get(players.indexOf(player)).setLoadedIn(true);
     numberOfPlayersLoadedIn += 1;
     return numberOfPlayersLoadedIn == players.size();
   }

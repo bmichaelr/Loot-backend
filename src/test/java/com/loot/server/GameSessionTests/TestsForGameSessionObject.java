@@ -190,16 +190,11 @@ public class TestsForGameSessionObject {
         Boolean allLoadedIn;
 
         // Load in player 1
-        player1.setLoadedIn(true);
         allLoadedIn = gameSession.loadedIntoGame(player1);
         assert allLoadedIn.equals(Boolean.FALSE);
         assert gameSession.getNumberOfPlayersLoadedIn() == 1;
-        assert gameSession.getPlayers().get(gameSession.getPlayers().indexOf(player1)).getLoadedIn().equals(Boolean.TRUE);
 
         // Load in the rest of the players
-        player2.setLoadedIn(true);
-        player3.setLoadedIn(true);
-        player4.setLoadedIn(true);
         allLoadedIn = gameSession.loadedIntoGame(player2);
         assert allLoadedIn.equals(Boolean.FALSE) && gameSession.getNumberOfPlayersLoadedIn() == 2;
         allLoadedIn = gameSession.loadedIntoGame(player3);
