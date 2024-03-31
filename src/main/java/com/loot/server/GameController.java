@@ -1,18 +1,14 @@
 package com.loot.server;
 
-import com.loot.server.domain.cards.Card;
+import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.domain.request.*;
-import com.loot.server.domain.response.GameStartResponse;
-import com.loot.server.domain.response.LobbyResponse;
-import com.loot.server.domain.response.ServerData;
+import com.loot.server.domain.response.*;
+import com.loot.server.logic.impl.GameSession.GameAction;
 import com.loot.server.service.ErrorCheckingService;
 import com.loot.server.service.GameControllerService;
-import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
@@ -40,7 +36,7 @@ public class GameController {
     }
 
     @MessageMapping("/createGame")
-    public void createGame(CreateGameRequest request, @Header("simpSessionId") String sessionId) {
+    public void createGame(@Payload CreateGameRequest request, @Header("simpSessionId") String sessionId) {
         System.out.println("Create game request: " + request);
         if(errorCheckingService.requestContainsError(request)) { return; }
 
@@ -53,6 +49,7 @@ public class GameController {
     @MessageMapping("/joinGame")
     public void joinGame(@Payload JoinGameRequest request, @Header("simpSessionId") String sessionId) {
         if(errorCheckingService.requestContainsError(request)) { return; }
+        System.out.println(ANSIConstants.BLUE_FG + "Received valid request to " + ANSIConstants.YELLOW_FG + "\"/joinGame\"" + ANSIConstants.BLUE_FG + " : " + request + ANSIConstants.RESET);
 
         String roomKey = request.getRoomKey();
         UUID clientUUID = request.getPlayer().getId();
@@ -84,40 +81,36 @@ public class GameController {
         messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
-    @MessageMapping("/game/loadedIn")
+    @MessageMapping("/game/sync")
     public void loadedIntoGame(GameInteractionRequest request) {
         if(errorCheckingService.requestContainsError(request)) { return; }
+        System.out.println(ANSIConstants.BLUE_FG + "Received valid request to " + ANSIConstants.YELLOW_FG + "\"/game/sync\"" + ANSIConstants.BLUE_FG + " : " + request + ANSIConstants.RESET);
 
         String roomKey = request.getRoomKey();
-        var player = request.getPlayer();
-        Boolean roundHasBegun = gameService.playerLoadedIn(roomKey, player);
-        if (roundHasBegun) {
-             var dealtCards = gameService.getFirstCards(roomKey);
-             for(Pair<UUID, Card> pair : dealtCards) {
-                 messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft(), pair.getRight());
-             }
-
-             // Send the message here?
-            Pair<GamePlayer, Card> pair = gameService.nextTurn(roomKey);
-            GameStartResponse startResponse = GameStartResponse.builder()
-                    .message(pair.getLeft().getName() + " is starting the round.")
-                    .startingPlayer(pair.getLeft().getId())
-                    .build();
-            messagingTemplate.convertAndSend("/topic/game/update/" + roomKey, startResponse);
-            messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft().getId(), pair.getRight());
+        GamePlayer player = request.getPlayer();
+        GameAction actionToTake = gameService.syncPlayer(roomKey, player);
+        switch(actionToTake) {
+            case START_ROUND -> {
+                StartRoundResponse startRoundResponse = gameService.startRound(roomKey);
+                messagingTemplate.convertAndSend("/topic/game/startRound/" + roomKey, startRoundResponse);
+            }
+            case NEXT_TURN -> {
+                NextTurnResponse nextTurnResponse = gameService.getNextTurn(roomKey);
+                messagingTemplate.convertAndSend("/topic/game/nextTurn/" + roomKey, nextTurnResponse);
+            }
+            case ROUND_END -> {
+                RoundStatusResponse roundStatusResponse = gameService.getRoundStatus(roomKey);
+                messagingTemplate.convertAndSend("/topic/game/roundStatus/" + roomKey, roundStatusResponse);
+            }
         }
     }
 
     @MessageMapping("/game/playCard")
     public void playCard(PlayCardRequest playCardRequest) {
-        String roomKey = playCardRequest.getRoomKey();
-        var response = gameService.playCard(playCardRequest);
-        messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);
+        System.out.println("playCardRequest = " + playCardRequest);
 
-        // send new ?
-        if(!response.getGameOver() && !response.getRoundOver()) {
-            Pair<GamePlayer, Card> pair = gameService.nextTurn(roomKey);
-            messagingTemplate.convertAndSend("/topic/game/dealtCard/" + pair.getLeft().getId(), pair.getRight());
-        }
+        String roomKey = playCardRequest.getRoomKey();
+        PlayedCardResponse response = gameService.playCard(playCardRequest);
+        messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);
     }
 }
