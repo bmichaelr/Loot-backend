@@ -58,7 +58,7 @@ public class GameControllerTest {
     void verifyCreateGameMessageIsReceivedWhenValid() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.VALID);
 
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
@@ -67,7 +67,7 @@ public class GameControllerTest {
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.successQueueNotEmpty()));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.errorQueueIsEmpty()));
 
-        LobbyResponse lobbyResponse = wsTestHelper.successBlockingQueue.poll(2, SECONDS);
+        LobbyResponse lobbyResponse = wsTestHelper.lobbyResponseBlockingQueue.poll(2, SECONDS);
         System.out.println(lobbyResponse);
         wsTestHelper.shutdown();
     }
@@ -76,7 +76,7 @@ public class GameControllerTest {
     void verifyThatCreateGameFailsWhenMissingRoomName() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.MISSING_ROOM_NAME);
 
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
@@ -90,7 +90,7 @@ public class GameControllerTest {
     void verifyThatCreateGameFailsWhenMissingPlayer() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.MISSING_GAME_PLAYER);
 
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
@@ -104,7 +104,7 @@ public class GameControllerTest {
     void verifyThatCreateGameFailsWhenGamePlayerMissingName() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.GAME_PLAYER_MISSING_NAME);
 
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
@@ -119,7 +119,7 @@ public class GameControllerTest {
     void verifyThatCreateGameFailsWhenGamePlayerMissingId() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.GAME_PLAYER_MISSING_ID);
 
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
@@ -133,7 +133,7 @@ public class GameControllerTest {
     // -- MARK: Join Game Tests
     @Test
     void verifyJoinGameMessageIsReceivedWhenValid() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         String roomKey = createRandomGame(wsTestHelper);
@@ -147,7 +147,7 @@ public class GameControllerTest {
     }
     @Test
     void verifyJoinGameMSendsErrorWhenMissingRoomKey() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         String roomKey = createRandomGame(wsTestHelper);
@@ -164,7 +164,7 @@ public class GameControllerTest {
     }
     @Test
     void verifyJoinGameFailsWhenMissingPlayer() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         String roomKey = createRandomGame(wsTestHelper);
@@ -178,7 +178,7 @@ public class GameControllerTest {
     }
     @Test
     void verifyJoinGameSendsErrorWhenWrongRoomKey() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         String roomKey = createRandomGame(wsTestHelper);
@@ -193,7 +193,7 @@ public class GameControllerTest {
     }
     @Test
     void verifyJoinGameSendsErrorWhenLobbyFull() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         String roomKey = createRandomGameAndFillIt(wsTestHelper);
@@ -212,7 +212,7 @@ public class GameControllerTest {
 
     @Test
     void verifyJoinGameSendsErrorWhenGameInProgress() throws ExecutionException, InterruptedException, TimeoutException {
-        WsTestHelper<LobbyResponse> wsTestHelper = new WsTestHelper<>(LobbyResponse.class, getWsPath());
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.withErrorHandling();
 
         final List<GamePlayer> playersInGame = new ArrayList<>();
@@ -232,18 +232,18 @@ public class GameControllerTest {
         wsTestHelper.shutdown();
     }
 
-    private String createRandomGame(WsTestHelper<?> wsTestHelper) {
+    private String createRandomGame(WsTestHelper wsTestHelper) {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.RANDOM_PLAYER);
         UUID randomUUID = createGameRequest.getPlayer().getId();
         wsTestHelper.listenToChannel("/topic/matchmaking/" + randomUUID);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
 
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.successQueueIsEmpty()));
-        LobbyResponse lobbyResponse = (LobbyResponse) wsTestHelper.pollSuccessQueue();
+        LobbyResponse lobbyResponse = (LobbyResponse) wsTestHelper.pollLobbyResponseQueue();
         return lobbyResponse.getRoomKey();
     }
 
-    private String createRandomGameAndFillIt(WsTestHelper<?> wsTestHelper) {
+    private String createRandomGameAndFillIt(WsTestHelper wsTestHelper) {
         String roomKey = createRandomGame(wsTestHelper);
         for(int i = 0; i < 3; i++) {
             JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.RANDOM_PLAYER);
@@ -252,12 +252,12 @@ public class GameControllerTest {
             wsTestHelper.listenToChannel("/topic/matchmaking/" + randomUUID);
             wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
             await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.successQueueNotEmpty()));
-            wsTestHelper.pollSuccessQueue();
+            wsTestHelper.pollLobbyResponseQueue();
         }
         return roomKey;
     }
 
-    private String createRandomGameAndFillIt(WsTestHelper<?> wsTestHelper, List<GamePlayer> playerList) {
+    private String createRandomGameAndFillIt(WsTestHelper wsTestHelper, List<GamePlayer> playerList) {
         UUID randomUUID;
         // Create the game
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.RANDOM_PLAYER);
@@ -268,7 +268,7 @@ public class GameControllerTest {
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.successQueueIsEmpty()));
 
         // Get room key
-        String roomKey =  ((LobbyResponse)wsTestHelper.pollSuccessQueue()).getRoomKey();
+        String roomKey =  ((LobbyResponse)wsTestHelper.pollLobbyResponseQueue()).getRoomKey();
 
         // Join the rest of the players and add to list
         for(int i = 0; i < 3; i++) {
@@ -278,14 +278,14 @@ public class GameControllerTest {
             wsTestHelper.listenToChannel("/topic/matchmaking/" + randomUUID);
             wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
             await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.successQueueNotEmpty()));
-            wsTestHelper.pollSuccessQueue();
+            wsTestHelper.pollLobbyResponseQueue();
             playerList.add(playerCreated);
         }
         return roomKey;
     }
 
-    private void startGame(WsTestHelper<?> wsTestHelper, List<GamePlayer> players, String roomKey) {
-        wsTestHelper.clearSuccessQueue();
+    private void startGame(WsTestHelper wsTestHelper, List<GamePlayer> players, String roomKey) {
+        wsTestHelper.clearLobbyResponseQueue();
         //wsTestHelper.listenToChannel("/topic/game/startRound/" + roomKey);
 
         int index = 0;
@@ -296,16 +296,16 @@ public class GameControllerTest {
         }
     }
 
-    private class WsTestHelper<T> {
+    private class WsTestHelper {
         ObjectMapper objectMapper = new ObjectMapper();
         StompFrameHandler successHandler;
         StompFrameHandler errorHandler;
-        public BlockingQueue<T> successBlockingQueue;
+        public BlockingQueue<LobbyResponse> lobbyResponseBlockingQueue;
         public BlockingQueue<ErrorResponse> errorBlockingQueue;
         public StompSession session;
 
-        public WsTestHelper(Class<T> responseType, String path) throws ExecutionException, InterruptedException, TimeoutException {
-            successBlockingQueue = new ArrayBlockingQueue<>(5);
+        public WsTestHelper(String path) throws ExecutionException, InterruptedException, TimeoutException {
+            lobbyResponseBlockingQueue = new ArrayBlockingQueue<>(5);
             session = webSocketStompClient
                     .connectAsync(path, new StompSessionHandlerAdapter() {})
                     .get(1, SECONDS);
@@ -313,13 +313,13 @@ public class GameControllerTest {
                  @Override
                  @NonNull
                  public Type getPayloadType(@NonNull StompHeaders headers) {
-                     return responseType;
+                     return LobbyResponse.class;
                  }
 
                  @Override
                  public void handleFrame(@NonNull StompHeaders headers, Object payload) {
-                    T response = objectMapper.convertValue(payload, responseType);
-                    boolean success = successBlockingQueue.offer(response);
+                    LobbyResponse response = objectMapper.convertValue(payload, LobbyResponse.class);
+                    boolean success = lobbyResponseBlockingQueue.offer(response);
                     if(!success) {
                         throw new RuntimeException("Unable to add to success queue!");
                     }
@@ -353,7 +353,7 @@ public class GameControllerTest {
             session.send(path, data);
         }
         public boolean successQueueIsEmpty() {
-            return successBlockingQueue.isEmpty();
+            return lobbyResponseBlockingQueue.isEmpty();
         }
         public boolean successQueueNotEmpty() {
             return !successQueueIsEmpty();
@@ -364,27 +364,27 @@ public class GameControllerTest {
         public boolean errorQueueNotEmpty() {
             return !errorQueueIsEmpty();
         }
-        public T pollSuccessQueue() {
-            return successBlockingQueue.poll();
+        public LobbyResponse pollLobbyResponseQueue() {
+            return lobbyResponseBlockingQueue.poll();
         }
-        public void clearSuccessQueue() {
-            successBlockingQueue.clear();
+        public void clearLobbyResponseQueue() {
+            lobbyResponseBlockingQueue.clear();
         }
         public ErrorResponse pollErrorQueue() {
             System.out.println("Polling Error Queue: " + errorBlockingQueue.peek());
             return errorBlockingQueue.poll();
         }
         public void printSuccessQueue() {
-            System.out.println("Printing queue contents of size: " + successBlockingQueue.size());
+            System.out.println("Printing queue contents of size: " + lobbyResponseBlockingQueue.size());
 
-            for (T t : successBlockingQueue) {
-                System.out.println("Queue contents: " + t);
+            for (LobbyResponse lobbyResponse : lobbyResponseBlockingQueue) {
+                System.out.println("Queue contents: " + lobbyResponse);
             }
         }
         public void shutdown() {
             session.disconnect();
             errorBlockingQueue.clear();
-            successBlockingQueue.clear();
+            lobbyResponseBlockingQueue.clear();
         }
     }
 }
