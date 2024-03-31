@@ -1,6 +1,5 @@
 package com.loot.server.GameSessionTests;
 
-import com.loot.server.domain.request.GameInteractionRequest;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.logic.impl.GameSession;
 import com.loot.server.service.ErrorCheckingService;
@@ -10,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @SpringBootTest
 public class TestsForGameSessionObject {
@@ -181,7 +179,7 @@ public class TestsForGameSessionObject {
             assert player.getReady().equals(Boolean.TRUE);
         }
         assert gameSession.getNumberOfReadyPlayers() == 4;
-        assert gameSession.getNumberOfPlayersLoadedIn() == 0;
+        assert gameSession.getNumberOfPlayersSynced() == 0;
 
         GamePlayer player1 = gameSession.getPlayers().get(0).copy();
         GamePlayer player2 = gameSession.getPlayers().get(1).copy();
@@ -190,17 +188,16 @@ public class TestsForGameSessionObject {
         Boolean allLoadedIn;
 
         // Load in player 1
-        allLoadedIn = gameSession.loadedIntoGame(player1);
-        assert allLoadedIn.equals(Boolean.FALSE);
-        assert gameSession.getNumberOfPlayersLoadedIn() == 1;
+        gameSession.syncPlayer(player1);
+        assert gameSession.getNumberOfPlayersSynced() == 1;
 
         // Load in the rest of the players
-        allLoadedIn = gameSession.loadedIntoGame(player2);
-        assert allLoadedIn.equals(Boolean.FALSE) && gameSession.getNumberOfPlayersLoadedIn() == 2;
-        allLoadedIn = gameSession.loadedIntoGame(player3);
-        assert allLoadedIn.equals(Boolean.FALSE) && gameSession.getNumberOfPlayersLoadedIn() == 3;
-        allLoadedIn = gameSession.loadedIntoGame(player4);
-        assert allLoadedIn.equals(Boolean.TRUE) && gameSession.getNumberOfPlayersLoadedIn() == 4;
+        gameSession.syncPlayer(player2);
+        assert gameSession.getNumberOfPlayersSynced() == 2;
+        gameSession.syncPlayer(player3);
+        assert gameSession.getNumberOfPlayersSynced() == 3;
+        gameSession.syncPlayer(player4);
+        assert gameSession.getNumberOfPlayersSynced() == 4;
     }
 
     @Test
@@ -214,10 +211,9 @@ public class TestsForGameSessionObject {
             var copy = player.copy(); copyOfPlayers.add(copy);
         });
 
-        Boolean loadedIn;
         for(int i = 0; i < copyOfPlayers.size(); i++) {
-            loadedIn = gameSession.loadedIntoGame(copyOfPlayers.get(i));
-            assert (i == copyOfPlayers.size() - 1) == loadedIn;
+             gameSession.syncPlayer(copyOfPlayers.get(i));
+            assert (i == copyOfPlayers.size() - 1);
         }
 
         gameSession.startRound();

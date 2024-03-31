@@ -60,7 +60,7 @@ public class GameSessionTestsUtil {
             var copy = player.copy(); copyOfPlayers.add(copy);
         });
         for (var copyOfPlayer : copyOfPlayers) {
-            gameSession.loadedIntoGame(copyOfPlayer);
+            gameSession.syncPlayer(copyOfPlayer);
         }
         gameSession.startRound();
         return gameSession;
