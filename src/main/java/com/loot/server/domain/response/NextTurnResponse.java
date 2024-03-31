@@ -14,15 +14,9 @@ import java.util.Map;
 @AllArgsConstructor
 @Data
 @Builder
-public class TurnUpdateResponse {
+public class NextTurnResponse {
 
-    private String message;
+    private GamePlayer player;
 
-    private Map<GamePlayer, List<Card>> cards;
-
-    // ? private Map<GamePlayer, Integer> wins;
-
-    private Boolean roundOver;
-
-    private Boolean gameOver;
+    private Card card;
 }
