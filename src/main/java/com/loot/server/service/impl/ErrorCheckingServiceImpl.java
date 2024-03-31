@@ -130,6 +130,7 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
       case BAD_REQUEST -> "The given request type is unknown, consult with the backend team to resolve this error.";
       case NONE -> "N/A";
     };
+    System.out.println("\u0000[31" + "Sending error! -> " + errorResponse + ANSIConstants.RESET);
     simpMessagingTemplate.convertAndSend(channelToSendTo, errorResponse);
   }
 }
