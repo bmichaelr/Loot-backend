@@ -3,14 +3,14 @@ package com.loot.server.service.impl;
 import java.util.*;
 
 import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.request.*;
-import com.loot.server.domain.response.LobbyResponse;
+import com.loot.server.domain.response.*;
 import com.loot.server.ClientDisconnectionEvent;
-import com.loot.server.domain.response.ServerData;
-import com.loot.server.domain.response.TurnUpdateResponse;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession.GameAction;
 import org.modelmapper.internal.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
@@ -89,6 +89,12 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
+    public Boolean gameExists(String roomKey) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        return gameSession != null;
+    }
+
+    @Override
     public void changePlayerReadyStatus(GameInteractionRequest request) {
         String roomKey = request.getRoomKey();
         var player = request.getPlayer();
@@ -97,54 +103,43 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public Boolean playerLoadedIn(String roomKey, GamePlayer player) {
-        var gameSession = getFromGameSessionMap(roomKey);
-        var roundStarted = gameSession.loadedIntoGame(player);
-        if(roundStarted) {
-            gameSession.startRound();
-        }
-        return roundStarted;
-    }
-
-    public List<Pair<UUID, Card>> getFirstCards(String roomKey) {
-        var gameSession = getFromGameSessionMap(roomKey);
-
-        List<Pair<UUID, Card>> cards = new ArrayList<>();
-        var dealtCardsMap = gameSession.getCardsInHand();
-        for(var player : dealtCardsMap.keySet()) {
-            cards.add(Pair.of(player.getId(), Card.fromPower(dealtCardsMap.get(player).getCardInHand())));
-        }
-        return cards;
+    public GameAction syncPlayer(String roomKey, GamePlayer player) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        return gameSession.syncPlayer(player);
     }
 
     @Override
-    public TurnUpdateResponse playCard(PlayCardRequest playCardRequest) {
-        var player = playCardRequest.getPlayer();
-        var card = playCardRequest.getCard();
-        var gameSession = getFromGameSessionMap(playCardRequest.getRoomKey());
+    public StartRoundResponse startRound(String roomKey) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        Pair<List<GamePlayer>, List<Card>> startingInformation = gameSession.startRound();
+        return new StartRoundResponse(startingInformation.getLeft(), startingInformation.getRight());
+    }
 
-        String message = gameSession.playCard(player, card);
-        return TurnUpdateResponse.builder()
-                .message(message)
-                .gameOver(gameSession.isGameIsOver())
-                .roundOver(gameSession.isRoundIsOver())
-                .cards(gameSession.getPlayedCards())
+    @Override
+    public RoundStatusResponse getRoundStatus(String roomKey) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        return gameSession.determineWinner();
+    }
+
+    @Override
+    public PlayedCardResponse playCard(PlayCardRequest playCardRequest) {
+        GamePlayer player = playCardRequest.getPlayer();
+        PlayedCard card = playCardRequest.getCard();
+        GameSession gameSession = getFromGameSessionMap(playCardRequest.getRoomKey());
+
+        return gameSession.playCard(player, card);
+    }
+
+    @Override
+    public NextTurnResponse getNextTurn(String roomKey) {
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+
+        GamePlayer nextPlayer = gameSession.nextTurn();
+        Card dealtCard = gameSession.dealCard(nextPlayer);
+        return NextTurnResponse.builder()
+                .player(nextPlayer)
+                .card(dealtCard)
                 .build();
-    }
-
-    @Override
-    public Pair<GamePlayer, Card> nextTurn(String roomKey) {
-        var gameSession = getFromGameSessionMap(roomKey);
-
-        var player = gameSession.nextTurn();
-        var card = gameSession.dealCard(player);
-        return Pair.of(player, card);
-    }
-
-    @Override
-    public GamePlayer getNextPlayersTurn(String roomKey) {
-        var gameSession = getFromGameSessionMap(roomKey);
-        return gameSession.nextPlayersTurn();
     }
 
     @Override
@@ -160,7 +155,6 @@ public class GameControllerServiceImpl implements GameControllerService {
     public LobbyResponse getInformationForLobby(String roomKey) {
         var gameSession = getFromGameSessionMap(roomKey);
         if(gameSession == null) {
-            System.out.println("Unable to retrieve game session with roomKey: " + roomKey);
             return null;
         }
 
@@ -176,7 +170,6 @@ public class GameControllerServiceImpl implements GameControllerService {
         UUID clientUUID = clientDisconnectionEvent.getClientUUID();
         String clientRoomKey = clientDisconnectionEvent.getGameRoomKey();
 
-        System.out.println(ANSI_RED + "Received a callback for " + clientUUID + ANSI_RESET);
         var gameSession = getFromGameSessionMap(clientRoomKey);
         if(gameSession == null) {
             return;
@@ -184,7 +177,6 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         for(var player: gameSession.getPlayers()) {
             if(player.getId().equals(clientUUID)) {
-                System.out.println(ANSI_RED + "Removing client (" + clientUUID + ") from room (" + clientRoomKey + ")." + ANSI_RESET);
                 gameSession.removePlayer(player);
                 updateLobbyOnDisconnect(gameSession);
                 break;
@@ -203,7 +195,6 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public void validateGameSession(GameSession gameSession) {
         if (gameSession.getPlayers().isEmpty()) {
-            System.out.println(ANSI_RED + "Game session object with roomKey (" + gameSession.getRoomKey() + ") is empty, removing it..." + ANSI_RESET);
             String roomKey = gameSession.getRoomKey();
             removeFromGameSessionMap(roomKey);
         }
@@ -257,7 +248,6 @@ public class GameControllerServiceImpl implements GameControllerService {
                             .build()
             );
         });
-
         return currentServers;
     }
 }
