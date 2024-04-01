@@ -87,6 +87,34 @@ public class GameControllerTest {
         wsTestHelper.shutdown();
     }
 
+    @Test
+    void verifyThatFetchServersFailsWhenPlayerMissingName() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
+        createRandomGame(wsTestHelper);
+
+        GamePlayer player = GameControllerTestUtil.createGamePlayerMissingName();
+        wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
+        wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
+
+        await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
+        await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
+        wsTestHelper.shutdown();
+    }
+
+    @Test
+    void verifyThatFetchServersFailsWhenPlayerMissingId() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
+        createRandomGame(wsTestHelper);
+
+        GamePlayer player = GameControllerTestUtil.createGamePlayerMissingId();
+        wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
+        wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
+
+        await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
+        await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
+        wsTestHelper.shutdown();
+    }
+
     // -- MARK: Create Game Tests
     @Test
     void verifyCreateGameMessageIsReceivedWhenValid() throws ExecutionException, InterruptedException, TimeoutException {
