@@ -140,12 +140,17 @@ public class GameControllerServiceImpl implements GameControllerService {
     }
 
     @Override
-    public void removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId) {
+    public Boolean removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId) {
         var player = gameInteractionRequest.getPlayer();
         var gameSession = getFromGameSessionMap(gameInteractionRequest.getRoomKey());
-        gameSession.removePlayer(player);
-        sessionCacheService.uncacheClientConnection(sessionId);
-        validateGameSession(gameSession);
+        Boolean success = gameSession.removePlayer(player);
+        if(success) {
+            sessionCacheService.uncacheClientConnection(sessionId);
+            validateGameSession(gameSession);
+            return true;
+        }
+
+        return false;
     }
 
     @Override

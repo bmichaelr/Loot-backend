@@ -292,6 +292,53 @@ public class GameControllerTest {
         wsTestHelper.shutdown();
     }
 
+    // -- MARK: Testing leave game endpoint
+    @Test
+    void verifyThatLeaveGameSendsMessageToOtherPlayers() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        final List<GamePlayer> players = new ArrayList<>();
+        String roomKey = createRandomGameAndFillIt(ws, players);
+        ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
+
+        GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, players.get(0));
+        ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
+
+        ws.sendToSocket("/app/leaveGame", request);
+        await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
+        ws.shutdown();
+    }
+
+    @Test
+    void verifyThatLeaveGameDoesNotSendMessageIfPlayerWasNotInLobby() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        String roomKey = createRandomGameAndFillIt(ws);
+        ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
+
+        GamePlayer player = GameControllerTestUtil.createValidGamePlayer();
+        GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
+        ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
+
+        ws.sendToSocket("/app/leaveGame", request);
+        await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
+        ws.shutdown();
+    }
+
+    @Test
+    void verifyThatLeaveGameThrowsErrorWhenMissingRoomKey() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        String roomKey = createRandomGameAndFillIt(ws);
+        ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
+
+        GamePlayer player = GameControllerTestUtil.createValidGamePlayer();
+        GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(null, player);
+        ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
+
+        ws.sendToSocket("/app/leaveGame", request);
+        await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
+        await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
+        ws.shutdown();
+    }
+
     // -- MARK: Testing the sync calls
     @Test
     void verifyThatFirstSyncCallReturnsStartResponse() throws ExecutionException, InterruptedException, TimeoutException {

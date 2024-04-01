@@ -79,6 +79,7 @@ public interface IGameSession {
      * Removes a player from the lobby. Normally this should only be called if the user disconnects from
      * the lobby itself, not mid-game.
      * @param player to remove from the lobby
+     * @return true if the removal was a success
      */
-    void removePlayer(GamePlayer player);
+    Boolean removePlayer(GamePlayer player);
 }

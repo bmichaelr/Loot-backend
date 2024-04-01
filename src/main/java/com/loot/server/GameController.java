@@ -56,11 +56,14 @@ public class GameController {
     @MessageMapping("/leaveGame")
     public void leaveGame(GameInteractionRequest request, @Header("simpSessionId") String sessionId) {
         if(errorCheckingService.requestContainsError(request)) { return; }
-        gameService.removePlayerFromGameSession(request, sessionId);
+        Boolean success = gameService.removePlayerFromGameSession(request, sessionId);
         String roomKey = request.getRoomKey();
-        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
-        if(lobbyResponse != null) {
-            messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+
+        if(success) {
+            LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
+            if (lobbyResponse != null) {
+                messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
+            }
         }
     }
 

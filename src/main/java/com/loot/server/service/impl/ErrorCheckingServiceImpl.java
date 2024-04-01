@@ -1,6 +1,5 @@
 package com.loot.server.service.impl;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.domain.request.CreateGameRequest;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.GameInteractionRequest;

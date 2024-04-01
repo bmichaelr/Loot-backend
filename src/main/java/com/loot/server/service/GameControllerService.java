@@ -32,7 +32,7 @@ public interface GameControllerService {
      * @param gameInteractionRequest containing the player information and the room key
      * @param sessionId of the client leaving, so they can be removed from the cache
      */
-    void removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId);
+    Boolean removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId);
 
     /**
      * A client wishes to join an already existing lobby.

@@ -27,9 +27,7 @@ public class SessionEventListener {
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
         StompHeaderAccessor stompHeaderAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
         var simpSessionId = stompHeaderAccessor.getSessionId();
-        System.out.println("Received a session connected event for new client with session id "+simpSessionId+"...");
     }
 
     @EventListener

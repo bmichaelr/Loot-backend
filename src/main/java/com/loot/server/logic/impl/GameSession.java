@@ -324,7 +324,7 @@ public class GameSession implements IGameSession {
   }
 
   @Override
-  synchronized public void removePlayer(GamePlayer player) {
+  synchronized public Boolean removePlayer(GamePlayer player) {
     boolean success = players.remove(player);
 
     if(success) {
@@ -333,7 +333,11 @@ public class GameSession implements IGameSession {
       for (var p : players) {
         p.setReady(false);
       }
+
+      return true;
     }
+
+    return false;
   }
 
   @Override
