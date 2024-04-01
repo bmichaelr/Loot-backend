@@ -61,7 +61,7 @@ public class GameSession implements IGameSession {
           return cardEnum;
         }
       }
-      return null;
+      return INVALID;
     }
   }
 
@@ -119,10 +119,13 @@ public class GameSession implements IGameSession {
     } else if (playedCard instanceof GuessingCard guessingCard) {
       playedCardResponse.setOutcome(playGuessingCard(guessingCard));
     } else {
+      CardEnum card = CardEnum.fromValue(powerOfPlayedCard);
       playedCardResponse.setOutcome(null);
-      switch (playedCard.getPower()) {
-        case 4 -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
-        case 8 -> removePlayerFromRound(playerActing);
+      switch (card) {
+        case WISHING_RING -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        case DRAGON ->  {} //do nothing;
+        case LOOT -> removePlayerFromRound(playerActing);
+        default -> throw new RuntimeException("Unknown card in personal play section!");
       }
     }
 

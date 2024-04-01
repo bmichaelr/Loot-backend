@@ -20,9 +20,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-
     @Autowired
     private SessionCacheService sessionCacheService;
 

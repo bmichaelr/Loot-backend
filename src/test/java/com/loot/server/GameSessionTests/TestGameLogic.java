@@ -1,6 +1,7 @@
 package com.loot.server.GameSessionTests;
 
 import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.response.RoundStatusResponse;
 import com.loot.server.logic.impl.GameSession;
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.GuessingCard;
@@ -53,6 +54,8 @@ public class TestGameLogic {
                 PlayedCard cardToPlay = createPlayedCardObjectHelper(player);
                 assert validateCardPlayed(player, cardToPlay);
             }
+            RoundStatusResponse response = gameSession.determineWinner();
+            System.out.println(ANSI_CYAN + "Winner of the round: " + response.getWinner() + ", number of wins = " + gameSession.getNumberOfWins().get(response.getWinner()));
         }
     }
 

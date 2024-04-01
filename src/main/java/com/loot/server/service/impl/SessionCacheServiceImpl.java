@@ -12,9 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class SessionCacheServiceImpl implements SessionCacheService {
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_RED = "\u001B[31m";
-
     static {
         sessionCache = new ConcurrentHashMap<>();
     }
@@ -28,10 +25,7 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
     @Override
     public void cacheClientConnection(UUID clientUUID, String gameRoomKey, String simpSessionId) {
-        System.out.println(ANSI_RED + "Caching client connection..." + ANSI_RESET);
         sessionCache.put(simpSessionId, ConcurrentPair.of(clientUUID, gameRoomKey));
-
-        memDump();
     }
 
     @Override
@@ -40,19 +34,8 @@ public class SessionCacheServiceImpl implements SessionCacheService {
 
         var clientInformation = sessionCache.remove(simpSessionId);
         if(clientInformation != null) {
-            System.out.println(ANSI_RED + "Removed client connection => " + clientInformation + ANSI_RESET);
             eventPublisher.publishEvent(new ClientDisconnectionEvent(this, clientInformation.getKey(), clientInformation.getValue()));
         }
-
-        memDump();
-    }
-
-    private void memDump() {
-        System.out.print("Session Cache: {");
-        for(var key : sessionCache.keySet()) {
-            System.out.print("[" + key + ", " + sessionCache.get(key).toString()+ "], ");
-        }
-        System.out.println("}");
     }
 
     @Data

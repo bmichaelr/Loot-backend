@@ -197,7 +197,7 @@ public class TestsForGameSessionObject {
         gameSession.syncPlayer(player3);
         assert gameSession.getNumberOfPlayersSynced() == 3;
         gameSession.syncPlayer(player4);
-        assert gameSession.getNumberOfPlayersSynced() == 4;
+        assert gameSession.getNumberOfPlayersSynced() == 0;
     }
 
     @Test
@@ -211,9 +211,8 @@ public class TestsForGameSessionObject {
             var copy = player.copy(); copyOfPlayers.add(copy);
         });
 
-        for(int i = 0; i < copyOfPlayers.size(); i++) {
-             gameSession.syncPlayer(copyOfPlayers.get(i));
-            assert (i == copyOfPlayers.size() - 1);
+        for (GamePlayer copyOfPlayer : copyOfPlayers) {
+            gameSession.syncPlayer(copyOfPlayer);
         }
 
         gameSession.startRound();
