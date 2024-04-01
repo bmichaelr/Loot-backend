@@ -1,5 +1,6 @@
 package com.loot.server.ControllerTest;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.lang.NonNull;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
@@ -37,12 +39,14 @@ public class GameControllerTest {
 
     @Getter
     public enum FrameHandlerType {
+        AVAILABLE_SERVER_RESPONSE(ServerData.class),
         LOBBY_RESPONSE(LobbyResponse.class),
         START_ROUND_RESPONSE(StartRoundResponse.class),
         NEXT_TURN_RESPONSE(NextTurnResponse.class),
         ROUND_STATUS_RESPONSE(RoundStatusResponse.class),
         PLAYED_CARD_RESPONSE(PlayedCardResponse.class),
-        ERROR_RESPONSE(ErrorResponse.class);
+        ERROR_RESPONSE(ErrorResponse.class),
+        STRING_RESPONSE(String.class);
 
         private final Class<?> classType;
 
@@ -66,6 +70,21 @@ public class GameControllerTest {
                 new WebSocketStompClient(
                         new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));
         webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
+    }
+
+    // -- MARK: Fetch Available Servers Tests
+    @Test
+    void verifyThatFetchServersSendsMessageWhenCorrect() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
+        createRandomGame(wsTestHelper);
+        GamePlayer player = GameControllerTestUtil.createValidGamePlayer();
+        UUID playerId = player.getId();
+        wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + playerId, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
+        wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
+
+        await().atMost(3, SECONDS).untilAsserted(() -> assertNotNull(wsTestHelper.pollQueue(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
+        await().atMost(3, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
+        wsTestHelper.shutdown();
     }
 
     // -- MARK: Create Game Tests
@@ -244,10 +263,24 @@ public class GameControllerTest {
         );
         wsTestHelper.shutdown();
     }
-    
+
+    // -- MARK: Testing the sync calls
     @Test
     void verifyThatFirstSyncCallReturnsStartResponse() throws ExecutionException, InterruptedException, TimeoutException {
-    
+        WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
+        final List<GamePlayer> playersInGame = new ArrayList<>();
+        String roomKey = createRandomGameAndFillIt(wsTestHelper, playersInGame);
+        wsTestHelper.listenToChannel("/topic/game/startRound/" + roomKey, FrameHandlerType.START_ROUND_RESPONSE);
+
+        int index, length = playersInGame.size();
+        for(index = 0; index < length; index++) {
+            GamePlayer player = playersInGame.get(index);
+            GameInteractionRequest gameInteractionRequest = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
+            wsTestHelper.sendToSocket("/app/game/sync", gameInteractionRequest);
+        }
+
+        await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.START_ROUND_RESPONSE)));
+        wsTestHelper.shutdown();
     }
 
     private String createRandomGame(WsTestHelper wsTestHelper) throws InterruptedException {
@@ -311,7 +344,6 @@ public class GameControllerTest {
     }
 
     public class WsTestHelper {
-
         private final ObjectMapper objectMapper = new ObjectMapper();
         private final Map<FrameHandlerType, BlockingQueue<?>> queues = new EnumMap<>(FrameHandlerType.class);
         private final Map<FrameHandlerType, StompFrameHandler> frameHandlers = new EnumMap<>(FrameHandlerType.class);
@@ -325,15 +357,12 @@ public class GameControllerTest {
         public void listenToChannel(String url, FrameHandlerType frameHandlerType) {
             session.subscribe(url, frameHandlers.get(frameHandlerType));
         }
-
         public void sendToSocket(String path, Object data) {
             session.send(path, data);
         }
-
         public boolean isQueueEmpty(FrameHandlerType forFrame) {
             return queues.get(forFrame).isEmpty();
         }
-
         public Object pollQueue(FrameHandlerType forFrame) throws InterruptedException {
             return queues.get(forFrame).poll(3, SECONDS);
         }
@@ -348,6 +377,10 @@ public class GameControllerTest {
             }
         }
         private <T> void initializeQueueAndFrameHandler(Class<T> clazz, FrameHandlerType frameHandlerType) {
+            if(frameHandlerType == FrameHandlerType.AVAILABLE_SERVER_RESPONSE) {
+                initializeAvailableServerResponseQueueAndFrameHandler();
+                return;
+            }
             BlockingQueue<T> queue = new ArrayBlockingQueue<>(5);
             queues.put(frameHandlerType, queue);
 
@@ -360,7 +393,6 @@ public class GameControllerTest {
 
                 @Override
                 public void handleFrame(@NonNull StompHeaders headers, Object payload) {
-                    System.out.println("Adding to queue! -> " + clazz.getName());
                     T response = objectMapper.convertValue(payload, clazz);
                     boolean success = queue.offer(response);
                     if (!success) {
@@ -369,6 +401,33 @@ public class GameControllerTest {
                 }
             };
             frameHandlers.put(frameHandlerType, handler);
+        }
+        private void initializeAvailableServerResponseQueueAndFrameHandler() {
+            ArrayBlockingQueue<List<ServerData>> arrayBlockingQueue = new ArrayBlockingQueue<>(5);
+            StompFrameHandler frameHandler = new StompFrameHandler() {
+                @Override
+                @NonNull
+                public Type getPayloadType(@NonNull StompHeaders headers) {
+                    return new ParameterizedTypeReference<List<ServerData>>() {}.getType();
+                }
+
+                @Override
+                public void handleFrame(@NonNull StompHeaders headers, Object payload) {
+                    try {
+                        List<ServerData> response = objectMapper.convertValue(payload, new TypeReference<List<ServerData>>() {});
+                        boolean success = arrayBlockingQueue.offer(response);
+                        if (!success) {
+                            System.out.println("Unable to add response to the queue.");
+                        } else {
+                            System.out.println("Able to add the response to the queue.");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error handling payload: " + e.getMessage());
+                    }
+                }
+            };
+            queues.put(FrameHandlerType.AVAILABLE_SERVER_RESPONSE, arrayBlockingQueue);
+            frameHandlers.put(FrameHandlerType.AVAILABLE_SERVER_RESPONSE, frameHandler);
         }
     }
 }

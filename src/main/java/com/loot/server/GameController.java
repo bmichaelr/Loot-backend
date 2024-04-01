@@ -1,6 +1,5 @@
 package com.loot.server;
 
-import ch.qos.logback.core.pattern.color.ANSIConstants;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.logic.impl.GameSession.GameAction;
@@ -29,7 +28,6 @@ public class GameController {
     @MessageMapping("/loadAvailableServers")
     public void getAvailableServers(GamePlayer playerRequesting) {
         if(errorCheckingService.requestContainsError(playerRequesting)) { return; }
-
         UUID clientId = playerRequesting.getId();
         List<ServerData> response = gameService.getListOfServers();
         messagingTemplate.convertAndSend("/topic/matchmaking/servers/" + clientId, response);
@@ -37,9 +35,7 @@ public class GameController {
 
     @MessageMapping("/createGame")
     public void createGame(@Payload CreateGameRequest request, @Header("simpSessionId") String sessionId) {
-        System.out.println("Create game request: " + request);
         if(errorCheckingService.requestContainsError(request)) { return; }
-
         UUID clientUUID = request.getPlayer().getId();
         String roomKey = gameService.createNewGameSession(request, sessionId);
         LobbyResponse response = gameService.getInformationForLobby(roomKey);
@@ -49,8 +45,6 @@ public class GameController {
     @MessageMapping("/joinGame")
     public void joinGame(@Payload JoinGameRequest request, @Header("simpSessionId") String sessionId) {
         if(errorCheckingService.requestContainsError(request)) { return; }
-        System.out.println(ANSIConstants.BLUE_FG + "Received valid request to " + ANSIConstants.YELLOW_FG + "\"/joinGame\"" + ANSIConstants.BLUE_FG + " : " + request + ANSIConstants.RESET);
-
         String roomKey = request.getRoomKey();
         UUID clientUUID = request.getPlayer().getId();
         gameService.joinCurrentGameSession(request, sessionId);
@@ -62,7 +56,6 @@ public class GameController {
     @MessageMapping("/leaveGame")
     public void leaveGame(GameInteractionRequest request, @Header("simpSessionId") String sessionId) {
         if(errorCheckingService.requestContainsError(request)) { return; }
-
         gameService.removePlayerFromGameSession(request, sessionId);
         String roomKey = request.getRoomKey();
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
@@ -74,7 +67,6 @@ public class GameController {
     @MessageMapping("/ready")
     public void startGame(GameInteractionRequest request) {
         if(errorCheckingService.requestContainsError(request)) { return; }
-
         String roomKey = request.getRoomKey();
         gameService.changePlayerReadyStatus(request);
         LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
@@ -84,8 +76,6 @@ public class GameController {
     @MessageMapping("/game/sync")
     public void loadedIntoGame(GameInteractionRequest request) {
         if(errorCheckingService.requestContainsError(request)) { return; }
-        System.out.println(ANSIConstants.BLUE_FG + "Received valid request to " + ANSIConstants.YELLOW_FG + "\"/game/sync\"" + ANSIConstants.BLUE_FG + " : " + request + ANSIConstants.RESET);
-
         String roomKey = request.getRoomKey();
         GamePlayer player = request.getPlayer();
         GameAction actionToTake = gameService.syncPlayer(roomKey, player);
@@ -107,8 +97,6 @@ public class GameController {
 
     @MessageMapping("/game/playCard")
     public void playCard(PlayCardRequest playCardRequest) {
-        System.out.println("playCardRequest = " + playCardRequest);
-
         String roomKey = playCardRequest.getRoomKey();
         PlayedCardResponse response = gameService.playCard(playCardRequest);
         messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);

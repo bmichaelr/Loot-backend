@@ -1,6 +1,7 @@
 package com.loot.server.domain.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.request.GamePlayer;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.List;
 @Data
 public class StartRoundResponse {
 
+    @JsonInclude
     private List<PlayerCardPair> playersAndCards;
 
     @JsonIgnore
@@ -30,11 +32,14 @@ public class StartRoundResponse {
         this.playersAndCards = playersAndCards;
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    private static class PlayerCardPair {
-        private GamePlayer player;
-        private Card card;
+    @JsonIgnore
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder("{\n");
+        for(var playerCardPair : playersAndCards) {
+            builder.append(playerCardPair).append(",\n");
+        }
+        builder.append("}");
+        return builder.toString();
     }
 }
