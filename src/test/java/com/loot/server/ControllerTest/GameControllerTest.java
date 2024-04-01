@@ -2,6 +2,7 @@ package com.loot.server.ControllerTest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.loot.server.GameSessionTests.GameSessionTestsUtil;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.ControllerTest.GameControllerTestUtil.RequestType;
@@ -23,6 +24,7 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
+import java.sql.Time;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -336,6 +338,22 @@ public class GameControllerTest {
         ws.sendToSocket("/app/leaveGame", request);
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
+        ws.shutdown();
+    }
+
+    @Test
+    void verifyReadyReturnsMessageToLobby() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        List<GamePlayer> players = new ArrayList<>();
+        String roomKey = createRandomGameAndFillIt(ws, players);
+
+        ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
+        for(var player : players) {
+            GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
+            request.getPlayer().setReady(true);
+            ws.sendToSocket("/app/ready", request);
+            await().atMost(5, SECONDS).untilAsserted(() -> assertNotNull(ws.pollQueue(FrameHandlerType.LOBBY_RESPONSE)));
+        }
         ws.shutdown();
     }
 
