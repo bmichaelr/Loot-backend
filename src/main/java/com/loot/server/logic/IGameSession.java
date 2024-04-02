@@ -3,6 +3,12 @@ package com.loot.server.logic;
 import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.PlayedCard;
+import com.loot.server.domain.response.PlayedCardResponse;
+import com.loot.server.domain.response.RoundStatusResponse;
+import com.loot.server.logic.impl.GameSession.GameAction;
+import org.modelmapper.internal.Pair;
+
+import java.util.List;
 
 public interface IGameSession {
 
@@ -12,13 +18,13 @@ public interface IGameSession {
      * @param playerActing the player who is playing the card
      * @param card the card that has been played
      */
-    String playCard(GamePlayer playerActing, PlayedCard card);
+    PlayedCardResponse playCard(GamePlayer playerActing, PlayedCard card);
 
     /**
      * Called to start the round. This will instantiate all the data structures and reset any variables that
      * may have been altered from last round
      */
-    void startRound();
+    Pair<List<GamePlayer>, List<Card>> startRound();
 
     /**
      * Called when a player has gotten out. Do cleanup on the player, put any cards they still have into the
@@ -36,10 +42,11 @@ public interface IGameSession {
     /**
      * This function will be used to sync players when they are loading in to a new round. The game server won't
      * start sending the initial turn information until all the players have loaded in
+     *
      * @param player that has successfully loaded in
-     * @return true if all players have loaded in
+     * @return pair containing status of sync and type
      */
-    Boolean loadedIntoGame(GamePlayer player);
+    GameAction syncPlayer(GamePlayer player);
 
     /**
      * Deal the next card to a player, given a player object.
@@ -47,6 +54,13 @@ public interface IGameSession {
      * @return the card that they drew
      */
     Card dealCard(GamePlayer player);
+
+    /**
+     * When we reached the end of a round, this will determine the winner and tell us if the game is over or
+     * just the round
+     * @return round status response including player who won and booleans to indicate if round or game is over
+     */
+    RoundStatusResponse determineWinner();
 
     /**
      * Called to change a player's ready status when inside the lobby.
@@ -65,6 +79,7 @@ public interface IGameSession {
      * Removes a player from the lobby. Normally this should only be called if the user disconnects from
      * the lobby itself, not mid-game.
      * @param player to remove from the lobby
+     * @return true if the removal was a success
      */
-    void removePlayer(GamePlayer player);
+    Boolean removePlayer(GamePlayer player);
 }

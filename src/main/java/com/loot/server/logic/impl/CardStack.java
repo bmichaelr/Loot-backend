@@ -45,4 +45,8 @@ public class CardStack implements ICardStack {
 
     @Override
     public Boolean deckIsEmpty() { return drawPile == null || drawPile.isEmpty(); }
+
+    public Integer getNumberOfCardsInDeck() {
+        return drawPile.size();
+    }
 }

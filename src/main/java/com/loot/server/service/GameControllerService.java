@@ -2,10 +2,9 @@ package com.loot.server.service;
 
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.request.*;
-import com.loot.server.domain.response.LobbyResponse;
-import com.loot.server.domain.response.ServerData;
-import com.loot.server.domain.response.TurnUpdateResponse;
+import com.loot.server.domain.response.*;
 import com.loot.server.logic.impl.GameSession;
+import com.loot.server.logic.impl.GameSession.GameAction;
 import org.modelmapper.internal.Pair;
 
 import java.util.List;
@@ -33,7 +32,7 @@ public interface GameControllerService {
      * @param gameInteractionRequest containing the player information and the room key
      * @param sessionId of the client leaving, so they can be removed from the cache
      */
-    void removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId);
+    Boolean removePlayerFromGameSession(GameInteractionRequest gameInteractionRequest, String sessionId);
 
     /**
      * A client wishes to join an already existing lobby.
@@ -42,7 +41,19 @@ public interface GameControllerService {
      */
     void joinCurrentGameSession(JoinGameRequest request, String sessionId);
 
+    /**
+     * Check if a game is join able
+     * @param roomKey of the game
+     * @return true if you can join the room
+     */
     Boolean gameAbleToBeJoined(String roomKey);
+
+    /**
+     * Check if the room key given by a user even exists
+     * @param roomKey to check
+     * @return true if the room exists
+     */
+    Boolean gameExists(String roomKey);
 
     /**
      * Retrieve the information about a currently instantiated game session
@@ -51,15 +62,41 @@ public interface GameControllerService {
      */
     LobbyResponse getInformationForLobby(String roomKey);
 
-    List<Pair<UUID, Card>> getFirstCards(String roomKey);
+    /**
+     * Get everyone's first card for the round
+     * @param roomKey of the game session
+     * @return the list of people and their cards
+     */
+    StartRoundResponse startRound(String roomKey);
 
-    TurnUpdateResponse playCard(PlayCardRequest playCardRequest);
+    /**
+     * Get the status of the round/game, who won and whether it is over
+     * @param roomKey for the game session
+     * @return round status response containing winning player and boolean flags
+     */
+    RoundStatusResponse getRoundStatus(String roomKey);
 
-    Pair<GamePlayer, Card> nextTurn(String roomKey);
+    /**
+     * Used to play a card
+     * @param playCardRequest the request containing the player and the card they are playing
+     * @return a response indicating what the result was
+     */
+    PlayedCardResponse playCard(PlayCardRequest playCardRequest);
 
-    GamePlayer getNextPlayersTurn(String roomKey);
+    /**
+     * Return the next player and the card they were dealt
+     * @param roomKey of the game session
+     * @return the player and the card
+     */
+    NextTurnResponse getNextTurn(String roomKey);
 
-    Boolean playerLoadedIn(String roomKey, GamePlayer player);
+    /**
+     * Sync the player, and return the action that should be taken
+     * @param roomKey of game session
+     * @param player syncing
+     * @return action to take if any
+     */
+    GameAction syncPlayer(String roomKey, GamePlayer player);
 
     /**
      * Update a lobby when a client has disconnected and won't be reconnecting to the server

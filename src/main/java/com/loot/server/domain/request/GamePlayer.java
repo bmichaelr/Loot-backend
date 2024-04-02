@@ -21,19 +21,17 @@ public class GamePlayer {
     private UUID id;
 
     @JsonProperty
+    private String name;
+
+    @JsonProperty
     private Boolean ready;
-
-    @JsonProperty
-    private String status;
-
-    @JsonProperty
-    private Boolean loadedIn;
 
     @JsonProperty
     private Boolean isSafe;
 
     @JsonProperty
-    private String name;
+    private Boolean isOut;
+
 
     @JsonIgnore
     @Override
@@ -59,7 +57,7 @@ public class GamePlayer {
     @Override
     public String toString(){
         return "Game Player : {\n\tname : " + this.name + ",\n\tid : " + this.id + ",\n\tready : " + this.ready
-                + ",\n\tloadedIn: " + this.loadedIn + ",\n\tsafe : " + this.isSafe + "\n}";
+                + ",\n\tsafe : " + this.isSafe + ",\n\tout: " + isOut + "\n}";
     }
 
     @JsonIgnore
@@ -68,10 +66,5 @@ public class GamePlayer {
                 .name(this.name)
                 .id(this.id)
                 .build();
-    }
-
-    @JsonIgnore
-    public Boolean missingParam() {
-        return this.getName() == null || this.getId() == null;
     }
 }

@@ -101,6 +101,9 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
 
     UUID clientID = joinGameRequest.getPlayer().getId();
     String roomKey = joinGameRequest.getRoomKey();
+    if(!gameControllerService.gameExists(roomKey)) {
+      return Pair.of(RequestErrorType.INVALID_ROOM_KEY, clientID);
+    }
     if(!gameControllerService.gameAbleToBeJoined(roomKey)) {
       return Pair.of(RequestErrorType.UNABLE_TO_JOIN_GAME, clientID);
     }
