@@ -133,9 +133,7 @@ public class GameSession implements IGameSession {
       gameState = GameState.ROUND_OVER;
     }
 
-    log(playerActing.getId() + " just played " + Card.fromPower(powerOfPlayedCard).getName());
     Boolean waitFlag = playedCard.getPower() == 2 || playedCard.getPower() == 3;
-    GamePlayer playerWhoJustActed = players.get(players.indexOf(playerActing));
     PlayedCardResponse response =  PlayedCardResponse.builder()
             .cardPlayed(Card.fromPower(playedCard.getPower()))
             .outcome(outcome)
@@ -235,7 +233,6 @@ public class GameSession implements IGameSession {
       }
     }
 
-    log("Determining the winner: Winner is " + winningPlayer.getId() + ", they have won " + numberOfWins.get(winningPlayer) + " times.");
     return RoundStatusResponse.builder()
             .winner(winningPlayer)
             .roundOver(true)
@@ -270,7 +267,6 @@ public class GameSession implements IGameSession {
       cardList.add(Card.fromPower(drawnCard));
     }
 
-    log("Starting the round.");
     return Pair.of(playerList, cardList);
   }
 
@@ -419,28 +415,5 @@ public class GameSession implements IGameSession {
     }
 
     return stringBuilder.toString();
-  }
-
-  private void log(String actionTaken) {
-    final String ANSI_RESET = "\u001B[0m";
-    final String ANSI_RED = "\u001B[31m";
-    final String ANSI_GREEN = "\u001B[32m";
-    final String ANSI_YELLOW = "\u001B[33m";
-    final String ANSI_BLUE = "\u001B[34m";
-    final String ANSI_PURPLE = "\u001B[35m";
-    final String ANSI_CYAN = "\u001B[36m";
-    final String ANSI_WHITE = "\u001B[37m";
-
-    String separator = ANSI_BLUE + "+--------------------------------+-------------------------------------------------------+" + ANSI_RESET;
-    System.out.println("\n\nGameSession Log ::\nThe action being taken: " + actionTaken + "\nThe number of cards in the deck: " + cardStack.getNumberOfCardsInDeck());
-    System.out.println(separator);
-    System.out.printf("|      %-20s      |      %-45s    |\n", "Player", "Their Current Cards");
-
-    for(var player : cardsInHand.keySet()) {
-      String playerColor = player.getIsOut() ? ANSI_RED : ANSI_GREEN;
-      System.out.println(separator);
-      System.out.println(playerColor + player.getId() + ANSI_RESET + ", " + cardsInHand.get(player));
-    }
-    System.out.println(separator);
   }
 }
