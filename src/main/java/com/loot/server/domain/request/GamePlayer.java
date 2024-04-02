@@ -57,7 +57,7 @@ public class GamePlayer {
     @Override
     public String toString(){
         return "Game Player : {\n\tname : " + this.name + ",\n\tid : " + this.id + ",\n\tready : " + this.ready
-                + ",\n\tsafe : " + this.isSafe + "\n}";
+                + ",\n\tsafe : " + this.isSafe + ",\n\tout: " + isOut + "\n}";
     }
 
     @JsonIgnore

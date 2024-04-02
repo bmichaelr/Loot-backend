@@ -100,31 +100,30 @@ public class GameSession implements IGameSession {
 
   @Override
   public PlayedCardResponse playCard(GamePlayer playerActing, PlayedCard playedCard) {
-    Boolean waitFlag = playedCard.getPower() == 2 || playedCard.getPower() == 3;
-
-    // Build the response partially
-    PlayedCardResponse playedCardResponse = PlayedCardResponse.builder()
-            .playerWhoPlayed(playerActing)
-            .cardPlayed(Card.fromPower(playedCard.getPower()))
-            .waitFlag(waitFlag)
-            .build();
-
+    System.out.println("Play card called!\nPlayer who is playing the card: " + playerActing.getId() + "\nThe card they are playing: " + playedCard);
     int powerOfPlayedCard = playedCard.getPower();
     cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
     int powerOfPlayerOtherCard = cardsInHand.get(playerActing).getHoldingCard();
     playedCards.get(playerActing).add(Card.fromPower(powerOfPlayedCard));
 
+    BaseCardResult outcome;
     if (playedCard instanceof TargetedEffectCard effectCard) {
-      playedCardResponse.setOutcome(playTargetedEffectCard(effectCard, powerOfPlayerOtherCard, playerActing));
+      outcome = playTargetedEffectCard(effectCard, powerOfPlayerOtherCard, playerActing);
     } else if (playedCard instanceof GuessingCard guessingCard) {
-      playedCardResponse.setOutcome(playGuessingCard(guessingCard));
+      outcome = playGuessingCard(guessingCard);
     } else {
       CardEnum card = CardEnum.fromValue(powerOfPlayedCard);
-      playedCardResponse.setOutcome(null);
+      outcome = new BaseCardResult(playerActing);
       switch (card) {
-        case WISHING_RING -> playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        case WISHING_RING -> {
+          playerActing.setIsSafe(true);
+          playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
+        }
         case DRAGON ->  {} //do nothing;
-        case LOOT -> removePlayerFromRound(playerActing);
+        case LOOT -> {
+          playerActing.setIsOut(true);
+          removePlayerFromRound(playerActing);
+        }
         default -> throw new RuntimeException("Unknown card in personal play section!");
       }
     }
@@ -134,7 +133,18 @@ public class GameSession implements IGameSession {
       gameState = GameState.ROUND_OVER;
     }
 
-    return playedCardResponse;
+    log(playerActing.getId() + " just played " + Card.fromPower(powerOfPlayedCard).getName());
+    Boolean waitFlag = playedCard.getPower() == 2 || playedCard.getPower() == 3;
+    GamePlayer playerWhoJustActed = players.get(players.indexOf(playerActing));
+    PlayedCardResponse response =  PlayedCardResponse.builder()
+            .cardPlayed(Card.fromPower(playedCard.getPower()))
+            .outcome(outcome)
+            .playerWhoPlayed(playerActing)
+            .waitFlag(waitFlag)
+            .build();
+
+    System.out.println("THE PLAYED CARD RESPONSE BEING SENT FROM SERVER: " + response);
+    return response;
   }
 
   private BaseCardResult playTargetedEffectCard(TargetedEffectCard card, int playersCard, GamePlayer playerActing) {
@@ -150,20 +160,22 @@ public class GameSession implements IGameSession {
         GamePlayer playerToDiscard = null;
         int powerOfOpponentCard = cardsInHand.get(playedOn).getCardInHand();
         if (powerOfOpponentCard > playersCard) {
+          playerActing.setIsOut(true);
           removePlayerFromRound(playerActing);
           playerToDiscard = playerActing;
         } else if (powerOfOpponentCard < playersCard) {
+          playedOn.setIsOut(true);
           removePlayerFromRound(playedOn);
           playerToDiscard = playedOn;
         }
         yield new DuckResult(playedOn, Card.fromPower(powerOfOpponentCard), Card.fromPower(playersCard), playerToDiscard);
-
       case NET_TROLL:
         int discardedCard = cardsInHand.get(playedOn).discardHand();
         playedCards.get(playedOn).add(Card.fromPower(discardedCard));
         Card drawnCard = null;
         if (cardStack.deckIsEmpty() || discardedCard == 8) {
           removePlayerFromRound(playedOn);
+          playedOn.setIsOut(true);
         } else {
           int newCard = cardStack.drawCard();
           cardsInHand.get(playedOn).drawCard(newCard);
@@ -189,6 +201,7 @@ public class GameSession implements IGameSession {
     boolean successfulGuess = cardsInHand.get(playedOn).getCardInHand().equals(guessedCard);
 
     if (successfulGuess) {
+      playedOn.setIsOut(true);
       removePlayerFromRound(playedOn);
     }
 
@@ -221,6 +234,8 @@ public class GameSession implements IGameSession {
         gameIsOver = true;
       }
     }
+
+    log("Determining the winner: Winner is " + winningPlayer.getId() + ", they have won " + numberOfWins.get(winningPlayer) + " times.");
     return RoundStatusResponse.builder()
             .winner(winningPlayer)
             .roundOver(true)
@@ -255,6 +270,7 @@ public class GameSession implements IGameSession {
       cardList.add(Card.fromPower(drawnCard));
     }
 
+    log("Starting the round.");
     return Pair.of(playerList, cardList);
   }
 
@@ -264,6 +280,7 @@ public class GameSession implements IGameSession {
     if (index < turnIndex) {
       turnIndex -= 1;
     }
+    players.get(players.indexOf(playerToRemove)).setIsOut(true);
     playersInRound.get(index).setIsOut(true);
     playersInRound.remove(playerToRemove);
     if (cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
@@ -318,8 +335,11 @@ public class GameSession implements IGameSession {
 
   @Override
   synchronized public void addPlayer(GamePlayer player) {
-    numberOfPlayers += 1;
+    player.setIsOut(false);
+    player.setIsSafe(false);
     player.setReady(false);
+
+    numberOfPlayers += 1;
     players.add(player);
   }
 
@@ -355,7 +375,10 @@ public class GameSession implements IGameSession {
           }
           yield GameAction.NEXT_TURN;
         }
-        case ROUND_OVER, GAME_OVER -> GameAction.ROUND_END;
+        case ROUND_OVER, GAME_OVER -> {
+          gameState = GameState.WAITING_TO_START;
+          yield GameAction.ROUND_END;
+        }
       };
       numberOfPlayersSynced = 0;
       return actionToTake;
@@ -396,5 +419,28 @@ public class GameSession implements IGameSession {
     }
 
     return stringBuilder.toString();
+  }
+
+  private void log(String actionTaken) {
+    final String ANSI_RESET = "\u001B[0m";
+    final String ANSI_RED = "\u001B[31m";
+    final String ANSI_GREEN = "\u001B[32m";
+    final String ANSI_YELLOW = "\u001B[33m";
+    final String ANSI_BLUE = "\u001B[34m";
+    final String ANSI_PURPLE = "\u001B[35m";
+    final String ANSI_CYAN = "\u001B[36m";
+    final String ANSI_WHITE = "\u001B[37m";
+
+    String separator = ANSI_BLUE + "+--------------------------------+-------------------------------------------------------+" + ANSI_RESET;
+    System.out.println("\n\nGameSession Log ::\nThe action being taken: " + actionTaken + "\nThe number of cards in the deck: " + cardStack.getNumberOfCardsInDeck());
+    System.out.println(separator);
+    System.out.printf("|      %-20s      |      %-45s    |\n", "Player", "Their Current Cards");
+
+    for(var player : cardsInHand.keySet()) {
+      String playerColor = player.getIsOut() ? ANSI_RED : ANSI_GREEN;
+      System.out.println(separator);
+      System.out.println(playerColor + player.getId() + ANSI_RESET + ", " + cardsInHand.get(player));
+    }
+    System.out.println(separator);
   }
 }

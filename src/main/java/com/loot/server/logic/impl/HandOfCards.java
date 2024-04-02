@@ -1,5 +1,6 @@
 package com.loot.server.logic.impl;
 
+import com.loot.server.domain.cards.Card;
 import com.loot.server.logic.IHandOfCards;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -55,6 +56,9 @@ public class HandOfCards implements IHandOfCards {
 
     @Override
     public String toString() {
-        return "Hand of Cards:\n\tHolding Card: " + holdingCard + "\n\tDrawn Card: " + drawnCard;
+        String inHand = "Holding Card: " + ((holdingCard == -1) ? "None" : Card.fromPower(holdingCard).getName());
+        String drawn = ", Drawn Card: " + ((drawnCard == -1) ? "None" : Card.fromPower(drawnCard).getName());
+
+        return inHand + drawn;
     }
 }

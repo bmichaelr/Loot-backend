@@ -1,12 +1,19 @@
 package com.loot.server.ControllerTest;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.loot.server.GameSessionTests.GameSessionTestsUtil;
+import com.loot.server.domain.cards.Card;
+import com.loot.server.domain.cards.GuessingCard;
+import com.loot.server.domain.cards.PlayedCard;
+import com.loot.server.domain.cards.TargetedEffectCard;
+import com.loot.server.domain.cards.cardresults.*;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.ControllerTest.GameControllerTestUtil.RequestType;
-import lombok.Getter;
+import lombok.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +31,6 @@ import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
-import java.sql.Time;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -131,7 +137,6 @@ public class GameControllerTest {
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
 
         LobbyResponse lobbyResponse = (LobbyResponse) wsTestHelper.pollQueue(FrameHandlerType.LOBBY_RESPONSE);
-        System.out.println(lobbyResponse);
         wsTestHelper.shutdown();
     }
 
@@ -376,6 +381,89 @@ public class GameControllerTest {
         wsTestHelper.shutdown();
     }
 
+    @Test
+    void verifyThatSecondSyncCallReturnsNextTurnResponse() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        final List<GamePlayer> players = new ArrayList<>(4);
+        String roomKey = createRandomGameAndFillIt(ws, players);
+
+        StartRoundResponse startRoundResponse = (StartRoundResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.START_ROUND_RESPONSE);
+        assertNotNull(startRoundResponse);
+        NextTurnResponse nextTurnResponse = (NextTurnResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.NEXT_TURN_RESPONSE);
+        assertNotNull(nextTurnResponse);
+        ws.shutdown();
+    }
+
+    @Test
+    void verifyThatEndpointsWorkAsExpectedWhenMockPlaying() throws ExecutionException, InterruptedException, TimeoutException {
+        WsTestHelper ws = new WsTestHelper(getWsPath());
+        final List<GamePlayer> players = new ArrayList<>(4);
+        String roomKey = createRandomGameAndFillIt(ws, players);
+
+        // Get the first start round response from the server
+        StartRoundResponse startRoundResponse = (StartRoundResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.START_ROUND_RESPONSE);
+        GameHelper gameHelper = new GameHelper(startRoundResponse.getPlayersAndCards(), roomKey);
+
+        // Listen to all the channels needed for the game
+        ws.listenToChannel("/topic/game/nextTurn/" + roomKey, FrameHandlerType.NEXT_TURN_RESPONSE);
+        ws.listenToChannel("/topic/game/roundStatus/" + roomKey, FrameHandlerType.ROUND_STATUS_RESPONSE);
+        ws.listenToChannel("/topic/game/turnStatus/" + roomKey, FrameHandlerType.PLAYED_CARD_RESPONSE);
+
+        // Game Loop!
+        while(true) {
+            ws.clearAllQueues();
+            syncAllPlayers(ws, players, roomKey);
+
+            await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE) && ws.isQueueEmpty(FrameHandlerType.ROUND_STATUS_RESPONSE)));
+
+            // Handle the case where there was not next turn response and instead the round status response was sent
+            // TODO: implement a full game loop here, not just one turn
+            if(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE)) {
+                assertFalse(ws.isQueueEmpty(FrameHandlerType.ROUND_STATUS_RESPONSE));
+                RoundStatusResponse roundStatusResponse = (RoundStatusResponse) ws.pollQueue(FrameHandlerType.ROUND_STATUS_RESPONSE);
+                System.out.println("ROUND STATUS RESPONSE OBJECT: " + roundStatusResponse);
+                break;
+            }
+
+            // In this case, the next turn response queue is not empty
+            assertFalse(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE));
+            NextTurnResponse nextTurnResponse = (NextTurnResponse) ws.pollQueue(FrameHandlerType.NEXT_TURN_RESPONSE);
+            gameHelper.addCard(nextTurnResponse);
+
+            PlayCardRequestWrapper playCardRequest = gameHelper.playRandomCard();
+            ws.sendToSocket("/app/game/playCard", playCardRequest);
+
+            await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.PLAYED_CARD_RESPONSE)));
+            PlayedCardResponse playedCardResponse = (PlayedCardResponse) ws.pollQueue(FrameHandlerType.PLAYED_CARD_RESPONSE);
+            gameHelper.playCard(playedCardResponse);
+        }
+        ws.shutdown();
+     }
+
+    private Object doASyncCall(WsTestHelper ws, List<GamePlayer> players, String key, FrameHandlerType responseExpected) throws InterruptedException {
+        switch(responseExpected) {
+            case START_ROUND_RESPONSE -> ws.listenToChannel("/topic/game/startRound/" + key, responseExpected);
+            case NEXT_TURN_RESPONSE -> ws.listenToChannel("/topic/game/nextTurn/" + key, responseExpected);
+            case ROUND_STATUS_RESPONSE -> ws.listenToChannel("/topic/game/roundStatus/" + key, responseExpected);
+            default -> throw new RuntimeException("Unexpected frame handler passed in to sync call!");
+        }
+
+        for (var player : players) {
+            GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(key, player);
+            ws.sendToSocket("/app/game/sync", request);
+        }
+
+        await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(responseExpected)));
+        return ws.pollQueue(responseExpected);
+    }
+
+    private void syncAllPlayers(WsTestHelper ws, List<GamePlayer> players, String key) {
+        for (var player : players) {
+            GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(key, player);
+            ws.sendToSocket("/app/game/sync", request);
+        }
+    }
+
     private String createRandomGame(WsTestHelper wsTestHelper) throws InterruptedException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.RANDOM_PLAYER);
         UUID randomUUID = createGameRequest.getPlayer().getId();
@@ -459,6 +547,9 @@ public class GameControllerTest {
         public Object pollQueue(FrameHandlerType forFrame) throws InterruptedException {
             return queues.get(forFrame).poll(3, SECONDS);
         }
+        public void clearAllQueues() {
+            queues.values().forEach(BlockingQueue::clear);
+        }
         public void shutdown() {
             session.disconnect();
             queues.values().forEach(BlockingQueue::clear);
@@ -522,5 +613,252 @@ public class GameControllerTest {
             queues.put(FrameHandlerType.AVAILABLE_SERVER_RESPONSE, arrayBlockingQueue);
             frameHandlers.put(FrameHandlerType.AVAILABLE_SERVER_RESPONSE, frameHandler);
         }
+    }
+
+    private class GameHelper {
+
+        private final Map<GamePlayer, List<Card>> players;
+        private GamePlayer playerWhoseTurnItIs = null;
+        private final Random random = new Random();
+        private final String roomKey;
+
+        public GameHelper(List<PlayerCardPair> startingData, String roomKey) {
+            this.roomKey = roomKey;
+            players = new HashMap<>();
+            for(var pair : startingData) {
+                players.put(pair.getPlayer(), new ArrayList<>());
+                players.get(pair.getPlayer()).add(pair.getCard());
+            }
+        }
+        public void playCard(PlayedCardResponse playedCardResponse) {
+            System.out.println("Call to playCard with PlayedCardResponse: " + playedCardResponse);
+            GamePlayer playerWhoPlayed = playedCardResponse.getPlayerWhoPlayed();
+            List<Card> playersCards = players.get(playerWhoPlayed);
+            Card playedCard = playedCardResponse.getCardPlayed();
+            for(var card : playersCards) {
+                if (card.getPower() == playedCard.getPower()) {
+                    playersCards.remove(card);
+                    break;
+                }
+            }
+
+            // Do this to update the players boolean fields (idk if you can alter the key of a map)
+            players.remove(playerWhoPlayed);
+            players.put(playerWhoPlayed, playersCards);
+
+            doCardLogic(playedCardResponse.getOutcome(), playerWhoPlayed);
+        }
+        private void doCardLogic(BaseCardResult result, GamePlayer playerWhoPlayed) {
+            if(result instanceof DuckResult duckResult) {
+                // Do duck result
+                doDuckResultLogic(duckResult);
+            } else if(result instanceof GazeboResult gazeboResult) {
+                // Do gazebo result
+                doGazeboResultLogic(gazeboResult, playerWhoPlayed);
+            } else if(result instanceof MaulRatResult maulRatResult) {
+                // Do maul rat result
+                doMaulRatResultLogic(maulRatResult);
+            } else if(result instanceof NetTrollResult netTrollResult) {
+                // Do the net troll result
+                doNetTrollResultLogic(netTrollResult);
+            } else if(result instanceof PottedResult pottedResult) {
+                // Do the potted result
+                doPottedPlantResultLogic(pottedResult);
+            } else {
+                GamePlayer playerEffected = result.getPlayedOn();
+                List<Card> playerEffectedCards = players.get(playerEffected);
+                if(playerEffectedCards == null) {
+                    throw new RuntimeException("Unable to get the effected player from the map!");
+                }
+
+                // Refresh the mapping in case their status variables changed
+                players.remove(playerEffected);
+                players.put(playerEffected, playerEffectedCards);
+            }
+        }
+        private void doDuckResultLogic(DuckResult duckResult) {
+            GamePlayer playerWhoLost = duckResult.getPlayerToDiscard();
+            if(playerWhoLost.getIsOut() != Boolean.TRUE) {
+                throw new RuntimeException("The player who lost the duck of doom is not marked as out!");
+            }
+
+            List<Card> playerWhoLostCards = players.get(playerWhoLost);
+            if(playerWhoLostCards == null) {
+                throw new RuntimeException("Could not find the player who lost in map! (DUCK OF DOOM)");
+            }
+
+            // Refresh mapping
+            assert playerWhoLost.getIsOut();
+            playerWhoLostCards.clear();
+            players.remove(playerWhoLost);
+            players.put(playerWhoLost, playerWhoLostCards);
+        }
+        private void doGazeboResultLogic(GazeboResult gazeboResult, GamePlayer playerWhoPlayed) {
+            GamePlayer opponent = gazeboResult.getPlayedOn();
+            Card playerWhoPlayedCard = gazeboResult.getPlayersCard();
+            Card opponentCard = gazeboResult.getOpponentCard();
+
+            List<Card> playerWhoPlayedCards = players.get(playerWhoPlayed);
+            playerWhoPlayedCards.remove(playerWhoPlayedCard);
+            playerWhoPlayedCards.add(opponentCard);
+
+            List<Card> opponentCards = players.get(opponent);
+            opponentCards.remove(opponentCard);
+            opponentCards.add(playerWhoPlayedCard);
+        }
+        private void doMaulRatResultLogic(MaulRatResult maulRatResult) {
+            // nothing happens
+        }
+        private void doNetTrollResultLogic(NetTrollResult netTrollResult) {
+            GamePlayer playedOn = netTrollResult.getPlayedOn();
+            Card discardedCard = netTrollResult.getDiscardedCard();
+
+            List<Card> playedOnCards = players.get(playedOn);
+            if(playedOnCards == null) {
+                throw new RuntimeException("Unable to retrieve the played on player from the map! (NET TROLL RESULT)");
+            }
+            playedOnCards.remove(discardedCard);
+
+            if(playedOn.getIsOut()) {
+                players.remove(playedOn);
+                players.put(playedOn, playedOnCards);
+                return;
+            }
+
+            Card drawnCard = netTrollResult.getDrawnCard();
+            playedOnCards.add(drawnCard);
+            players.put(playedOn, playedOnCards);
+        }
+        private void doPottedPlantResultLogic(PottedResult pottedResult) {
+            GamePlayer playedOn = pottedResult.getPlayedOn();
+            List<Card> playedOnCards = players.get(playedOn);
+
+            if(playedOnCards == null) {
+                throw new RuntimeException("Unable to get played on player from the map! (POTTED RESULT)");
+            }
+
+            Card cardGuessed = pottedResult.getGuessedCard();
+            boolean correctGuess = pottedResult.getCorrectGuess();
+
+            if(correctGuess) {
+                assert playedOn.getIsOut();
+                playedOnCards.remove(cardGuessed);
+                players.remove(playedOn);
+                players.put(playedOn, playedOnCards);
+            }
+        }
+        public void addCard(NextTurnResponse nextTurnResponse) {
+            System.out.println("Call to addCard, nextTurnResponse = " + nextTurnResponse);
+            if(nextTurnResponse == null) {
+                throw new RuntimeException("NULL NextTurnResponse detected in addCard!");
+            }
+
+            GamePlayer player = nextTurnResponse.getPlayer();
+            Card card = nextTurnResponse.getCard();
+
+            List<Card> mapping = players.get(player);
+            if(mapping == null) {
+                throw new RuntimeException("NULL list of cards in addCard for player -> " + player);
+            }
+
+            mapping.add(card);
+            players.put(player, mapping);
+            playerWhoseTurnItIs = player;
+        }
+        public PlayCardRequestWrapper playRandomCard() {
+            if(playerWhoseTurnItIs == null) {
+                throw new RuntimeException("The current player is null! Something went wrong.");
+            }
+
+            System.out.println("Call to playRandomCard: Player whose turn it is: " + playerWhoseTurnItIs);
+
+            List<Card> playersCards = players.get(playerWhoseTurnItIs);
+            int indexOfCardToPlay = random.nextInt() % 2 == 0 ? 0 : 1;
+            Card cardToBePlayed = playersCards.remove(indexOfCardToPlay);
+            PlayedCardWrapper playedCard = playThisCardRandomly(cardToBePlayed, playerWhoseTurnItIs);
+            return PlayCardRequestWrapper.builder()
+                    .roomKey(roomKey)
+                    .player(playerWhoseTurnItIs)
+                    .card(playedCard)
+                    .build();
+        }
+        private PlayedCardWrapper playThisCardRandomly(Card card, GamePlayer self) {
+            return switch (card.getPower()) {
+                case 1:
+                    GuessingCard guessingCard = new GuessingCard(1, random.nextInt(2, 9), getRandomPlayer(self));
+                    yield new PlayedCardWrapper(guessingCard);
+                case 2, 3, 5, 6:
+                    TargetedEffectCard targetedEffectCard = new TargetedEffectCard(card.getPower(), getRandomPlayer(self));
+                    yield new PlayedCardWrapper(targetedEffectCard);
+                case 4, 7, 8:
+                    PlayedCard playedCard = new PlayedCard(card.getPower());
+                    yield new PlayedCardWrapper(playedCard);
+                default:
+                    throw new RuntimeException("Unknown card level passed in to playThisCardRandomly -> " + card.getPower());
+            };
+        }
+        private GamePlayer getRandomPlayer(GamePlayer self) {
+            for(var player : players.keySet()) {
+                if(player.equals(self)) continue;
+                if(!player.getIsOut()) return player;
+            }
+            throw new RuntimeException("There are no players in the round that are not out!");
+        }
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class PlayedCardWrapper {
+
+        @JsonProperty
+        private int power;
+        @JsonProperty
+        private String type;
+        @JsonProperty
+        private GamePlayer guessedOn;
+        @JsonProperty
+        private int guessedCard;
+        @JsonProperty
+        private GamePlayer playedOn;
+
+        @JsonIgnore
+        public PlayedCardWrapper(PlayedCard playedCard) {
+            this.type = "personal";
+            this.power = playedCard.getPower();
+        }
+
+        @JsonIgnore
+        public PlayedCardWrapper(GuessingCard guessingCard) {
+            this.type = "guess";
+            this.power = guessingCard.getPower();
+            this.guessedOn = guessingCard.getGuessedOn();
+            this.guessedCard = guessingCard.getGuessedCard();
+        }
+
+        @JsonIgnore
+        public PlayedCardWrapper(TargetedEffectCard targetedEffectCard) {
+            this.type = "targeted";
+            this.power = targetedEffectCard.getPower();
+            this.playedOn = targetedEffectCard.getPlayedOn();
+        }
+    }
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class PlayCardRequestWrapper {
+
+        @JsonProperty
+        private String roomKey;
+
+        @JsonProperty
+        private GamePlayer player;
+
+        @JsonProperty
+        private PlayedCardWrapper card;
     }
 }

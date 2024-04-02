@@ -70,6 +70,9 @@ public class GameControllerTestUtil {
                     .player(GamePlayer.builder()
                             .id(UUID.randomUUID())
                             .name("Rando")
+                            .ready(false)
+                            .isSafe(false)
+                            .isOut(false)
                             .build())
                     .roomName(TEST_ROOM_NAME)
                     .build();
