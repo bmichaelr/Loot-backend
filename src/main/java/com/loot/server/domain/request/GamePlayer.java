@@ -32,6 +32,14 @@ public class GamePlayer {
     @JsonProperty
     private Boolean isOut;
 
+    @JsonIgnore
+    public GamePlayer(String name) {
+        this.name = name;
+        this.ready = false;
+        this.isOut = false;
+        this.isSafe = false;
+        this.id = UUID.randomUUID();
+    }
 
     @JsonIgnore
     @Override
