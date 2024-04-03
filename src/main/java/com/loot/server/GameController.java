@@ -1,6 +1,7 @@
 package com.loot.server;
 
 import com.loot.server.domain.ObjectDecodingTestsHelper;
+import com.loot.server.domain.cards.cardresults.BaseCardResult;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.logic.impl.GameSession.GameAction;

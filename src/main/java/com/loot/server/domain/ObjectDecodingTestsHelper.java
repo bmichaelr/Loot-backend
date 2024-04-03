@@ -80,7 +80,6 @@ public class ObjectDecodingTestsHelper {
             case 6 -> new GazeboResult(mockGamePlayer(), Card.pottedPlant(), Card.turboniumDragon());
             default -> throw new RuntimeException("Invalid number passed to outcome switch!");
         };
-
         return PlayedCardResponse.builder()
                 .playerWhoPlayed(mockGamePlayer())
                 .cardPlayed(Card.pottedPlant())
