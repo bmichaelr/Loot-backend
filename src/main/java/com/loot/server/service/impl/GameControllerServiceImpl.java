@@ -162,6 +162,7 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         return LobbyResponse.builder()
                 .roomKey(roomKey)
+                .name(gameSession.getName())
                 .players(gameSession.getPlayers())
                 .allReady(gameSession.allPlayersReady())
                 .build();
