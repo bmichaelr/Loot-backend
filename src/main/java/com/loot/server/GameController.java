@@ -1,5 +1,7 @@
 package com.loot.server;
 
+import com.loot.server.domain.ObjectDecodingTestsHelper;
+import com.loot.server.domain.cards.cardresults.BaseCardResult;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.logic.impl.GameSession.GameAction;
@@ -27,6 +29,8 @@ public class GameController {
 
     @MessageMapping("/loadAvailableServers")
     public void getAvailableServers(GamePlayer playerRequesting) {
+        System.out.println("Received a message in the server method!");
+
         if(errorCheckingService.requestContainsError(playerRequesting)) { return; }
         UUID clientId = playerRequesting.getId();
         List<ServerData> response = gameService.getListOfServers();
@@ -103,5 +107,21 @@ public class GameController {
         String roomKey = playCardRequest.getRoomKey();
         PlayedCardResponse response = gameService.playCard(playCardRequest);
         messagingTemplate.convertAndSend("/topic/game/turnStatus/" + roomKey, response);
+    }
+
+    // Tests for swift side
+    @MessageMapping("/test/decoding")
+    public void testLobbyResponseDecoding(ObjectDecodeTestRequest request) throws Exception {
+        Object response = switch(request.getType()) {
+            case "LOBBY_RESPONSE"   -> ObjectDecodingTestsHelper.mockLobbyResponse();
+            case "SERVERS_RESPONSE" -> ObjectDecodingTestsHelper.mockServersResponse();
+            case "GAME_PLAYER"      -> ObjectDecodingTestsHelper.mockGamePlayer();
+            case "START_ROUND"      -> ObjectDecodingTestsHelper.mockStartRoundResponse();
+            case "NEXT_TURN"        -> ObjectDecodingTestsHelper.mockNextTurnResponse();
+            case "ROUND_STATUS"     -> ObjectDecodingTestsHelper.mockRoundStatusResponse();
+            case "PLAYED_CARD"      -> ObjectDecodingTestsHelper.mockPlayedCardResponse();
+            default -> throw new Exception("Unknown type caught in decoding switch!");
+        };
+        messagingTemplate.convertAndSend("/topic/test/decoding/" + request.getId(), response);
     }
 }

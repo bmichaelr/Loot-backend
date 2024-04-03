@@ -27,8 +27,6 @@ import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.SockJsClient;
-import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -74,9 +72,7 @@ public class GameControllerTest {
 
     @BeforeEach
     void setup() {
-        webSocketStompClient =
-                new WebSocketStompClient(
-                        new SockJsClient(List.of(new WebSocketTransport(new StandardWebSocketClient()))));
+        webSocketStompClient = new WebSocketStompClient(new StandardWebSocketClient());
         webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
     }
 
@@ -769,8 +765,6 @@ public class GameControllerTest {
             if(playerWhoseTurnItIs == null) {
                 throw new RuntimeException("The current player is null! Something went wrong.");
             }
-
-            System.out.println("Call to playRandomCard: Player whose turn it is: " + playerWhoseTurnItIs);
 
             List<Card> playersCards = players.get(playerWhoseTurnItIs);
             int indexOfCardToPlay = random.nextInt() % 2 == 0 ? 0 : 1;

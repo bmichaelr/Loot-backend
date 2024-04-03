@@ -100,7 +100,6 @@ public class GameSession implements IGameSession {
 
   @Override
   public PlayedCardResponse playCard(GamePlayer playerActing, PlayedCard playedCard) {
-    System.out.println("Play card called!\nPlayer who is playing the card: " + playerActing.getId() + "\nThe card they are playing: " + playedCard);
     int powerOfPlayedCard = playedCard.getPower();
     cardsInHand.get(playerActing).playedCard(powerOfPlayedCard);
     int powerOfPlayerOtherCard = cardsInHand.get(playerActing).getHoldingCard();
@@ -134,15 +133,12 @@ public class GameSession implements IGameSession {
     }
 
     Boolean waitFlag = playedCard.getPower() == 2 || playedCard.getPower() == 3;
-    PlayedCardResponse response =  PlayedCardResponse.builder()
+      return PlayedCardResponse.builder()
             .cardPlayed(Card.fromPower(playedCard.getPower()))
             .outcome(outcome)
             .playerWhoPlayed(playerActing)
             .waitFlag(waitFlag)
             .build();
-
-    System.out.println("THE PLAYED CARD RESPONSE BEING SENT FROM SERVER: " + response);
-    return response;
   }
 
   private BaseCardResult playTargetedEffectCard(TargetedEffectCard card, int playersCard, GamePlayer playerActing) {
