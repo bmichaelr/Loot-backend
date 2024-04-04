@@ -32,6 +32,9 @@ public class GamePlayer {
     @JsonProperty
     private Boolean isOut;
 
+    @JsonProperty
+    private Boolean isHost;
+
     @JsonIgnore
     public GamePlayer(String name) {
         this.name = name;

@@ -1,9 +1,6 @@
 package com.loot.server.ServiceTests;
 
-import com.loot.server.domain.request.CreateGameRequest;
-import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.domain.request.GameInteractionRequest;
-import com.loot.server.domain.request.JoinGameRequest;
+import com.loot.server.domain.request.*;
 
 import java.util.UUID;
 
@@ -12,7 +9,7 @@ public class ErrorCheckingServiceTestsUtil {
   // Create Game Request
   public static CreateGameRequest validCreateGameRequest() {
     return CreateGameRequest.builder()
-            .roomName("My New Room")
+            .settings(createGameSettings())
             .player(makeValidGamePlayer())
             .build();
   }
@@ -23,13 +20,20 @@ public class ErrorCheckingServiceTestsUtil {
   }
   public static CreateGameRequest createGameRequestMissingPlayer() {
     return CreateGameRequest.builder()
-            .roomName("My New Room")
+            .settings(createGameSettings())
             .build();
   }
   public static CreateGameRequest createGameRequestWithInvalidRoomName() {
     return CreateGameRequest.builder()
-            .roomName("")
+            .settings(createGameSettings())
             .player(makeValidGamePlayer())
+            .build();
+  }
+  public static GameSettings createGameSettings() {
+    return GameSettings.builder()
+            .roomName("My New Room")
+            .numberOfWinsNeeded(5)
+            .numberOfPlayers(4)
             .build();
   }
 

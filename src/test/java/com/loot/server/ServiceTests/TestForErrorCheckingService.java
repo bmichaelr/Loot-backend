@@ -47,7 +47,7 @@ public class TestForErrorCheckingService {
     // Mock create the game request
     String roomName = "My New Room";
     GamePlayer gamePlayer = GamePlayer.builder().name("Host").id(UUID.randomUUID()).build();
-    CreateGameRequest createGameRequest = CreateGameRequest.builder().player(gamePlayer).roomName(roomName).build();
+    CreateGameRequest createGameRequest = CreateGameRequest.builder().player(gamePlayer).settings(ErrorCheckingServiceTestsUtil.createGameSettings()).build();
     String roomKeyOfCreatedGame = createNewGame(createGameRequest);
 
     JoinGameRequest request;

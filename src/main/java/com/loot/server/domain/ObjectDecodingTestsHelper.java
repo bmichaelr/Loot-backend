@@ -26,6 +26,7 @@ public class ObjectDecodingTestsHelper {
     public static LobbyResponse mockLobbyResponse() {
         return LobbyResponse.builder()
                 .roomKey("123456")
+                .name("Ben's room")
                 .allReady(false)
                 .players(List.of(mockGamePlayer(), mockGamePlayer(), mockGamePlayer(), mockGamePlayer()))
                 .build();

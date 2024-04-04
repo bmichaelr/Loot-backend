@@ -1,9 +1,6 @@
 package com.loot.server.ControllerTest;
 
-import com.loot.server.domain.request.CreateGameRequest;
-import com.loot.server.domain.request.GameInteractionRequest;
-import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.domain.request.JoinGameRequest;
+import com.loot.server.domain.request.*;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -57,7 +54,7 @@ public class GameControllerTestUtil {
     public static CreateGameRequest createGameRequest(RequestType requestType) {
         if(requestType == RequestType.MISSING_GAME_PLAYER) {
             return CreateGameRequest.builder()
-                    .roomName(TEST_ROOM_NAME)
+                    .settings(createGameSettings())
                     .build();
         }
         if(requestType == RequestType.MISSING_ROOM_NAME) {
@@ -74,12 +71,12 @@ public class GameControllerTestUtil {
                             .isSafe(false)
                             .isOut(false)
                             .build())
-                    .roomName(TEST_ROOM_NAME)
+                    .settings(createGameSettings())
                     .build();
         }
         return CreateGameRequest
                 .builder()
-                .roomName(TEST_ROOM_NAME)
+                .settings(createGameSettings())
                 .player(
                         switch(requestType) {
                             case VALID -> createValidGamePlayer();
@@ -90,6 +87,13 @@ public class GameControllerTestUtil {
                 )
                 .build();
     }
+  private static GameSettings createGameSettings() {
+    return GameSettings.builder()
+            .roomName(TEST_ROOM_NAME)
+            .numberOfWinsNeeded(5)
+            .numberOfPlayers(4)
+            .build();
+  }
     public static JoinGameRequest createJoinGameRequest(String roomKey, RequestType requestType) {
         return JoinGameRequest.builder()
                 .player(switch (requestType) {
