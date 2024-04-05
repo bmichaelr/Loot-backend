@@ -40,6 +40,22 @@ public class TestForErrorCheckingService {
     requestToTest = ErrorCheckingServiceTestsUtil.createGameRequestWithInvalidRoomName();
     hasError = errorCheckingService.requestContainsError(requestToTest);
     assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.BAD_ROOM_NAME);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_NUMBER_OF_PLAYERS);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_NUMBER_OF_WINS_NEEDED);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_ROOM_NAME);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
   }
 
   @Test

@@ -7,6 +7,38 @@ import java.util.UUID;
 public class ErrorCheckingServiceTestsUtil {
 
   // Create Game Request
+  public enum SettingsType {
+    MISSING_ROOM_NAME,
+    BAD_ROOM_NAME,
+    MISSING_NUMBER_OF_PLAYERS,
+    MISSING_NUMBER_OF_WINS_NEEDED
+  }
+  public static CreateGameRequest makeCreateGameRequest(SettingsType settingsType) {
+    return CreateGameRequest.builder()
+            .player(makeValidGamePlayer())
+            .settings(
+                    switch(settingsType) {
+                      case MISSING_ROOM_NAME -> GameSettings.builder()
+                              .numberOfPlayers(4)
+                              .numberOfWinsNeeded(3)
+                              .build();
+                      case BAD_ROOM_NAME -> GameSettings.builder()
+                              .numberOfWinsNeeded(3)
+                              .numberOfPlayers(4)
+                              .roomName("")
+                              .build();
+                      case MISSING_NUMBER_OF_PLAYERS -> GameSettings.builder()
+                              .numberOfWinsNeeded(3)
+                              .roomName("Room!")
+                              .build();
+                      case MISSING_NUMBER_OF_WINS_NEEDED -> GameSettings.builder()
+                              .numberOfPlayers(4)
+                              .roomName("Room!")
+                              .build();
+                    }
+            )
+            .build();
+  }
   public static CreateGameRequest validCreateGameRequest() {
     return CreateGameRequest.builder()
             .settings(createGameSettings())
