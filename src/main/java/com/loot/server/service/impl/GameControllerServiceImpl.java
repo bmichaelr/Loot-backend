@@ -64,6 +64,7 @@ public class GameControllerServiceImpl implements GameControllerService {
         String roomKey = request.getRoomKey();
         GameSession gameSession = getFromGameSessionMap(roomKey);
         GamePlayer player = request.getPlayer();
+        player.setIsHost(false);
         gameSession.addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
@@ -160,14 +161,12 @@ public class GameControllerServiceImpl implements GameControllerService {
             return null;
         }
 
-        LobbyResponse response = LobbyResponse.builder()
+        return LobbyResponse.builder()
                 .roomKey(roomKey)
                 .name(gameSession.getName())
                 .players(gameSession.getPlayers())
                 .allReady(gameSession.allPlayersReady())
                 .build();
-        System.out.println("< DEBUG > The LobbyResponse being sent: " + response);
-        return response;
     }
 
     @EventListener

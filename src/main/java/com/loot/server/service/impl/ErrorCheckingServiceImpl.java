@@ -74,6 +74,9 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
     if(settings.getRoomName() == null || settings.getNumberOfWinsNeeded() == null || settings.getNumberOfPlayers() == null) {
       return Pair.of(RequestErrorType.MISSING_GAME_SETTINGS, clientID);
     }
+    if(settings.getRoomName().isEmpty()) {
+      return Pair.of(RequestErrorType.INVALID_ROOM_NAME, clientID);
+    }
     return Pair.of(RequestErrorType.NONE, clientID);
   }
 

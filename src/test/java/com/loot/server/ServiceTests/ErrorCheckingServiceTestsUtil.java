@@ -25,7 +25,7 @@ public class ErrorCheckingServiceTestsUtil {
   }
   public static CreateGameRequest createGameRequestWithInvalidRoomName() {
     return CreateGameRequest.builder()
-            .settings(createGameSettings())
+            .settings(createGameSettingsMissingBadRoomName())
             .player(makeValidGamePlayer())
             .build();
   }
@@ -36,7 +36,13 @@ public class ErrorCheckingServiceTestsUtil {
             .numberOfPlayers(4)
             .build();
   }
-
+  private static GameSettings createGameSettingsMissingBadRoomName() {
+    return GameSettings.builder()
+            .roomName("")
+            .numberOfWinsNeeded(5)
+            .numberOfPlayers(4)
+            .build();
+  }
   // Game Player
   public static GamePlayer makeValidGamePlayer() {
     return GamePlayer.builder()

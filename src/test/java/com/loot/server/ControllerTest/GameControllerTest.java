@@ -417,7 +417,6 @@ public class GameControllerTest {
             if(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE)) {
                 assertFalse(ws.isQueueEmpty(FrameHandlerType.ROUND_STATUS_RESPONSE));
                 RoundStatusResponse roundStatusResponse = (RoundStatusResponse) ws.pollQueue(FrameHandlerType.ROUND_STATUS_RESPONSE);
-                System.out.println("ROUND STATUS RESPONSE OBJECT: " + roundStatusResponse);
                 break;
             }
 
@@ -627,7 +626,6 @@ public class GameControllerTest {
             }
         }
         public void playCard(PlayedCardResponse playedCardResponse) {
-            System.out.println("Call to playCard with PlayedCardResponse: " + playedCardResponse);
             GamePlayer playerWhoPlayed = playedCardResponse.getPlayerWhoPlayed();
             List<Card> playersCards = players.get(playerWhoPlayed);
             Card playedCard = playedCardResponse.getCardPlayed();
@@ -744,7 +742,6 @@ public class GameControllerTest {
             }
         }
         public void addCard(NextTurnResponse nextTurnResponse) {
-            System.out.println("Call to addCard, nextTurnResponse = " + nextTurnResponse);
             if(nextTurnResponse == null) {
                 throw new RuntimeException("NULL NextTurnResponse detected in addCard!");
             }
