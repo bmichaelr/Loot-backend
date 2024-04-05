@@ -133,6 +133,9 @@ public class GameControllerTest {
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
 
         LobbyResponse lobbyResponse = (LobbyResponse) wsTestHelper.pollQueue(FrameHandlerType.LOBBY_RESPONSE);
+        GamePlayer receivedPlayer = lobbyResponse.getPlayers().get(lobbyResponse.getPlayers().indexOf(GameControllerTestUtil.createValidGamePlayer()));
+        assertNotNull(receivedPlayer);
+        assertTrue(receivedPlayer.getIsHost());
         wsTestHelper.shutdown();
     }
 
