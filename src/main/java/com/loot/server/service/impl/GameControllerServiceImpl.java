@@ -48,11 +48,11 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public String createNewGameSession(CreateGameRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
-        String roomName = request.getRoomName();
-        var player = request.getPlayer();
+        GamePlayer player = request.getPlayer();
 
-        addToGameSessionMap(roomKey, new GameSession(roomKey, roomName));
-        var gameSession = getFromGameSessionMap(roomKey);
+        addToGameSessionMap(roomKey, new GameSession(roomKey, request.getSettings()));
+        GameSession gameSession = getFromGameSessionMap(roomKey);
+        player.setIsHost(true);
         gameSession.addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
@@ -64,6 +64,7 @@ public class GameControllerServiceImpl implements GameControllerService {
         String roomKey = request.getRoomKey();
         GameSession gameSession = getFromGameSessionMap(roomKey);
         GamePlayer player = request.getPlayer();
+        player.setIsHost(false);
         gameSession.addPlayer(player);
 
         sessionCacheService.cacheClientConnection(player.getId(), roomKey, sessionId);
@@ -162,6 +163,7 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         return LobbyResponse.builder()
                 .roomKey(roomKey)
+                .maxPlayers(gameSession.getMaxPlayers())
                 .name(gameSession.getName())
                 .players(gameSession.getPlayers())
                 .allReady(gameSession.allPlayersReady())
@@ -173,14 +175,18 @@ public class GameControllerServiceImpl implements GameControllerService {
         UUID clientUUID = clientDisconnectionEvent.getClientUUID();
         String clientRoomKey = clientDisconnectionEvent.getGameRoomKey();
 
-        var gameSession = getFromGameSessionMap(clientRoomKey);
+        GameSession gameSession = getFromGameSessionMap(clientRoomKey);
         if(gameSession == null) {
             return;
         }
-
         for(var player: gameSession.getPlayers()) {
             if(player.getId().equals(clientUUID)) {
                 gameSession.removePlayer(player);
+                if(player.getIsHost()) {
+                    if(!gameSession.getPlayers().isEmpty()) {
+                        gameSession.getPlayers().get(0).setIsHost(true);
+                    }
+                }
                 updateLobbyOnDisconnect(gameSession);
                 break;
             }

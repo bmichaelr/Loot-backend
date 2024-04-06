@@ -7,17 +7,20 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CreateGameRequest {
+public class GameSettings {
 
   @JsonProperty
-  private GameSettings settings;
+  private String roomName;
 
   @JsonProperty
-  private GamePlayer player;
+  private Integer numberOfPlayers;
+
+  @JsonProperty
+  private Integer numberOfWinsNeeded;
 
 }

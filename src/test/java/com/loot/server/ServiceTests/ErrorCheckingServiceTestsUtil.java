@@ -1,18 +1,47 @@
 package com.loot.server.ServiceTests;
 
-import com.loot.server.domain.request.CreateGameRequest;
-import com.loot.server.domain.request.GamePlayer;
-import com.loot.server.domain.request.GameInteractionRequest;
-import com.loot.server.domain.request.JoinGameRequest;
+import com.loot.server.domain.request.*;
 
 import java.util.UUID;
 
 public class ErrorCheckingServiceTestsUtil {
 
   // Create Game Request
+  public enum SettingsType {
+    MISSING_ROOM_NAME,
+    BAD_ROOM_NAME,
+    MISSING_NUMBER_OF_PLAYERS,
+    MISSING_NUMBER_OF_WINS_NEEDED
+  }
+  public static CreateGameRequest makeCreateGameRequest(SettingsType settingsType) {
+    return CreateGameRequest.builder()
+            .player(makeValidGamePlayer())
+            .settings(
+                    switch(settingsType) {
+                      case MISSING_ROOM_NAME -> GameSettings.builder()
+                              .numberOfPlayers(4)
+                              .numberOfWinsNeeded(3)
+                              .build();
+                      case BAD_ROOM_NAME -> GameSettings.builder()
+                              .numberOfWinsNeeded(3)
+                              .numberOfPlayers(4)
+                              .roomName("")
+                              .build();
+                      case MISSING_NUMBER_OF_PLAYERS -> GameSettings.builder()
+                              .numberOfWinsNeeded(3)
+                              .roomName("Room!")
+                              .build();
+                      case MISSING_NUMBER_OF_WINS_NEEDED -> GameSettings.builder()
+                              .numberOfPlayers(4)
+                              .roomName("Room!")
+                              .build();
+                    }
+            )
+            .build();
+  }
   public static CreateGameRequest validCreateGameRequest() {
     return CreateGameRequest.builder()
-            .roomName("My New Room")
+            .settings(createGameSettings())
             .player(makeValidGamePlayer())
             .build();
   }
@@ -23,16 +52,29 @@ public class ErrorCheckingServiceTestsUtil {
   }
   public static CreateGameRequest createGameRequestMissingPlayer() {
     return CreateGameRequest.builder()
-            .roomName("My New Room")
+            .settings(createGameSettings())
             .build();
   }
   public static CreateGameRequest createGameRequestWithInvalidRoomName() {
     return CreateGameRequest.builder()
-            .roomName("")
+            .settings(createGameSettingsMissingBadRoomName())
             .player(makeValidGamePlayer())
             .build();
   }
-
+  public static GameSettings createGameSettings() {
+    return GameSettings.builder()
+            .roomName("My New Room")
+            .numberOfWinsNeeded(5)
+            .numberOfPlayers(4)
+            .build();
+  }
+  private static GameSettings createGameSettingsMissingBadRoomName() {
+    return GameSettings.builder()
+            .roomName("")
+            .numberOfWinsNeeded(5)
+            .numberOfPlayers(4)
+            .build();
+  }
   // Game Player
   public static GamePlayer makeValidGamePlayer() {
     return GamePlayer.builder()

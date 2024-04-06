@@ -6,6 +6,7 @@ import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.cards.TargetedEffectCard;
 import com.loot.server.domain.cards.cardresults.*;
 import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.GameSettings;
 import com.loot.server.domain.response.PlayedCardResponse;
 import com.loot.server.domain.response.RoundStatusResponse;
 import com.loot.server.logic.IGameSession;
@@ -91,9 +92,11 @@ public class GameSession implements IGameSession {
 
   private CardStack cardStack;                                // The stack of card used in the round
 
-  public GameSession(String roomKey, String name) {
+  public GameSession(String roomKey, GameSettings settings) {
     this.roomKey = roomKey;
-    this.name = name;
+    this.name = settings.getRoomName();
+    this.winsNeeded = settings.getNumberOfWinsNeeded();
+    this.maxPlayers = settings.getNumberOfPlayers();
     players = new ArrayList<>();
     numberOfWins = new HashMap<>();
   }

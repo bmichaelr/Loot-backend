@@ -1,6 +1,7 @@
 package com.loot.server.GameSessionTests;
 
 import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.GameSettings;
 import com.loot.server.logic.impl.GameSession;
 
 import java.util.ArrayList;
@@ -36,13 +37,13 @@ public class GameSessionTestsUtil {
     }
 
     public static GameSession createGameRoom(String roomKey, int numberOfPlayers) {
-        GameSession gameSession = new GameSession(roomKey, "Some room Name");
+        GameSession gameSession = new GameSession(roomKey, createGameSettings());
         addPlayersToGameRoom(gameSession, numberOfPlayers);
         return gameSession;
     }
 
     public static GameSession createReadyLobby(String roomKey) {
-        GameSession gameSession = new GameSession(roomKey, "Room Name");
+        GameSession gameSession = new GameSession(roomKey, createGameSettings());
         createPlayers().forEach(gameSession::addPlayer);
         List<GamePlayer> playerListCopy = new ArrayList<>(createPlayers());
         playerListCopy.forEach(gamePlayer -> {
@@ -52,7 +53,13 @@ public class GameSessionTestsUtil {
 
         return gameSession;
     }
-
+    public static GameSettings createGameSettings() {
+        return GameSettings.builder()
+                .roomName("My New Room")
+                .numberOfWinsNeeded(5)
+                .numberOfPlayers(4)
+                .build();
+    }
     public static GameSession createStartedGame(String roomKey) {
         GameSession gameSession = createReadyLobby(roomKey);
         List<GamePlayer> copyOfPlayers = new ArrayList<>();

@@ -11,6 +11,15 @@ import java.util.UUID;
 
 public class ObjectDecodingTestsHelper {
 
+    public enum CardResponseType {
+        BASE,
+        DUCK,
+        GAZEBO,
+        RAT,
+        TROLL,
+        POTTED
+    }
+
     private static final Random random = new Random();
 
     public static GamePlayer mockGamePlayer() {
@@ -26,6 +35,7 @@ public class ObjectDecodingTestsHelper {
     public static LobbyResponse mockLobbyResponse() {
         return LobbyResponse.builder()
                 .roomKey("123456")
+                .name("Ben's room")
                 .allReady(false)
                 .players(List.of(mockGamePlayer(), mockGamePlayer(), mockGamePlayer(), mockGamePlayer()))
                 .build();
@@ -68,21 +78,38 @@ public class ObjectDecodingTestsHelper {
                 .build();
     }
 
-    public static PlayedCardResponse mockPlayedCardResponse() {
+    public static PlayedCardResponse mockPlayedCardResponse(CardResponseType cardResponseType) {
         // There are six different types of BaseCardResult that could be included as the outcome
-        int outcomeToSend = random.nextInt(1, 7);
-        BaseCardResult outcome = switch (outcomeToSend) {
-            case 1 -> new BaseCardResult(mockGamePlayer());
-            case 2 -> new PottedResult(mockGamePlayer(), Card.duckOfDoom(), false);
-            case 3 -> new MaulRatResult(mockGamePlayer(), Card.loot());
-            case 4 -> new DuckResult(mockGamePlayer(), Card.netTroll(), Card.pottedPlant(), mockGamePlayer());
-            case 5 -> new NetTrollResult(mockGamePlayer(), Card.wishingRing(), Card.duckOfDoom());
-            case 6 -> new GazeboResult(mockGamePlayer(), Card.pottedPlant(), Card.turboniumDragon());
-            default -> throw new RuntimeException("Invalid number passed to outcome switch!");
+        Card cardPlayed;
+        BaseCardResult outcome = switch (cardResponseType) {
+            case BASE -> {
+                cardPlayed = Card.wishingRing();
+                yield new BaseCardResult(mockGamePlayer());
+            }
+            case POTTED -> {
+                cardPlayed = Card.pottedPlant();
+                yield new PottedResult(mockGamePlayer(), Card.duckOfDoom(), false);
+            }
+            case RAT -> {
+                cardPlayed = Card.maulRat();
+                yield new MaulRatResult(mockGamePlayer(), Card.loot());
+            }
+            case DUCK -> {
+                cardPlayed = Card.duckOfDoom();
+                yield new DuckResult(mockGamePlayer(), Card.netTroll(), Card.pottedPlant(), mockGamePlayer());
+            }
+            case TROLL -> {
+                cardPlayed = Card.netTroll();
+                yield new NetTrollResult(mockGamePlayer(), Card.wishingRing(), Card.duckOfDoom());
+            }
+            case GAZEBO -> {
+                cardPlayed = Card.dreadGazebo();
+                yield new GazeboResult(mockGamePlayer(), Card.pottedPlant(), Card.turboniumDragon());
+            }
         };
         return PlayedCardResponse.builder()
                 .playerWhoPlayed(mockGamePlayer())
-                .cardPlayed(Card.pottedPlant())
+                .cardPlayed(cardPlayed)
                 .waitFlag(false)
                 .outcome(outcome)
                 .build();

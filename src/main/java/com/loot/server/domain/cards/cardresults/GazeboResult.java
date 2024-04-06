@@ -14,7 +14,7 @@ public class GazeboResult extends BaseCardResult {
 
     @JsonIgnore
     public GazeboResult(GamePlayer playedOn, Card opponentCard, Card playersCard) {
-        super(playedOn);
+        super(playedOn, "dreadGazebo");
         this.opponentCard = opponentCard;
         this.playersCard = playersCard;
     }

@@ -17,7 +17,7 @@ public class DuckResult extends BaseCardResult {
 
     @JsonIgnore
     public DuckResult(GamePlayer playedOn, Card opponentCard, Card playersCard, GamePlayer playerToDiscard) {
-        super(playedOn);
+        super(playedOn, "duckOfDoom");
         this.opponentCard = opponentCard;
         this.playersCard = playersCard;
         this.playerToDiscard = playerToDiscard;

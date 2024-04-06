@@ -1,6 +1,7 @@
 package com.loot.server.GameSessionTests;
 
 import com.loot.server.domain.request.GamePlayer;
+import com.loot.server.domain.request.GameSettings;
 import com.loot.server.logic.impl.GameSession;
 import com.loot.server.service.ErrorCheckingService;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ public class TestsForGameSessionObject {
 
     @Test
     public void testThatAddingPlayersWorks() {
-        GameSession gameSession = new GameSession("ABC123", "Boogers");
+        GameSession gameSession = new GameSession("ABC123", GameSessionTestsUtil.createGameSettings());
         List<GamePlayer> playersToAdd = GameSessionTestsUtil.createPlayers();
         playersToAdd.forEach(gameSession::addPlayer);
 

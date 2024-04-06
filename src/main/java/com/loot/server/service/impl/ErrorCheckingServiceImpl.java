@@ -28,6 +28,7 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
     UNKNOWN_REQUEST,
     UNABLE_TO_JOIN_GAME,
     MISSING_ROOM_KEY,
+    MISSING_GAME_SETTINGS,
     BAD_REQUEST,
     NONE
   }
@@ -60,7 +61,7 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
 
   private Pair<RequestErrorType, UUID> createGameRequestContainsError(CreateGameRequest createGameRequest) {
     UUID clientID;
-    if(createGameRequest.getRoomName() == null || createGameRequest.getPlayer() == null) {
+    if(createGameRequest.getSettings() == null || createGameRequest.getPlayer() == null) {
       clientID = createGameRequest.getPlayer() == null ? null : createGameRequest.getPlayer().getId();
       return Pair.of(RequestErrorType.MISSING_PARAMS, clientID);
     }
@@ -69,8 +70,12 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
     if(gamePlayerContainsError(createGameRequest.getPlayer())) {
       return Pair.of(RequestErrorType.MISSING_PARAMS, clientID);
     }
-    if(createGameRequest.getRoomName().isEmpty()) {
-      return Pair.of(RequestErrorType.MISSING_ROOM_KEY, clientID);
+    var settings = createGameRequest.getSettings();
+    if(settings.getRoomName() == null || settings.getNumberOfWinsNeeded() == null || settings.getNumberOfPlayers() == null) {
+      return Pair.of(RequestErrorType.MISSING_GAME_SETTINGS, clientID);
+    }
+    if(settings.getRoomName().isEmpty()) {
+      return Pair.of(RequestErrorType.INVALID_ROOM_NAME, clientID);
     }
     return Pair.of(RequestErrorType.NONE, clientID);
   }
@@ -126,6 +131,7 @@ public class ErrorCheckingServiceImpl implements ErrorCheckingService {
       case UNKNOWN_REQUEST -> "The request you made is unknown. Fatal error.";
       case UNABLE_TO_JOIN_GAME -> "Cannot join game. It may be full or in progress, refresh server list to get updated status.";
       case MISSING_ROOM_KEY -> "Room key missing in request, make sure it is included.";
+      case MISSING_GAME_SETTINGS -> "Missing settings when attempting to create game.";
       case BAD_REQUEST -> "The given request type is unknown, consult with the backend team to resolve this error.";
       case NONE -> "N/A";
     };

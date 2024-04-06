@@ -40,6 +40,22 @@ public class TestForErrorCheckingService {
     requestToTest = ErrorCheckingServiceTestsUtil.createGameRequestWithInvalidRoomName();
     hasError = errorCheckingService.requestContainsError(requestToTest);
     assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.BAD_ROOM_NAME);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_NUMBER_OF_PLAYERS);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_NUMBER_OF_WINS_NEEDED);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
+
+    requestToTest = ErrorCheckingServiceTestsUtil.makeCreateGameRequest(ErrorCheckingServiceTestsUtil.SettingsType.MISSING_ROOM_NAME);
+    hasError = errorCheckingService.requestContainsError(requestToTest);
+    assert hasError;
   }
 
   @Test
@@ -47,7 +63,7 @@ public class TestForErrorCheckingService {
     // Mock create the game request
     String roomName = "My New Room";
     GamePlayer gamePlayer = GamePlayer.builder().name("Host").id(UUID.randomUUID()).build();
-    CreateGameRequest createGameRequest = CreateGameRequest.builder().player(gamePlayer).roomName(roomName).build();
+    CreateGameRequest createGameRequest = CreateGameRequest.builder().player(gamePlayer).settings(ErrorCheckingServiceTestsUtil.createGameSettings()).build();
     String roomKeyOfCreatedGame = createNewGame(createGameRequest);
 
     JoinGameRequest request;

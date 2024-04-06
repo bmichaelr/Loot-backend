@@ -49,13 +49,12 @@ public class TestGameLogic {
                 var player = gameSession.nextTurn();
                 gameSession.dealCard(player);
                 var handOfCards = gameSession.getCardsInHand().get(player);
-                System.out.println(ANSI_RED + "ROUND ITERATION: " + ANSI_RESET + " Player playing = " + ANSI_BLUE + player.getName() + ANSI_RESET + ", Card In Hand = " + ANSI_BLUE + handOfCards.getCardInHand() + ANSI_RESET + ", Drawn Card: " + ANSI_BLUE + handOfCards.getDrawnCard() + ANSI_RESET);
                 assert handOfCards.hasTwoCards();
                 PlayedCard cardToPlay = createPlayedCardObjectHelper(player);
                 assert validateCardPlayed(player, cardToPlay);
             }
             RoundStatusResponse response = gameSession.determineWinner();
-            System.out.println(ANSI_CYAN + "Winner of the round: " + response.getWinner() + ", number of wins = " + gameSession.getNumberOfWins().get(response.getWinner()));
+            //System.out.println(ANSI_CYAN + "Winner of the round: " + response.getWinner() + ", number of wins = " + gameSession.getNumberOfWins().get(response.getWinner()));
         }
     }
 
@@ -72,15 +71,15 @@ public class TestGameLogic {
         } else { // It is the potted plant, e.g. the guessing card
             playedCard = new GuessingCard(cardToPlay, rand.nextInt(2,9), randomPlayer(currentlyPlaying, false));
         }
-        System.out.println(ANSI_YELLOW + "The card being played:");
-        if(playedCard instanceof GuessingCard guessingCard) {
-            System.out.println("\tGUESS CARD: power = " + guessingCard.getPower() + ", card guessed = " + guessingCard.getGuessedCard() + ", guessed on = " + guessingCard.getGuessedOn().getName());
-        } else if (playedCard instanceof TargetedEffectCard targetedEffectCard) {
-            System.out.println("TARGETED CARD: power = " + targetedEffectCard.getPower() + ", played on = " + targetedEffectCard.getPlayedOn().getName());
-        } else {
-            System.out.println("NORMAL CARD: power = " + playedCard.getPower());
-        }
-        System.out.println(ANSI_RESET);
+//        System.out.println(ANSI_YELLOW + "The card being played:");
+//        if(playedCard instanceof GuessingCard guessingCard) {
+//            System.out.println("\tGUESS CARD: power = " + guessingCard.getPower() + ", card guessed = " + guessingCard.getGuessedCard() + ", guessed on = " + guessingCard.getGuessedOn().getName());
+//        } else if (playedCard instanceof TargetedEffectCard targetedEffectCard) {
+//            System.out.println("TARGETED CARD: power = " + targetedEffectCard.getPower() + ", played on = " + targetedEffectCard.getPlayedOn().getName());
+//        } else {
+//            System.out.println("NORMAL CARD: power = " + playedCard.getPower());
+//        }
+//        System.out.println(ANSI_RESET);
         return playedCard;
     }
 
@@ -112,7 +111,7 @@ public class TestGameLogic {
 
     // Massive function, not even going to bother with refactoring as this is a test function
     private Boolean validateCardPlayed(GamePlayer player, PlayedCard card) {
-        turnLog(player, card);
+        //turnLog(player, card);
         var cih = gameSession.getCardsInHand();
         var pir = gameSession.getPlayersInRound();
         var ppc = gameSession.getPlayedCards();
