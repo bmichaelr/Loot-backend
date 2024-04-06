@@ -17,7 +17,7 @@ public class NetTrollResult extends BaseCardResult {
 
     @JsonIgnore
     public NetTrollResult(GamePlayer playedOn, Card discardedCard, Card drawnCard) {
-        super(playedOn);
+        super(playedOn, "netTroll");
         this.discardedCard = discardedCard;
         this.drawnCard = drawnCard;
     }

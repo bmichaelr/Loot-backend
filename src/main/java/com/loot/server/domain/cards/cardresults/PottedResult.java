@@ -14,7 +14,7 @@ public class PottedResult extends BaseCardResult {
 
     @JsonIgnore
     public PottedResult(GamePlayer playedOn, Card guessedCard, Boolean correctGuess) {
-        super(playedOn);
+        super(playedOn, "pottedPlant");
         this.guessedCard = guessedCard;
         this.correctGuess = correctGuess;
     }

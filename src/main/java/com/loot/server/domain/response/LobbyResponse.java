@@ -24,6 +24,9 @@ public class LobbyResponse {
     private String name;
 
     @JsonProperty
+    private Integer maxPlayers;
+
+    @JsonProperty
     private List<GamePlayer> players;
 
     @JsonProperty

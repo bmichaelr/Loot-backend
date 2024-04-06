@@ -14,7 +14,7 @@ public class MaulRatResult extends BaseCardResult {
 
     @JsonIgnore
     public MaulRatResult(GamePlayer playedOn, Card opponentsCard) {
-        super(playedOn);
+        super(playedOn, "maulRat");
         this.opponentsCard = opponentsCard;
     }
 

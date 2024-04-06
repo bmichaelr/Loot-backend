@@ -163,6 +163,7 @@ public class GameControllerServiceImpl implements GameControllerService {
 
         return LobbyResponse.builder()
                 .roomKey(roomKey)
+                .maxPlayers(gameSession.getMaxPlayers())
                 .name(gameSession.getName())
                 .players(gameSession.getPlayers())
                 .allReady(gameSession.allPlayersReady())

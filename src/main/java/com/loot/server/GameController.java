@@ -1,6 +1,9 @@
 package com.loot.server;
 
 import com.loot.server.domain.ObjectDecodingTestsHelper;
+import com.loot.server.domain.cards.GuessingCard;
+import com.loot.server.domain.cards.PlayedCard;
+import com.loot.server.domain.cards.TargetedEffectCard;
 import com.loot.server.domain.cards.cardresults.BaseCardResult;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
@@ -29,8 +32,6 @@ public class GameController {
 
     @MessageMapping("/loadAvailableServers")
     public void getAvailableServers(GamePlayer playerRequesting) {
-        System.out.println("Received a message in the server method!");
-
         if(errorCheckingService.requestContainsError(playerRequesting)) { return; }
         UUID clientId = playerRequesting.getId();
         List<ServerData> response = gameService.getListOfServers();
@@ -69,6 +70,16 @@ public class GameController {
                 messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
             }
         }
+    }
+
+    @MessageMapping("/updateGameSettings")
+    public void updateGameSettings(@Payload UpdateSettingsRequest updateSettingsRequest) {
+        // TODO: add error checking for the request and also update the lobby settings
+        // TODO: make sure the person is host, make sure if they change the number of players
+        // TODO: it wont conflict with how many people there are
+        String roomKey = updateSettingsRequest.getRoomKey();
+        LobbyResponse lobbyResponse = gameService.getInformationForLobby(roomKey);
+        messagingTemplate.convertAndSend("/topic/lobby/" + roomKey, lobbyResponse);
     }
 
     @MessageMapping("/ready")
@@ -119,9 +130,27 @@ public class GameController {
             case "START_ROUND"      -> ObjectDecodingTestsHelper.mockStartRoundResponse();
             case "NEXT_TURN"        -> ObjectDecodingTestsHelper.mockNextTurnResponse();
             case "ROUND_STATUS"     -> ObjectDecodingTestsHelper.mockRoundStatusResponse();
-            case "PLAYED_CARD"      -> ObjectDecodingTestsHelper.mockPlayedCardResponse();
+            case "PLAYED_CARD_1"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.BASE);
+            case "PLAYED_CARD_2"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.DUCK);
+            case "PLAYED_CARD_3"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.GAZEBO);
+            case "PLAYED_CARD_4"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.RAT);
+            case "PLAYED_CARD_5"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.TROLL);
+            case "PLAYED_CARD_6"    -> ObjectDecodingTestsHelper.mockPlayedCardResponse(ObjectDecodingTestsHelper.CardResponseType.POTTED);
             default -> throw new Exception("Unknown type caught in decoding switch!");
         };
         messagingTemplate.convertAndSend("/topic/test/decoding/" + request.getId(), response);
+    }
+
+    @MessageMapping("/test/encoding")
+    public void testEncoding(@Payload PlayCardRequest playCardRequest) throws Exception {
+        System.out.println("Received a play card request: " + playCardRequest);
+        PlayedCard playedCard = playCardRequest.getCard();
+        if(playedCard instanceof GuessingCard guessCard) {
+            System.out.println("It is a guessing card as the played card: " + guessCard);
+        } else if(playedCard instanceof TargetedEffectCard targetedEffectCard) {
+            System.out.println("It is an instance of the targeted effect card: " + targetedEffectCard);
+        } else {
+            System.out.println("Just a normal played card response: " + playedCard);
+        }
     }
 }
