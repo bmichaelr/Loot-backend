@@ -1,6 +1,6 @@
 package com.loot.server;
 
-import com.loot.server.domain.entity.Player;
+import com.loot.server.domain.entity.PlayerEntity;
 import com.loot.server.domain.entity.dto.PlayerDto;
 import com.loot.server.repositories.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ public class PlayerController {
     }
 
     @GetMapping(value = "/player/get")
-    public ResponseEntity<List<Player>> getSavedPlayers() {
-        List<Player> playersInDb = new ArrayList<>();
+    public ResponseEntity<List<PlayerEntity>> getSavedPlayers() {
+        List<PlayerEntity> playersInDb = new ArrayList<>();
         playerRepository.findAll().forEach(playersInDb::add);
         return ResponseEntity.ok(playersInDb);
     }
