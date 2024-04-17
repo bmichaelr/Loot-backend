@@ -5,9 +5,12 @@ import com.loot.server.domain.entity.dto.PlayerDto;
 import com.loot.server.mappers.Mapper;
 import com.loot.server.repositories.PlayerRepository;
 import com.loot.server.service.PlayerControllerService;
-import org.springframework.http.HttpStatusCode;
+import org.modelmapper.internal.Pair;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,39 +24,59 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
     }
 
     @Override
-    public HttpStatusCode createNewPlayer(PlayerDto playerDto) {
+    public HttpStatus createNewPlayer(PlayerDto playerDto) {
         if(playerDto.missingParameters()) {
-            return HttpStatusCode.valueOf(400);
+            return HttpStatus.BAD_REQUEST;
         }
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerByUniqueName(playerDto.getUniqueName());
         if(optionalPlayerEntity.isPresent()) {
-            return HttpStatusCode.valueOf(409);
+            return HttpStatus.CONFLICT;
         }
         PlayerEntity playerToCreate = mapper.mapFrom(playerDto);
         playerRepository.save(playerToCreate);
-        return HttpStatusCode.valueOf(201);
+        return HttpStatus.CREATED;
     }
 
     @Override
-    public HttpStatusCode updatePlayerName(UUID clientId, String name) {
+    public HttpStatus updatePlayerName(UUID clientId, String name) {
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(clientId);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatusCode.valueOf(404);
+            return HttpStatus.BAD_REQUEST;
         }
         PlayerEntity player = optionalPlayerEntity.get();
         player.setName(name);
         playerRepository.save(player);
-        return HttpStatusCode.valueOf(200);
+        return HttpStatus.OK;
     }
 
     @Override
-    public HttpStatusCode deletePlayerAccount(UUID uuid) {
+    public HttpStatus deletePlayerAccount(UUID uuid) {
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(uuid);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatusCode.valueOf(404);
+            return HttpStatus.BAD_REQUEST;
         }
         PlayerEntity playerToDelete = optionalPlayerEntity.get();
         playerRepository.delete(playerToDelete);
-        return HttpStatusCode.valueOf(200);
+        return HttpStatus.OK;
+    }
+
+    @Override
+    public Pair<Optional<PlayerDto>, HttpStatus> getExistingPlayer(UUID uuid) {
+        if(uuid == null) {
+            return Pair.of(Optional.empty(), HttpStatus.BAD_REQUEST);
+        }
+        Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(uuid);
+        if(optionalPlayerEntity.isEmpty()) {
+            return Pair.of(Optional.empty(), HttpStatus.NOT_FOUND);
+        }
+        PlayerEntity playerEntity = optionalPlayerEntity.get();
+        return Pair.of(Optional.of(mapper.mapTo(playerEntity)), HttpStatus.OK);
+    }
+
+    @Override
+    public List<PlayerDto> getAllPlayers() {
+        final List<PlayerDto> players = new ArrayList<>();
+        playerRepository.findAll().forEach(playerEntity -> players.add(mapper.mapTo(playerEntity)));
+        return players;
     }
 }

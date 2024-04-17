@@ -12,12 +12,12 @@ import java.util.UUID;
 @Repository
 public interface PlayerRepository extends CrudRepository<PlayerEntity, Long> {
     @Query (
-            value = "SELECT * FROM users WHERE uniqueName = :uniqueName LIMIT 1",
+            value = "SELECT * FROM users WHERE unique_name = :uniqueName LIMIT 1",
             nativeQuery = true
     )
     Optional<PlayerEntity> findPlayerByUniqueName(@Param("uniqueName") String uniqueName);
     @Query (
-            value = "SELECT * FROM users WHERE clientId = :id LIMIT 1",
+            value = "SELECT * FROM users WHERE client_id = :id LIMIT 1",
             nativeQuery = true
     )
     Optional<PlayerEntity> findPlayerEntityByClientId(@Param("id") UUID id);
