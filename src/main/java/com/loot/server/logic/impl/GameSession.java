@@ -257,11 +257,11 @@ public class GameSession implements IGameSession {
     final List<Card> cardList = new ArrayList<>();
     for (var player : players) {
       int drawnCard = cardStack.drawCard();
-
       playedCards.put(player, new ArrayList<>());
       cardsInHand.put(player, new HandOfCards(drawnCard));
       playersInRound.add(player);
-
+      player.setIsOut(false);
+      player.setIsSafe(false);
       playerList.add(player);
       cardList.add(Card.fromPower(drawnCard));
     }
