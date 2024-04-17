@@ -24,6 +24,9 @@ public class PlayerEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "uniqueName")
+    private String uniqueName;
+
     @Column(name = "picture")
     private String profilePicture;
 
