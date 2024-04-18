@@ -39,9 +39,12 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
 
     @Override
     public HttpStatus updatePlayerName(UUID clientId, String name) {
+        if(clientId == null || name == null) {
+            return HttpStatus.BAD_REQUEST;
+        }
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(clientId);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatus.BAD_REQUEST;
+            return HttpStatus.NOT_FOUND;
         }
         PlayerEntity player = optionalPlayerEntity.get();
         player.setName(name);
@@ -53,7 +56,7 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
     public HttpStatus deletePlayerAccount(UUID uuid) {
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(uuid);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatus.BAD_REQUEST;
+            return HttpStatus.NOT_FOUND;
         }
         PlayerEntity playerToDelete = optionalPlayerEntity.get();
         playerRepository.delete(playerToDelete);
