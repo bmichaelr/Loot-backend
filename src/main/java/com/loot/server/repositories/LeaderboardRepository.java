@@ -12,7 +12,7 @@ import java.util.UUID;
 @Repository
 public interface LeaderboardRepository extends CrudRepository<LeaderboardEntryEntity, Long> {
     @Query(
-            value = "SELECT * FROM leaderboard where player = :id LIMIT 1",
+            value = "SELECT * FROM leaderboard where player_id = :id LIMIT 1",
             nativeQuery = true
     )
     Optional<LeaderboardEntryEntity> findEntryByPlayerId(@Param("id") UUID playerId);

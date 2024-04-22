@@ -12,6 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class LeaderboardEntryDto {
-    private UUID playerId;
+    private String playerName;
     private Long numberOfWins;
 }

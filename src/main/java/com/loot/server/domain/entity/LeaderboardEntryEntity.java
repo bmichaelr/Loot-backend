@@ -15,18 +15,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @Table(name = "leaderboard")
 public class LeaderboardEntryEntity {
-    public static LeaderboardEntryEntity makeEntryFor(UUID playerId) {
-        return new LeaderboardEntryEntity(playerId, 1L);
+    public static LeaderboardEntryEntity makeEntryFor(UUID playerId, String playerName) {
+        return new LeaderboardEntryEntity(playerId, playerName, 1L);
     }
-    public LeaderboardEntryEntity(UUID uuid, Long wins) {
+    public LeaderboardEntryEntity(UUID uuid, String name, Long wins) {
         this.playerId = uuid;
+        this.playerName = name;
         this.numberOfWins = wins;
     }
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(name = "player")
+    @Column(name = "player_id")
     private UUID playerId;
+    @Column(name = "player_name")
+    private String playerName;
     @Column(name = "wins")
     private Long numberOfWins;
 }

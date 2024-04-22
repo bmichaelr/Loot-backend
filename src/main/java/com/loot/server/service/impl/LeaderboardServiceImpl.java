@@ -37,10 +37,11 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         if(optionalPlayer.isEmpty()) {
             return; // Anonymous users do not get their wins saved
         }
+        PlayerEntity playerEntity = optionalPlayer.get();
         LeaderboardEntryEntity leaderboardEntry;
         Optional<LeaderboardEntryEntity> entry = leaderboardRepository.findEntryByPlayerId(playerId);
         if(entry.isEmpty()) {
-            leaderboardEntry = LeaderboardEntryEntity.makeEntryFor(playerId);
+            leaderboardEntry = LeaderboardEntryEntity.makeEntryFor(playerEntity.getUuid(), playerEntity.getName());
         } else {
             leaderboardEntry = entry.get();
             leaderboardEntry.setNumberOfWins(leaderboardEntry.getNumberOfWins() + 1);
@@ -55,5 +56,4 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         final List<LeaderboardEntryDto> truncatedList = topEntries.subList(0, 50);
         simpMessagingTemplate.convertAndSend("/topic/leaderboard", truncatedList);
     }
-
 }
