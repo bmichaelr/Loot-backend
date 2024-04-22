@@ -16,20 +16,14 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class LobbyResponse {
-
     @JsonProperty
     private String roomKey;
-
     @JsonProperty
     private String name;
-
     @JsonProperty
     private Integer maxPlayers;
-
     @JsonProperty
     private List<GamePlayer> players;
-
     @JsonProperty
     private Boolean allReady;
-
 }

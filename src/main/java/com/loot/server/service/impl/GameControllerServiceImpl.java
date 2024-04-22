@@ -107,8 +107,7 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public StartRoundResponse startRound(String roomKey) {
         GameSession gameSession = getFromGameSessionMap(roomKey);
-        Pair<List<GamePlayer>, List<Card>> startingInformation = gameSession.startRound();
-        return new StartRoundResponse(startingInformation.getLeft(), startingInformation.getRight());
+        return gameSession.startRound();
     }
 
     @Override

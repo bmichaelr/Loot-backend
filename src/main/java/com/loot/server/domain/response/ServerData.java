@@ -13,20 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ServerData {
-
     @JsonProperty
     private String name;
-
     @JsonProperty
     private String key;
-
     @JsonProperty
     private Integer maximumPlayers;
-
     @JsonProperty
     private Integer numberOfPlayers;
-
     @JsonProperty
     private String status;
-
 }

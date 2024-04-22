@@ -14,10 +14,10 @@ import java.util.List;
 @Builder
 @Data
 public class StartRoundResponse {
-
+    @JsonInclude
+    private Card cardKeptOut;
     @JsonInclude
     private List<PlayerCardPair> playersAndCards;
-
     @JsonIgnore
     public StartRoundResponse(List<GamePlayer> players, List<Card> cards) {
         if(players.size() != cards.size()) {
@@ -31,7 +31,6 @@ public class StartRoundResponse {
         }
         this.playersAndCards = playersAndCards;
     }
-
     @JsonIgnore
     @Override
     public String toString() {
