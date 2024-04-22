@@ -1,4 +1,4 @@
-package com.loot.server;
+package com.loot.server.controllers;
 
 import com.loot.server.domain.entity.dto.PlayerDto;
 import com.loot.server.service.PlayerControllerService;

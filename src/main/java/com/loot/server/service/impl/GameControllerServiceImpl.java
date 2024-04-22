@@ -2,27 +2,33 @@ package com.loot.server.service.impl;
 
 import java.util.*;
 
+import com.loot.server.events.GameWonEvent;
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
-import com.loot.server.ClientDisconnectionEvent;
+import com.loot.server.events.ClientDisconnectionEvent;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.logic.impl.GameSession;
 import com.loot.server.logic.impl.GameSession.GameAction;
 import org.modelmapper.internal.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
-    @Autowired
-    private SessionCacheService sessionCacheService;
-    @Autowired
-    private SimpMessagingTemplate simpMessagingTemplate;
+    private final SessionCacheService sessionCacheService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
+
+    public GameControllerServiceImpl(SessionCacheService sessionCacheService, SimpMessagingTemplate simpMessagingTemplate, ApplicationEventPublisher eventPublisher) {
+        this.sessionCacheService = sessionCacheService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.eventPublisher = eventPublisher;
+    }
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
     synchronized private void addToGameSessionMap(String key, GameSession gameSession) {
@@ -111,7 +117,8 @@ public class GameControllerServiceImpl implements GameControllerService {
         RoundStatusResponse roundStatusResponse = gameSession.determineWinner();
         if(roundStatusResponse.getGameOver()) {
             final UUID winningId = roundStatusResponse.getWinner().getId();
-
+            GameWonEvent event = new GameWonEvent(this, winningId);
+            eventPublisher.publishEvent(event);
         }
         return roundStatusResponse;
     }

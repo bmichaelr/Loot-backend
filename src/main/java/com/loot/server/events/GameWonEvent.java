@@ -1,4 +1,4 @@
-package com.loot.server;
+package com.loot.server.events;
 
 import lombok.Getter;
 import lombok.Setter;

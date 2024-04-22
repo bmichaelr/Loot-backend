@@ -230,6 +230,8 @@ public class GameSession implements IGameSession {
       if (num + 1 == winsNeeded) {
         gameIsOver = true;
       }
+    } else if(winsNeeded == 1) {
+      gameIsOver = true;
     }
 
     return RoundStatusResponse.builder()
