@@ -19,32 +19,24 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
-
     @Autowired
     private SessionCacheService sessionCacheService;
-
-    @Autowired // not sure about keeping this in here, but for now it stays
+    @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
-
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
-
     synchronized private void addToGameSessionMap(String key, GameSession gameSession) {
         gameSessionMap.put(key, gameSession);
     }
-
     synchronized private GameSession getFromGameSessionMap(String key) {
         return gameSessionMap.get(key);
     }
-
     synchronized private List<GameSession> getAllGameSessions() {
         return List.copyOf(gameSessionMap.values());
     }
-
     synchronized private void removeFromGameSessionMap(String key) {
         gameSessionMap.remove(key);
     }
-
     @Override
     public String createNewGameSession(CreateGameRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
@@ -116,7 +108,12 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public RoundStatusResponse getRoundStatus(String roomKey) {
         GameSession gameSession = getFromGameSessionMap(roomKey);
-        return gameSession.determineWinner();
+        RoundStatusResponse roundStatusResponse = gameSession.determineWinner();
+        if(roundStatusResponse.getGameOver()) {
+            final UUID winningId = roundStatusResponse.getWinner().getId();
+
+        }
+        return roundStatusResponse;
     }
 
     @Override
