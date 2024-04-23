@@ -1,5 +1,6 @@
 package com.loot.server.service.impl;
 
+import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.events.GameWonEvent;
 import com.loot.server.domain.entity.LeaderboardEntryEntity;
 import com.loot.server.domain.entity.PlayerEntity;
@@ -29,6 +30,7 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         this.simpMessagingTemplate = simpMessagingTemplate;
         this.mapper = mapper;
     }
+
     @Override
     @EventListener
     public void updateLeaderboard(GameWonEvent gameWonEvent) {
@@ -48,12 +50,28 @@ public class LeaderboardServiceImpl implements LeaderboardService {
         }
         leaderboardRepository.save(leaderboardEntry);
     }
+
     @Override
     public void pushUpdatesToUsers() {
+        final List<LeaderboardEntryDto> list = fetchTopStandings();
+        simpMessagingTemplate.convertAndSend("/topic/leaderboard", list);
+    }
+
+    @Override
+    public List<LeaderboardEntryDto> retrieveLeaderboardStandings() {
+        return fetchTopStandings();
+    }
+
+    @Override
+    public Optional<LeaderboardEntryDto> retrievePersonalStanding(GamePlayer player) {
+        Optional<LeaderboardEntryEntity> entry = leaderboardRepository.findEntryByPlayerId(player.getId());
+        return entry.map(mapper::mapTo);
+    }
+
+    private List<LeaderboardEntryDto> fetchTopStandings() {
         List<LeaderboardEntryDto> topEntries = new ArrayList<>();
         leaderboardRepository.findAll().forEach(entry -> topEntries.add(mapper.mapTo(entry)));
         topEntries.sort((a, b) -> Math.toIntExact(b.getNumberOfWins() - a.getNumberOfWins()));
-        final List<LeaderboardEntryDto> truncatedList = topEntries.subList(0, 50);
-        simpMessagingTemplate.convertAndSend("/topic/leaderboard", truncatedList);
+        return topEntries.subList(0, 50);
     }
 }

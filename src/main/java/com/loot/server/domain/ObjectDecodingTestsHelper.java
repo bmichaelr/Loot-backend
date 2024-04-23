@@ -29,6 +29,7 @@ public class ObjectDecodingTestsHelper {
                 .isOut(false)
                 .isSafe(false)
                 .ready(false)
+                .isHost(false)
                 .build();
     }
 
@@ -38,6 +39,7 @@ public class ObjectDecodingTestsHelper {
                 .name("Ben's room")
                 .allReady(false)
                 .players(List.of(mockGamePlayer(), mockGamePlayer(), mockGamePlayer(), mockGamePlayer()))
+                .maxPlayers(4)
                 .build();
     }
 
@@ -60,6 +62,7 @@ public class ObjectDecodingTestsHelper {
                             PlayerCardPair.builder().player(mockGamePlayer()).card(Card.duckOfDoom()).build()
                     )
                 )
+                .cardKeptOut(Card.fromPower(5))
                 .build();
     }
 
@@ -75,6 +78,7 @@ public class ObjectDecodingTestsHelper {
                 .winner(mockGamePlayer())
                 .roundOver(true)
                 .gameOver(false)
+                .winningCard(null)
                 .build();
     }
 
