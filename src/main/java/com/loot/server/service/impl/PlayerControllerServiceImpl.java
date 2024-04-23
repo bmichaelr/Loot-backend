@@ -27,7 +27,8 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
     @Override
     public void createNewPlayer(PlayerDto playerDto) throws PlayerControllerException {
         if(playerDto.missingParameters()) {
-            throw PlayerControllerException.badRequest(playerDto.getUuid());
+            UUID playerId = (playerDto.getUuid() == null) ? null : playerDto.getUuid();
+            throw PlayerControllerException.badRequest(playerId);
         }
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerByUniqueName(playerDto.getUniqueName());
         if(optionalPlayerEntity.isPresent()) {
@@ -70,6 +71,7 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
             throw PlayerControllerException.notFound(uuid);
         }
         PlayerEntity playerEntity = optionalPlayerEntity.get();
+        System.out.println("Player Entity found: " + playerEntity);
         return mapper.mapTo(playerEntity);
     }
 

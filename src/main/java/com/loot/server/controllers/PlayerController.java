@@ -19,23 +19,23 @@ public class PlayerController {
     @Autowired private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/players/create")
-    void createPlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
+    public void createPlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
         playerControllerService.createNewPlayer(playerDto);
     }
     @MessageMapping("/players/update")
-    void updatePlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
+    public void updatePlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
         PlayerDto updatedPlayer = playerControllerService.updatePlayerName(playerDto);
         final UUID id = updatedPlayer.getUuid();
         messagingTemplate.convertAndSend("/topic/player/account/" + id, updatedPlayer);
     }
     @MessageMapping("/players/get")
-    void getPlayerAccountInformation(UUID uuid) throws PlayerControllerException {
+    public void getPlayerAccountInformation(UUID uuid) throws PlayerControllerException {
         PlayerDto playerDto = playerControllerService.getExistingPlayer(uuid);
         final UUID id = playerDto.getUuid();
         messagingTemplate.convertAndSend("/topic/player/account/" + id, playerDto);
     }
     @MessageMapping("/players/delete")
-    void deletePlayerAccount(UUID uuid) throws PlayerControllerException {
+    public void deletePlayerAccount(UUID uuid) throws PlayerControllerException {
         playerControllerService.deletePlayerAccount(uuid);
     }
     @ExceptionHandler

@@ -16,7 +16,11 @@ public class PlayerControllerException extends Exception {
     }
     public PlayerControllerException(String message, UUID playerID) {
         super(message);
-        this.playerID = Optional.of(playerID);
+        if(playerID == null) {
+            this.playerID = Optional.empty();
+        } else {
+            this.playerID = Optional.of(playerID);
+        }
     }
     public static PlayerControllerException badRequest(UUID uuid) {
         return new PlayerControllerException("ERROR : missing required information in request!", uuid);
