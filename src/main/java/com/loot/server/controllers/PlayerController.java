@@ -1,45 +1,51 @@
 package com.loot.server.controllers;
 
 import com.loot.server.domain.entity.dto.PlayerDto;
+import com.loot.server.domain.response.ErrorResponse;
+import com.loot.server.exceptions.PlayerControllerException;
 import com.loot.server.service.PlayerControllerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.util.List;
 import java.util.UUID;
 
-@RestController
+@Controller
 public class PlayerController {
-    @Autowired
-    private PlayerControllerService playerControllerService;
-    @PostMapping(value = "/api/player/create")
-    public ResponseEntity<?> createPlayerAccount(@RequestBody PlayerDto playerDto) {
-        HttpStatusCode httpStatusCode = playerControllerService.createNewPlayer(playerDto);
-        return ResponseEntity.status(httpStatusCode).build();
+
+    @Autowired private PlayerControllerService playerControllerService;
+    @Autowired private SimpMessagingTemplate messagingTemplate;
+
+    @MessageMapping("/players/create")
+    void createPlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
+        playerControllerService.createNewPlayer(playerDto);
     }
-    @PutMapping(value = "/api/player/update")
-    public ResponseEntity<?> getSavedPlayers(@RequestParam("id") UUID clientId, @RequestParam("name") String newName) {
-        HttpStatusCode httpStatusCode = playerControllerService.updatePlayerName(clientId, newName);
-        return ResponseEntity.status(httpStatusCode).build();
+    @MessageMapping("/players/update")
+    void updatePlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
+        PlayerDto updatedPlayer = playerControllerService.updatePlayerName(playerDto);
+        final UUID id = updatedPlayer.getUuid();
+        messagingTemplate.convertAndSend("/topic/player/account/" + id, updatedPlayer);
     }
-    @DeleteMapping(value = "/api/player/delete")
-    public ResponseEntity<?> deleteExistingPlayer(@RequestParam("id") UUID uuid) {
-        HttpStatusCode httpStatusCode = playerControllerService.deletePlayerAccount(uuid);
-        return ResponseEntity.status(httpStatusCode).build();
+    @MessageMapping("/players/get")
+    void getPlayerAccountInformation(UUID uuid) throws PlayerControllerException {
+        PlayerDto playerDto = playerControllerService.getExistingPlayer(uuid);
+        final UUID id = playerDto.getUuid();
+        messagingTemplate.convertAndSend("/topic/player/account/" + id, playerDto);
     }
-    @GetMapping(value = "/api/player/get")
-    public ResponseEntity<?> getPlayerInformation(@RequestParam("id") UUID id) {
-        var response = playerControllerService.getExistingPlayer(id);
-        if(response.getLeft().isEmpty()) {
-            return ResponseEntity.status(response.getRight()).build();
+    @MessageMapping("/players/delete")
+    void deletePlayerAccount(UUID uuid) throws PlayerControllerException {
+        playerControllerService.deletePlayerAccount(uuid);
+    }
+    @ExceptionHandler
+    void handlePlayerControllerExceptions(PlayerControllerException exception) {
+        if(exception.getPlayerID().isEmpty()) {
+            return;
         }
-        return ResponseEntity.ok(response.getLeft().get());
-    }
-    @GetMapping(value = "/api/players")
-    public ResponseEntity<List<PlayerDto>> getAllPlayers() {
-        final List<PlayerDto> players = playerControllerService.getAllPlayers();
-        return ResponseEntity.ok(players);
+        final UUID id = exception.getPlayerID().get();
+        ErrorResponse errorResponse = new ErrorResponse();
+        errorResponse.setDetails(exception.getMessage());
+        messagingTemplate.convertAndSend("/topic/error/" + id, errorResponse);
     }
 }

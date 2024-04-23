@@ -2,6 +2,7 @@ package com.loot.server.service.impl;
 
 import com.loot.server.domain.entity.PlayerEntity;
 import com.loot.server.domain.entity.dto.PlayerDto;
+import com.loot.server.exceptions.PlayerControllerException;
 import com.loot.server.mappers.Mapper;
 import com.loot.server.repositories.PlayerRepository;
 import com.loot.server.service.PlayerControllerService;
@@ -24,56 +25,52 @@ public class PlayerControllerServiceImpl implements PlayerControllerService {
     }
 
     @Override
-    public HttpStatus createNewPlayer(PlayerDto playerDto) {
+    public void createNewPlayer(PlayerDto playerDto) throws PlayerControllerException {
         if(playerDto.missingParameters()) {
-            return HttpStatus.BAD_REQUEST;
+            throw PlayerControllerException.badRequest(playerDto.getUuid());
         }
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerByUniqueName(playerDto.getUniqueName());
         if(optionalPlayerEntity.isPresent()) {
-            return HttpStatus.CONFLICT;
+            throw PlayerControllerException.nameTaken(playerDto.getUuid());
         }
         PlayerEntity playerToCreate = mapper.mapFrom(playerDto);
         playerRepository.save(playerToCreate);
-        return HttpStatus.CREATED;
     }
 
     @Override
-    public HttpStatus updatePlayerName(UUID clientId, String name) {
-        if(clientId == null || name == null) {
-            return HttpStatus.BAD_REQUEST;
+    public PlayerDto updatePlayerName(PlayerDto playerDto) throws PlayerControllerException {
+        if(playerDto.missingParameters()) {
+            throw PlayerControllerException.badRequest(playerDto.getUuid());
         }
+        final UUID clientId = playerDto.getUuid();
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(clientId);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatus.NOT_FOUND;
+            throw PlayerControllerException.notFound(clientId);
         }
         PlayerEntity player = optionalPlayerEntity.get();
-        player.setName(name);
+        player.setName(playerDto.getName());
         playerRepository.save(player);
-        return HttpStatus.OK;
+        return mapper.mapTo(player);
     }
 
     @Override
-    public HttpStatus deletePlayerAccount(UUID uuid) {
+    public void deletePlayerAccount(UUID uuid) throws PlayerControllerException {
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(uuid);
         if(optionalPlayerEntity.isEmpty()) {
-            return HttpStatus.NOT_FOUND;
+            throw PlayerControllerException.notFound(uuid);
         }
         PlayerEntity playerToDelete = optionalPlayerEntity.get();
         playerRepository.delete(playerToDelete);
-        return HttpStatus.OK;
     }
 
     @Override
-    public Pair<Optional<PlayerDto>, HttpStatus> getExistingPlayer(UUID uuid) {
-        if(uuid == null) {
-            return Pair.of(Optional.empty(), HttpStatus.BAD_REQUEST);
-        }
+    public PlayerDto getExistingPlayer(UUID uuid) throws PlayerControllerException {
         Optional<PlayerEntity> optionalPlayerEntity = playerRepository.findPlayerEntityByClientId(uuid);
         if(optionalPlayerEntity.isEmpty()) {
-            return Pair.of(Optional.empty(), HttpStatus.NOT_FOUND);
+            throw PlayerControllerException.notFound(uuid);
         }
         PlayerEntity playerEntity = optionalPlayerEntity.get();
-        return Pair.of(Optional.of(mapper.mapTo(playerEntity)), HttpStatus.OK);
+        return mapper.mapTo(playerEntity);
     }
 
     @Override
