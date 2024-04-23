@@ -21,6 +21,9 @@ public class PlayerController {
     @MessageMapping("/players/create")
     public void createPlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
         playerControllerService.createNewPlayer(playerDto);
+        final UUID id = playerDto.getUuid();
+        // Not sure what to send, but some sort of
+        messagingTemplate.convertAndSend("/topic/player/created/" + id, "Player Created Successfully");
     }
     @MessageMapping("/players/update")
     public void updatePlayerAccount(PlayerDto playerDto) throws PlayerControllerException {
