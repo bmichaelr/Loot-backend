@@ -14,6 +14,7 @@ import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
 import com.loot.server.ControllerTest.GameControllerTestUtil.RequestType;
 import lombok.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -768,6 +769,9 @@ public class GameControllerTest {
 
             List<Card> playersCards = players.get(playerWhoseTurnItIs);
             int indexOfCardToPlay = random.nextInt() % 2 == 0 ? 0 : 1;
+            if(playersCards.size() != 2 && indexOfCardToPlay > 0) {
+                indexOfCardToPlay = 0;
+            }
             Card cardToBePlayed = playersCards.remove(indexOfCardToPlay);
             PlayedCardWrapper playedCard = playThisCardRandomly(cardToBePlayed, playerWhoseTurnItIs);
             return PlayCardRequestWrapper.builder()

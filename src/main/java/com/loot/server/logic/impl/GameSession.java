@@ -9,6 +9,7 @@ import com.loot.server.domain.request.GamePlayer;
 import com.loot.server.domain.request.GameSettings;
 import com.loot.server.domain.response.PlayedCardResponse;
 import com.loot.server.domain.response.RoundStatusResponse;
+import com.loot.server.domain.response.StartRoundResponse;
 import com.loot.server.logic.IGameSession;
 
 import java.util.*;
@@ -230,17 +231,20 @@ public class GameSession implements IGameSession {
       if (num + 1 == winsNeeded) {
         gameIsOver = true;
       }
+    } else if(winsNeeded == 1) {
+      gameIsOver = true;
     }
 
     return RoundStatusResponse.builder()
             .winner(winningPlayer)
             .roundOver(true)
             .gameOver(gameIsOver)
+            .winningCard(gameIsOver ? Card.fromPower(cardsInHand.get(winningPlayer).getCardInHand()) : null)
             .build();
   }
 
   @Override
-  public Pair<List<GamePlayer>, List<Card>> startRound() {
+  public StartRoundResponse startRound() {
     if(!gameInProgress) {
       gameInProgress = true;
     }
@@ -265,8 +269,9 @@ public class GameSession implements IGameSession {
       playerList.add(player);
       cardList.add(Card.fromPower(drawnCard));
     }
-
-    return Pair.of(playerList, cardList);
+    StartRoundResponse startRoundResponse = new StartRoundResponse(playerList, cardList);
+    startRoundResponse.setCardKeptOut(Card.fromPower(cardStack.getCardKeptOut()));
+    return startRoundResponse;
   }
 
   @Override

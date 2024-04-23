@@ -11,13 +11,10 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerCardPair {
-
     @JsonInclude
     private GamePlayer player;
-
     @JsonInclude
     private Card card;
-
     @JsonIgnore
     @Override
     public String toString() {

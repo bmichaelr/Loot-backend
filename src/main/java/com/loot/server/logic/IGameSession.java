@@ -5,6 +5,7 @@ import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.response.PlayedCardResponse;
 import com.loot.server.domain.response.RoundStatusResponse;
+import com.loot.server.domain.response.StartRoundResponse;
 import com.loot.server.logic.impl.GameSession.GameAction;
 import org.modelmapper.internal.Pair;
 
@@ -24,7 +25,7 @@ public interface IGameSession {
      * Called to start the round. This will instantiate all the data structures and reset any variables that
      * may have been altered from last round
      */
-    Pair<List<GamePlayer>, List<Card>> startRound();
+    StartRoundResponse startRound();
 
     /**
      * Called when a player has gotten out. Do cleanup on the player, put any cards they still have into the

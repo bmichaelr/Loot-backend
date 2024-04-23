@@ -15,8 +15,6 @@ import java.util.Map;
 @Data
 @Builder
 public class NextTurnResponse {
-
     private GamePlayer player;
-
     private Card card;
 }

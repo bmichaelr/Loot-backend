@@ -1,6 +1,6 @@
 package com.loot.server.service.impl;
 
-import com.loot.server.ClientDisconnectionEvent;
+import com.loot.server.events.ClientDisconnectionEvent;
 import com.loot.server.service.SessionCacheService;
 import lombok.Data;
 import org.springframework.context.ApplicationEventPublisher;

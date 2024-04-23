@@ -15,10 +15,8 @@ import java.util.UUID;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GameStartResponse {
-
     @JsonProperty
     private String message;
-
     @JsonProperty
     private UUID startingPlayer;
 }

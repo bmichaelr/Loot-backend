@@ -2,49 +2,47 @@ package com.loot.server.service.impl;
 
 import java.util.*;
 
+import com.loot.server.events.GameWonEvent;
 import com.loot.server.domain.cards.Card;
 import com.loot.server.domain.cards.PlayedCard;
 import com.loot.server.domain.request.*;
 import com.loot.server.domain.response.*;
-import com.loot.server.ClientDisconnectionEvent;
+import com.loot.server.events.ClientDisconnectionEvent;
 import com.loot.server.service.GameControllerService;
 import com.loot.server.service.SessionCacheService;
 import com.loot.server.logic.impl.GameSession;
 import com.loot.server.logic.impl.GameSession.GameAction;
 import org.modelmapper.internal.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GameControllerServiceImpl implements GameControllerService {
+    private final SessionCacheService sessionCacheService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
-    @Autowired
-    private SessionCacheService sessionCacheService;
-
-    @Autowired // not sure about keeping this in here, but for now it stays
-    private SimpMessagingTemplate simpMessagingTemplate;
-
+    public GameControllerServiceImpl(SessionCacheService sessionCacheService, SimpMessagingTemplate simpMessagingTemplate, ApplicationEventPublisher eventPublisher) {
+        this.sessionCacheService = sessionCacheService;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+        this.eventPublisher = eventPublisher;
+    }
     private final Set<String> inUseRoomKeys = new HashSet<>();
     private final Map<String, GameSession> gameSessionMap = new HashMap<>();
-
     synchronized private void addToGameSessionMap(String key, GameSession gameSession) {
         gameSessionMap.put(key, gameSession);
     }
-
     synchronized private GameSession getFromGameSessionMap(String key) {
         return gameSessionMap.get(key);
     }
-
     synchronized private List<GameSession> getAllGameSessions() {
         return List.copyOf(gameSessionMap.values());
     }
-
     synchronized private void removeFromGameSessionMap(String key) {
         gameSessionMap.remove(key);
     }
-
     @Override
     public String createNewGameSession(CreateGameRequest request, String sessionId) {
         String roomKey = getRoomKeyForNewGame();
@@ -109,14 +107,19 @@ public class GameControllerServiceImpl implements GameControllerService {
     @Override
     public StartRoundResponse startRound(String roomKey) {
         GameSession gameSession = getFromGameSessionMap(roomKey);
-        Pair<List<GamePlayer>, List<Card>> startingInformation = gameSession.startRound();
-        return new StartRoundResponse(startingInformation.getLeft(), startingInformation.getRight());
+        return gameSession.startRound();
     }
 
     @Override
     public RoundStatusResponse getRoundStatus(String roomKey) {
         GameSession gameSession = getFromGameSessionMap(roomKey);
-        return gameSession.determineWinner();
+        RoundStatusResponse roundStatusResponse = gameSession.determineWinner();
+        if(roundStatusResponse.getGameOver()) {
+            final UUID winningId = roundStatusResponse.getWinner().getId();
+            GameWonEvent event = new GameWonEvent(this, winningId);
+            eventPublisher.publishEvent(event);
+        }
+        return roundStatusResponse;
     }
 
     @Override

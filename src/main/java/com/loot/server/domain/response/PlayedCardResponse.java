@@ -13,17 +13,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayedCardResponse {
-
     private String type;
     private GamePlayer playerWhoPlayed;
     private Card cardPlayed;
     private Boolean waitFlag;
     private BaseCardResult outcome;
-
     public static PlayedCardResponseBuilder builder() {
         return new CustomBuilder();
     }
-
     public static class CustomBuilder extends PlayedCardResponseBuilder {
         @Override
         public PlayedCardResponse build() {
