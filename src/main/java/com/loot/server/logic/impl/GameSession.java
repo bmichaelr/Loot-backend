@@ -120,11 +120,13 @@ public class GameSession implements IGameSession {
       switch (card) {
         case WISHING_RING -> {
           playerActing.setIsSafe(true);
+          players.get(players.indexOf(playerActing)).setIsSafe(true);
           playersInRound.get(playersInRound.indexOf(playerActing)).setIsSafe(true);
         }
         case DRAGON ->  {} //do nothing;
         case LOOT -> {
           playerActing.setIsOut(true);
+          players.get(players.indexOf(playerActing)).setIsOut(true);
           removePlayerFromRound(playerActing);
         }
         default -> throw new RuntimeException("Unknown card in personal play section!");
@@ -135,7 +137,6 @@ public class GameSession implements IGameSession {
       roundIsOver = true;
       gameState = GameState.ROUND_OVER;
     }
-
     Boolean waitFlag = playedCard.getPower() == 2 || playedCard.getPower() == 3;
       return PlayedCardResponse.builder()
             .cardPlayed(Card.fromPower(playedCard.getPower()))
@@ -159,10 +160,12 @@ public class GameSession implements IGameSession {
         int powerOfOpponentCard = cardsInHand.get(playedOn).getCardInHand();
         if (powerOfOpponentCard > playersCard) {
           playerActing.setIsOut(true);
+          players.get(players.indexOf(playerActing)).setIsOut(true);
           removePlayerFromRound(playerActing);
           playerToDiscard = playerActing;
         } else if (powerOfOpponentCard < playersCard) {
           playedOn.setIsOut(true);
+          players.get(players.indexOf(playedOn)).setIsOut(true);
           removePlayerFromRound(playedOn);
           playerToDiscard = playedOn;
         }
@@ -174,6 +177,7 @@ public class GameSession implements IGameSession {
         if (cardStack.deckIsEmpty() || discardedCard == 8) {
           removePlayerFromRound(playedOn);
           playedOn.setIsOut(true);
+          players.get(players.indexOf(playedOn)).setIsOut(true);
         } else {
           int newCard = cardStack.drawCard();
           cardsInHand.get(playedOn).drawCard(newCard);
@@ -263,9 +267,11 @@ public class GameSession implements IGameSession {
       int drawnCard = cardStack.drawCard();
       playedCards.put(player, new ArrayList<>());
       cardsInHand.put(player, new HandOfCards(drawnCard));
-      playersInRound.add(player);
+      players.get(players.indexOf(player)).setIsSafe(false);
+      players.get(players.indexOf(player)).setIsOut(false);
       player.setIsOut(false);
       player.setIsSafe(false);
+      playersInRound.add(player);
       playerList.add(player);
       cardList.add(Card.fromPower(drawnCard));
     }
@@ -283,9 +289,14 @@ public class GameSession implements IGameSession {
     players.get(players.indexOf(playerToRemove)).setIsOut(true);
     playersInRound.get(index).setIsOut(true);
     playersInRound.remove(playerToRemove);
-    if (cardsInHand.get(playerToRemove).getHoldingCard() != -1) {
-      var card = cardsInHand.get(playerToRemove).discardHand();
-      playedCards.get(playerToRemove).add(Card.fromPower(card));
+    Integer cardInHand;
+    if ((cardInHand = cardsInHand.get(playerToRemove).getCardInHand()) != -1) {
+      cardsInHand.get(playerToRemove).playedCard(cardInHand);
+      playedCards.get(playerToRemove).add(Card.fromPower(cardInHand));
+    }
+    if ((cardInHand = cardsInHand.get(playerToRemove).getCardInHand()) != -1) {
+      cardsInHand.get(playerToRemove).playedCard(cardInHand);
+      playedCards.get(playerToRemove).add(Card.fromPower(cardInHand));
     }
   }
 

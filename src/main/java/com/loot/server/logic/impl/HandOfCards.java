@@ -28,9 +28,6 @@ public class HandOfCards implements IHandOfCards {
 
     @Override
     public Integer getCardInHand() {
-        if(holdingCard == -1) {
-            throw new RuntimeException("Cannot get card from player, they have no card");
-        }
         return holdingCard;
     }
 
