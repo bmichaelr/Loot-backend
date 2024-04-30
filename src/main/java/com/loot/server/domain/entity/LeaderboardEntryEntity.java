@@ -24,7 +24,7 @@ public class LeaderboardEntryEntity {
         this.numberOfWins = wins;
     }
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(name = "player_id")
     private UUID playerId;

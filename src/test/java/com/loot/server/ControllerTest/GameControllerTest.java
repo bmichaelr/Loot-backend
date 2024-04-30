@@ -37,6 +37,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import static com.loot.server.GameSessionTests.TestGameLogic.ANSI_GREEN;
+import static com.loot.server.GameSessionTests.TestGameLogic.ANSI_RESET;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -86,190 +88,164 @@ public class GameControllerTest {
         UUID playerId = player.getId();
         wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + playerId, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
         wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
-
         await().atMost(3, SECONDS).untilAsserted(() -> assertNotNull(wsTestHelper.pollQueue(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
         await().atMost(3, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /topic/matchmaking/servers/ success validation test passed");
     }
 
     @Test
     void verifyThatFetchServersFailsWhenPlayerMissingName() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         createRandomGame(wsTestHelper);
-
         GamePlayer player = GameControllerTestUtil.createGamePlayerMissingName();
         wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
         wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
-
         await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /topic/matchmaking/servers/ error validation test passed(MISSING_NAME)");
     }
 
     @Test
     void verifyThatFetchServersFailsWhenPlayerMissingId() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         createRandomGame(wsTestHelper);
-
         GamePlayer player = GameControllerTestUtil.createGamePlayerMissingId();
         wsTestHelper.listenToChannel("/topic/matchmaking/servers/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.AVAILABLE_SERVER_RESPONSE);
         wsTestHelper.sendToSocket("/app/loadAvailableServers", player);
-
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.AVAILABLE_SERVER_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /topic/matchmaking/servers/ error validation test passed (MISSING_ID)");
     }
 
     // -- MARK: Create Game Tests
     @Test
     void verifyCreateGameMessageIsReceivedWhenValid() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.VALID);
-
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
-
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
-
         LobbyResponse lobbyResponse = (LobbyResponse) wsTestHelper.pollQueue(FrameHandlerType.LOBBY_RESPONSE);
         GamePlayer receivedPlayer = lobbyResponse.getPlayers().get(lobbyResponse.getPlayers().indexOf(GameControllerTestUtil.createValidGamePlayer()));
         assertNotNull(receivedPlayer);
         assertTrue(receivedPlayer.getIsHost());
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/createGame success validation test passed");
     }
 
     @Test
     void verifyThatCreateGameFailsWhenMissingRoomName() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.MISSING_ROOM_NAME);
-
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
-
         await().atMost(2, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(2, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/createGame error validation test passed (MISSING_ROOM_NAME)");
     }
 
     @Test
     void verifyThatCreateGameFailsWhenMissingPlayer() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.MISSING_GAME_PLAYER);
-
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/createGame error validation test passed (MISSING_PLAYER");
     }
 
     @Test
     void verifyThatCreateGameFailsWhenGamePlayerMissingName() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.GAME_PLAYER_MISSING_NAME);
-
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
-
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/createGame error validation test passed (MISSING_NAME");
     }
 
     @Test
     void verifyThatCreateGameFailsWhenGamePlayerMissingId() throws ExecutionException, InterruptedException, TimeoutException {
         CreateGameRequest createGameRequest = GameControllerTestUtil.createGameRequest(RequestType.GAME_PLAYER_MISSING_ID);
-
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/createGame", createGameRequest);
-
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/createGame error validation test passed (MISSING_ID");
     }
 
     // -- MARK: Join Game Tests
     @Test
     void verifyJoinGameMessageIsReceivedWhenValid() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         String roomKey = createRandomGame(wsTestHelper);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.VALID);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame success validation test passed");
     }
     @Test
     void verifyJoinGameMSendsErrorWhenMissingRoomKey() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         String roomKey = createRandomGame(wsTestHelper);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.MISSING_ROOM_KEY);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> {
             assertEquals("Bad request. Please try again.", ((ErrorResponse)wsTestHelper.pollQueue(FrameHandlerType.ERROR_RESPONSE)).details);
         });
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame success validation test passed");
     }
     @Test
     void verifyJoinGameFailsWhenMissingPlayer() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         String roomKey = createRandomGame(wsTestHelper);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.MISSING_GAME_PLAYER);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame error validation test passed (MISSING_PLAYER");
     }
     @Test
     void verifyJoinGameSendsErrorWhenWrongRoomKey() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         String roomKey = createRandomGame(wsTestHelper);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.WRONG_ROOM_KEY);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         assertEquals("The room could not be found, meaning it is likely no longer available. Please refresh the server list.",
                 ((ErrorResponse)wsTestHelper.pollQueue(FrameHandlerType.ERROR_RESPONSE)).details);
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame error validation test passed (WRONG_ROOM_KEY)");
     }
     @Test
     void verifyJoinGameSendsErrorWhenLobbyFull() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         String roomKey = createRandomGameAndFillIt(wsTestHelper);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.VALID);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(1, SECONDS).untilAsserted(() -> assertTrue(wsTestHelper.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(1, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         await().atMost(2, SECONDS).untilAsserted(() ->
@@ -277,26 +253,25 @@ public class GameControllerTest {
                         ((ErrorResponse)wsTestHelper.pollQueue(FrameHandlerType.ERROR_RESPONSE)).details)
         );
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame error validation test passed (ROOM_FULL)");
     }
 
     @Test
     void verifyJoinGameSendsErrorWhenGameInProgress() throws ExecutionException, InterruptedException, TimeoutException {
         WsTestHelper wsTestHelper = new WsTestHelper(getWsPath());
-        
-
         final List<GamePlayer> playersInGame = new ArrayList<>();
         String roomKey = createRandomGameAndFillIt(wsTestHelper, playersInGame);
         startGame(wsTestHelper, playersInGame, roomKey);
         JoinGameRequest joinGameRequest = GameControllerTestUtil.createJoinGameRequest(roomKey, RequestType.VALID);
         wsTestHelper.listenToChannel("/topic/matchmaking/" + GameControllerTestUtil.TEST_PLAYER_UUID, FrameHandlerType.LOBBY_RESPONSE);
         wsTestHelper.sendToSocket("/app/joinGame", joinGameRequest);
-
         await().atMost(2, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         await().atMost(2, SECONDS).untilAsserted(() ->
                 assertEquals("Cannot join game. It may be full or in progress, refresh server list to get updated status.",
                         ((ErrorResponse)wsTestHelper.pollQueue(FrameHandlerType.ERROR_RESPONSE)).details)
         );
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/joinGame error validation test passed (GAME_IN_PROGRESS)");
     }
 
     // -- MARK: Testing leave game endpoint
@@ -306,13 +281,12 @@ public class GameControllerTest {
         final List<GamePlayer> players = new ArrayList<>();
         String roomKey = createRandomGameAndFillIt(ws, players);
         ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
-
         GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, players.get(0));
         ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
-
         ws.sendToSocket("/app/leaveGame", request);
         await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         ws.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/leaveGame success validation test passed");
     }
 
     @Test
@@ -320,14 +294,13 @@ public class GameControllerTest {
         WsTestHelper ws = new WsTestHelper(getWsPath());
         String roomKey = createRandomGameAndFillIt(ws);
         ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
-
         GamePlayer player = GameControllerTestUtil.createValidGamePlayer();
         GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
         ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
-
         ws.sendToSocket("/app/leaveGame", request);
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         ws.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/leaveGame error validation test passed (NOT_MESSAGED)");
     }
 
     @Test
@@ -335,15 +308,14 @@ public class GameControllerTest {
         WsTestHelper ws = new WsTestHelper(getWsPath());
         String roomKey = createRandomGameAndFillIt(ws);
         ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
-
         GamePlayer player = GameControllerTestUtil.createValidGamePlayer();
         GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(null, player);
         ws.queues.get(FrameHandlerType.LOBBY_RESPONSE).clear();
-
         ws.sendToSocket("/app/leaveGame", request);
         await().atMost(5, SECONDS).untilAsserted(() -> assertTrue(ws.isQueueEmpty(FrameHandlerType.LOBBY_RESPONSE)));
         await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.ERROR_RESPONSE)));
         ws.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/leaveGame error validation test passed (MISSING_ROOM_KEY)");
     }
 
     @Test
@@ -351,7 +323,6 @@ public class GameControllerTest {
         WsTestHelper ws = new WsTestHelper(getWsPath());
         List<GamePlayer> players = new ArrayList<>();
         String roomKey = createRandomGameAndFillIt(ws, players);
-
         ws.listenToChannel("/topic/lobby/" + roomKey, FrameHandlerType.LOBBY_RESPONSE);
         for(var player : players) {
             GameInteractionRequest request = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
@@ -360,6 +331,7 @@ public class GameControllerTest {
             await().atMost(5, SECONDS).untilAsserted(() -> assertNotNull(ws.pollQueue(FrameHandlerType.LOBBY_RESPONSE)));
         }
         ws.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/ready success validation test passed");
     }
 
     // -- MARK: Testing the sync calls
@@ -369,16 +341,15 @@ public class GameControllerTest {
         final List<GamePlayer> playersInGame = new ArrayList<>();
         String roomKey = createRandomGameAndFillIt(wsTestHelper, playersInGame);
         wsTestHelper.listenToChannel("/topic/game/startRound/" + roomKey, FrameHandlerType.START_ROUND_RESPONSE);
-
         int index, length = playersInGame.size();
         for(index = 0; index < length; index++) {
             GamePlayer player = playersInGame.get(index);
             GameInteractionRequest gameInteractionRequest = GameControllerTestUtil.createGameInteractionRequest(roomKey, player);
             wsTestHelper.sendToSocket("/app/game/sync", gameInteractionRequest);
         }
-
         await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(wsTestHelper.isQueueEmpty(FrameHandlerType.START_ROUND_RESPONSE)));
         wsTestHelper.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/game/sync success validation test passed for initial sync");
     }
 
     @Test
@@ -386,58 +357,55 @@ public class GameControllerTest {
         WsTestHelper ws = new WsTestHelper(getWsPath());
         final List<GamePlayer> players = new ArrayList<>(4);
         String roomKey = createRandomGameAndFillIt(ws, players);
-
         StartRoundResponse startRoundResponse = (StartRoundResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.START_ROUND_RESPONSE);
         assertNotNull(startRoundResponse);
         NextTurnResponse nextTurnResponse = (NextTurnResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.NEXT_TURN_RESPONSE);
         assertNotNull(nextTurnResponse);
         ws.shutdown();
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: /app/game/sync success validation test passed for second sync");
     }
 
     @Test
     void verifyThatEndpointsWorkAsExpectedWhenMockPlaying() throws ExecutionException, InterruptedException, TimeoutException {
+        System.out.println("[INFORMATION] :: mock game test beginning");
         WsTestHelper ws = new WsTestHelper(getWsPath());
         final List<GamePlayer> players = new ArrayList<>(4);
         String roomKey = createRandomGameAndFillIt(ws, players);
-
         // Get the first start round response from the server
         StartRoundResponse startRoundResponse = (StartRoundResponse) doASyncCall(ws, players, roomKey, FrameHandlerType.START_ROUND_RESPONSE);
         GameHelper gameHelper = new GameHelper(startRoundResponse.getPlayersAndCards(), roomKey);
-
         // Listen to all the channels needed for the game
         ws.listenToChannel("/topic/game/nextTurn/" + roomKey, FrameHandlerType.NEXT_TURN_RESPONSE);
         ws.listenToChannel("/topic/game/roundStatus/" + roomKey, FrameHandlerType.ROUND_STATUS_RESPONSE);
         ws.listenToChannel("/topic/game/turnStatus/" + roomKey, FrameHandlerType.PLAYED_CARD_RESPONSE);
-
         // Game Loop!
         while(true) {
             ws.clearAllQueues();
             syncAllPlayers(ws, players, roomKey);
-
             await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE) && ws.isQueueEmpty(FrameHandlerType.ROUND_STATUS_RESPONSE)));
-
             // Handle the case where there was not next turn response and instead the round status response was sent
             // TODO: implement a full game loop here, not just one turn
             if(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE)) {
                 assertFalse(ws.isQueueEmpty(FrameHandlerType.ROUND_STATUS_RESPONSE));
                 RoundStatusResponse roundStatusResponse = (RoundStatusResponse) ws.pollQueue(FrameHandlerType.ROUND_STATUS_RESPONSE);
+                System.out.println(ANSI_GREEN + "\t[GAME_LOG] " + ANSI_RESET + " :: round status response correctly received");
                 break;
             }
-
             // In this case, the next turn response queue is not empty
             assertFalse(ws.isQueueEmpty(FrameHandlerType.NEXT_TURN_RESPONSE));
             NextTurnResponse nextTurnResponse = (NextTurnResponse) ws.pollQueue(FrameHandlerType.NEXT_TURN_RESPONSE);
+            System.out.println(ANSI_GREEN + "\t[GAME_LOG] " + ANSI_RESET + " :: received next turn response");
             gameHelper.addCard(nextTurnResponse);
-
             PlayCardRequestWrapper playCardRequest = gameHelper.playRandomCard();
             ws.sendToSocket("/app/game/playCard", playCardRequest);
-
             await().atMost(5, SECONDS).untilAsserted(() -> assertFalse(ws.isQueueEmpty(FrameHandlerType.PLAYED_CARD_RESPONSE)));
+            System.out.println(ANSI_GREEN + "\t[GAME_LOG] " + ANSI_RESET + " :: received play card response");
             PlayedCardResponse playedCardResponse = (PlayedCardResponse) ws.pollQueue(FrameHandlerType.PLAYED_CARD_RESPONSE);
             gameHelper.playCard(playedCardResponse);
         }
         ws.shutdown();
-     }
+        System.out.println(ANSI_GREEN + "[SUCCESS] " + ANSI_RESET + " :: mock game success validation test passed");
+    }
 
     private Object doASyncCall(WsTestHelper ws, List<GamePlayer> players, String key, FrameHandlerType responseExpected) throws InterruptedException {
         switch(responseExpected) {
